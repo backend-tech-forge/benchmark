@@ -13,9 +13,9 @@ http benchmarker
 | POST | /api/user | Create a user | ADMIN / USER |
 | GET | /api/user | Get the user information | ADMIN / USER |
 | PUT | /api/user | Update the user information | ADMIN / USER |
-| POST | /api/user/group | Create a user group | ADMIN / USER |
-| GET | /api/user/groups | Get the list of user groups | ADMIN |
-| GET | /api/user/groups/{group_id} | Get the user group information | ADMIN / USER |
+| POST | /api/user/group | Create a group | ADMIN |
+| GET | /api/user/groups | Get the list of groups | ADMIN |
+| GET | /api/user/groups/{group_id} | Get the group information | ADMIN |
 | POST | /api/benchmark | Run a benchmark test | ADMIN / USER |
 | GET | /api/benchmark/results/{test_id} | Get the result of a benchmark test | ADMIN / USER |
 | GET | /api/benchmark/results | Get the list of benchmark test results | ADMIN / USER |
