@@ -1,6 +1,9 @@
 http benchmarker
 ======
 
+* Java version : [amazon corrretto 17](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html)
+* Spring boot version : 3.2.3
+
 This is a simple http benchmark tool that can be used to **test the performance of a server**.
 
 * erd link : [https://www.erdcloud.com/d/MLpTGsonrqSK7ycAh](https://www.erdcloud.com/d/MLpTGsonrqSK7ycAh)
