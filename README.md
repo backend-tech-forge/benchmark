@@ -7,7 +7,130 @@ http benchmarker
 
 * API usage
 
-### `POST /api/benchmark`
+* `POST /api/benchmark` : Run a benchmark test
+* `GET /api/benchmark/results/{test_id}` : Get the result of a benchmark test
+* `GET /api/benchmark/results` : Get the list of benchmark test results
+* `POST /user` : Create a user
+* `GET /user` : Get the user information
+* `PUT /user` : Update the user information
+* `POST /user/group` : Create a user group
+* `GET /user/groups` : Get the list of user groups
+* `GET /user/groups/{group_id}` : Get the user group information
+* `POST /login` : Login
+* `POST /logout` : Logout
+
+* User roles
+  * ADMIN : Can access all APIs
+  * USER : Can access all APIs except for 
+    * `POST /user/group`
+    * `GET /user/groups` 
+    * `GET /user/groups/{group_id}`
+
+### `POST /api/user`
+#### Request
+
+```json
+{
+  "id": "gyumin",
+  "pw": "1234",
+  "slack_webhook_url": "https://hooks.slack.com/services/...",
+  "email": "ghkdqhrbals@gmail.com",
+  "email_notification": true,
+  "slack_notification": true
+}
+```
+
+### `GET /api/user`
+#### Response 200
+```json
+{
+  "id": "gyumin",
+  "slack_webhook_url": "https://hooks.slack.com/services/...",
+  "email": "ghkdqhrbals@gmail.com",
+  "email_notification": true,
+  "slack_notification": true,
+  "created_at": "2024-02-27T21:30:21.618101+09:00",
+  "updated_at": "2024-02-27T21:30:21.618101+09:00"
+}
+```
+
+#### Response 4xx
+```json
+{
+  "error_code": "USER_NOT_FOUND",
+  "error_message": "User not found",
+  "error_message_detail": ""
+}
+```
+
+### `PUT /api/user` [ADMIN / USER]
+
+#### Request
+
+```json
+{
+  "id": "gyumin",
+  "group_id": "group-a", // error when write admin
+  "slack_webhook_url": "https://hooks.slack.com/services/...", 
+  "email": "ghkdqhrbals@gmail.com", 
+  "email_notification": true, 
+  "slack_notification": true
+}
+```
+
+### `POST /api/user/group` [ADMIN / USER]
+
+#### Request
+
+```json
+{
+  "group_id": "group-a",
+  "description": "group A test reports"
+}
+```
+
+### `GET /api/user/groups` [ADMIN]
+
+#### Response
+
+```json
+
+{
+  "groups": [
+    {
+      "group_id": "group-a",
+      "description": "group A test reports",
+      "created_at": "2024-02-27T21:30:21.618101+09:00",
+      "users": [ "gyumin", "user1", "user2", ... ]
+    },
+    {
+      "group_id": "group-b",
+      "description": "group B test reports",
+      "created_at": "2024-02-27T21:30:21.618101+09:00",
+      "users": [ "user3", "user4", "user5", ... ]
+    }
+  ]
+}
+
+```
+
+### `GET /api/user/groups/{group_id}` [ADMIN / USER]
+
+#### Response
+
+```json
+{
+  "group_id": "group-a",
+  "description": "group A test reports",
+  "created_at": "2024-02-27T21:30:21.618101+09:00",
+  "users": [ "gyumin", "user1", "user2", ... ]
+}
+```
+
+
+
+
+### `POST /api/benchmark` [ADMIN / USER]
 #### Request
 
 ```json
@@ -92,7 +215,7 @@ http benchmarker
 }
 ```
 
-### `GET /api/benchmark/results/{test_id}`
+### `GET /api/benchmark/results/{test_id}` [ADMIN / USER]
 #### Response 200
 ```json
 {
@@ -149,7 +272,7 @@ http benchmarker
 }
 ```
 
-### `GET /api/benchmark/results`
+### `GET /api/benchmark/results` [ADMIN / USER]
 
 #### Response 200
 ```json
