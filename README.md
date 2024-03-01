@@ -1,7 +1,7 @@
 http benchmarker
 ======
 
-This is a simple http benchmark tool that can be used to **test the performance of a server**. 
+This is a simple http benchmark tool that can be used to **test the performance of a server**.
 
 * erd link : [https://www.erdcloud.com/d/MLpTGsonrqSK7ycAh](https://www.erdcloud.com/d/MLpTGsonrqSK7ycAh)
 
@@ -17,19 +17,19 @@ This is a simple http benchmark tool that can be used to **test the performance 
 ## API design
 
 
-| Method | URL                          | Description | Role |
-| --- |------------------------------| --- | --- |
+| Method | URL                         | Description | Role |
+| --- |-----------------------------| --- | --- |
 | POST | /api/user                   | Create a user | ADMIN / USER |
-| GET | /api/user                    | Get the user information | ADMIN / USER |
-| PUT | /api/user                    | Update the user information | ADMIN / USER |
-| POST | /api/user/group              | Create a group | ADMIN |
-| GET | /api/user/groups             | Get the list of groups | ADMIN |
-| GET | /api/user/groups/{group_id}  | Get the group information | ADMIN |
-| POST | /api/benchmark               | Run a benchmark test | ADMIN / USER |
-| GET | /api/benchmark/results/{test_id} | Get the result of a benchmark test | ADMIN / USER |
-| GET | /api/benchmark/results       | Get the list of benchmark test results | ADMIN / USER |
-| POST | /login                       | Login | ADMIN / USER |
-| POST | /logout                      | Logout | ADMIN / USER |
+| GET | /api/user                   | Get the user information | ADMIN / USER |
+| PUT | /api/user                   | Update the user information | ADMIN / USER |
+| POST | /api/user/group             | Create a group | ADMIN |
+| GET | /api/user/groups            | Get the list of groups | ADMIN |
+| GET | /api/user/group/{group_id}  | Get the group information | ADMIN |
+| POST | /api/benchmark              | Run a benchmark test | ADMIN / USER |
+| GET | /api/benchmark/result/{test_id} | Get the result of a benchmark test | ADMIN / USER |
+| GET | /api/benchmark/results      | Get the list of benchmark test results | ADMIN / USER |
+| POST | /login                      | Login | ADMIN / USER |
+| POST | /logout                     | Logout | ADMIN / USER |
 
 
 * User roles
