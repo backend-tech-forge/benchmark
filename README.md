@@ -7,17 +7,21 @@ http benchmarker
 
 * API usage
 
-* `POST /api/benchmark` : Run a benchmark test
-* `GET /api/benchmark/results/{test_id}` : Get the result of a benchmark test
-* `GET /api/benchmark/results` : Get the list of benchmark test results
-* `POST /user` : Create a user
-* `GET /user` : Get the user information
-* `PUT /user` : Update the user information
-* `POST /user/group` : Create a user group
-* `GET /user/groups` : Get the list of user groups
-* `GET /user/groups/{group_id}` : Get the user group information
-* `POST /login` : Login
-* `POST /logout` : Logout
+
+| Method | URL | Description | Role |
+| --- | --- | --- | --- |
+| POST | /api/user | Create a user | ADMIN / USER |
+| GET | /api/user | Get the user information | ADMIN / USER |
+| PUT | /api/user | Update the user information | ADMIN / USER |
+| POST | /api/user/group | Create a user group | ADMIN / USER |
+| GET | /api/user/groups | Get the list of user groups | ADMIN |
+| GET | /api/user/groups/{group_id} | Get the user group information | ADMIN / USER |
+| POST | /api/benchmark | Run a benchmark test | ADMIN / USER |
+| GET | /api/benchmark/results/{test_id} | Get the result of a benchmark test | ADMIN / USER |
+| GET | /api/benchmark/results | Get the list of benchmark test results | ADMIN / USER |
+| POST | /login | Login | ADMIN / USER |
+| POST | /logout | Logout | ADMIN / USER |
+
 
 * User roles
   * ADMIN : Can access all APIs
