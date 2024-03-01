@@ -17,19 +17,19 @@ This is a simple http benchmark tool that can be used to **test the performance 
 ## API design
 
 
-| Method | URL                         | Description | Role |
-| --- |-----------------------------| --- | --- |
-| POST | /api/user                   | Create a user | ADMIN / USER |
-| GET | /api/user                   | Get the user information | ADMIN / USER |
-| PUT | /api/user                   | Update the user information | ADMIN / USER |
-| POST | /api/user/group             | Create a group | ADMIN |
-| GET | /api/user/groups            | Get the list of groups | ADMIN |
-| GET | /api/user/group/{group_id}  | Get the group information | ADMIN |
-| POST | /api/benchmark              | Run a benchmark test | ADMIN / USER |
-| GET | /api/benchmark/result/{test_id} | Get the result of a benchmark test | ADMIN / USER |
-| GET | /api/benchmark/results      | Get the list of benchmark test results | ADMIN / USER |
-| POST | /login                      | Login | ADMIN / USER |
-| POST | /logout                     | Logout | ADMIN / USER |
+| Method | URL                      | Description                                         | Role |
+| --- |--------------------------|-----------------------------------------------------| --- |
+| POST | /api/user                | Create a user                                       | ADMIN / USER |
+| GET | /api/user                | Get the user information                            | ADMIN / USER |
+| PUT | /api/user                | Update the user information                         | ADMIN / USER |
+| POST | /api/group               | Create a group                                      | ADMIN |
+| GET | /api/groups              | Get the list of groups                              | ADMIN |
+| GET | /api/group/{group_id}    | Get the group information                           | ADMIN |
+| POST | /api/benchmark           | Run a benchmark test                                | ADMIN / USER |
+| GET | /api/benchmark/result/{test_id} | Get the result of a benchmark test                  | ADMIN / USER |
+| GET | /api/benchmark/results   | Get the list of benchmark test results within group | ADMIN / USER |
+| POST | /login                   | Login                                               | ADMIN / USER |
+| POST | /logout                  | Logout                                              | ADMIN / USER |
 
 
 * User roles
@@ -39,7 +39,8 @@ This is a simple http benchmark tool that can be used to **test the performance 
     * `GET /user/groups` 
     * `GET /user/groups/{group_id}`
 
-### `POST /api/user`
+## API specification
+### `POST /api/user` [ADMIN / USER]
 #### Request
 
 ```json
@@ -83,7 +84,7 @@ This is a simple http benchmark tool that can be used to **test the performance 
 ```json
 {
   "id": "gyumin",
-  "group_id": "group-a", // error when write admin
+  "group_id": "group-a", // error when write admin 
   "slack_webhook_url": "https://hooks.slack.com/services/...", 
   "email": "ghkdqhrbals@gmail.com", 
   "email_notification": true, 
@@ -91,7 +92,7 @@ This is a simple http benchmark tool that can be used to **test the performance 
 }
 ```
 
-### `POST /api/user/group` [ADMIN / USER]
+### `POST /api/group` [ADMIN / USER]
 
 #### Request
 
@@ -102,7 +103,7 @@ This is a simple http benchmark tool that can be used to **test the performance 
 }
 ```
 
-### `GET /api/user/groups` [ADMIN]
+### `GET /api/groups` [ADMIN]
 
 #### Response
 
@@ -127,7 +128,7 @@ This is a simple http benchmark tool that can be used to **test the performance 
 
 ```
 
-### `GET /api/user/groups/{group_id}` [ADMIN / USER]
+### `GET /api/group/{group_id}` [ADMIN / USER]
 
 #### Response
 
@@ -228,7 +229,7 @@ This is a simple http benchmark tool that can be used to **test the performance 
 }
 ```
 
-### `GET /api/benchmark/results/{test_id}` [ADMIN / USER]
+### `GET /api/benchmark/result/{test_id}` [ADMIN / USER]
 #### Response 200
 ```json
 {
