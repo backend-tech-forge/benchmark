@@ -149,15 +149,17 @@ This is a simple http benchmark tool that can be used to **test the performance 
 
 ```json
 {
-  "url": "http://example.com:8080/user",
+  "url": "http://example.com:8080/api/board",
   "method": "POST",
   "headers": {
     "Content-Type": "application/json"
   },
+  "vuser":10,
+  "request_per_user":1000,
   "body": {
-    "name": "John Doe",
-    "age": 25,
-    ...
+    "board_title": "...",
+    "board_content": "...",
+    "user_id": "..."
   },
   "prepare": {
     "url": "http://example.com:8080/login",
