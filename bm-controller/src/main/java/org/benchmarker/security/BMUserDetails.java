@@ -2,7 +2,9 @@ package org.benchmarker.security;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.user.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +18,7 @@ import java.util.List;
 @Setter
 @Getter
 @Component("bmUserDetails")
+@ToString
 public class BMUserDetails implements UserDetails {
 
     private String username;
@@ -24,6 +27,8 @@ public class BMUserDetails implements UserDetails {
     private boolean accountNonLocked;
     private boolean credentialsNonExpired;
     private boolean enabled;
+
+    private User user;
 
     private String permission;
     private List<String> permissions = new ArrayList<>();
