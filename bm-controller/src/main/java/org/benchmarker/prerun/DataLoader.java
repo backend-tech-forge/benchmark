@@ -1,4 +1,4 @@
-package org.benchmarker.pre;
+package org.benchmarker.prerun;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +15,12 @@ import org.springframework.stereotype.Component;
 import static org.benchmarker.user.constant.UserConsts.USER_GROUP_DEFAULT_ID;
 import static org.benchmarker.user.constant.UserConsts.USER_GROUP_DEFAULT_NAME;
 
+/**
+ * After the application starts, this class will be executed to add the default user to the database.
+ *
+ * @see org.springframework.boot.CommandLineRunner
+ *
+ */
 @Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
