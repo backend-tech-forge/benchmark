@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
@@ -22,6 +23,8 @@ public class InitiClass {
     protected UserRepository userRepository;
     @SpyBean
     protected UserGroupRepository userGroupRepository;
+    @SpyBean
+    protected PasswordEncoder passwordEncoder;
 
     @AfterEach
     void removeAll() {
