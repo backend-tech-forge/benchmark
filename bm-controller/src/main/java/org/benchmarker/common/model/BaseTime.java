@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.benchmarker.util.date.DateFormat;
+import org.benchmarker.common.util.DateUtil;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -26,14 +26,14 @@ public class BaseTime {
     @PrePersist
     public void onPrePersist(){
         if (this.createdAt == null) {
-            this.createdAt = DateFormat.getCurrentTime();
+            this.createdAt = DateUtil.getCurrentTime();
         }
         this.updatedAt = this.createdAt;
     }
 
     @PreUpdate
     public void onPreUpdate(){
-        this.updatedAt = DateFormat.getCurrentTime();
+        this.updatedAt = DateUtil.getCurrentTime();
     }
 
     @Override
