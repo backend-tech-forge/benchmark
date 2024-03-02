@@ -19,6 +19,7 @@ public class UserGroup extends BaseTime {
     public UserGroup(String id, String name) {
         this.id = id;
         this.name = name;
+
         if (this.name == null) {
             this.name = "default";
         }
