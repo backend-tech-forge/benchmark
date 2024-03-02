@@ -21,7 +21,8 @@ class UserServiceTest extends InitiClass {
     public void createUser() {
         // Given
         User user = User.builder()
-                .id("test3")
+                .id("test")
+                .password("password")
                 .build();
         UserGroup userGroup = UserGroup.builder()
                 .id("default")
