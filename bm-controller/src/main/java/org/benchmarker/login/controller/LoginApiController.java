@@ -1,10 +1,11 @@
-package org.benchmarker.security;
+package org.benchmarker.login.controller;
 
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.benchmarker.security.dto.LoginRequestInfo;
+import org.benchmarker.login.service.LoginService;
+import org.benchmarker.login.controller.dto.LoginRequestInfo;
 import org.benchmarker.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

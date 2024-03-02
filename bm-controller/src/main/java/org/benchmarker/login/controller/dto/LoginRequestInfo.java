@@ -1,4 +1,4 @@
-package org.benchmarker.security.dto;
+package org.benchmarker.login.controller.dto;
 
 import lombok.Builder;
 import lombok.Getter;

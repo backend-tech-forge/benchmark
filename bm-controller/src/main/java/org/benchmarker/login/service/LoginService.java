@@ -1,11 +1,12 @@
-package org.benchmarker.security;
+package org.benchmarker.login.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalException;
-import org.benchmarker.security.dto.LoginRequestInfo;
+import org.benchmarker.security.JwtTokenProvider;
+import org.benchmarker.login.controller.dto.LoginRequestInfo;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;

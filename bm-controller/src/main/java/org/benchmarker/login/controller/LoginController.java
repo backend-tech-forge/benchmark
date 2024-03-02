@@ -1,4 +1,4 @@
-package org.benchmarker.security;
+package org.benchmarker.login.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.controller.annotation.GlobalControllerModel;
 import org.benchmarker.common.util.CookieUtil;
-import org.benchmarker.security.dto.LoginRequestInfo;
+import org.benchmarker.login.service.LoginService;
+import org.benchmarker.login.controller.dto.LoginRequestInfo;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
