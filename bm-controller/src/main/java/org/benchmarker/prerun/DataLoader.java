@@ -16,10 +16,10 @@ import static org.benchmarker.user.constant.UserConsts.USER_GROUP_DEFAULT_ID;
 import static org.benchmarker.user.constant.UserConsts.USER_GROUP_DEFAULT_NAME;
 
 /**
- * After the application starts, this class will be executed to add the default user to the database.
+ * After the application starts, this class will be executed to add the default user to the
+ * database.
  *
  * @see org.springframework.boot.CommandLineRunner
- *
  */
 @Component
 @RequiredArgsConstructor
@@ -43,20 +43,21 @@ public class DataLoader implements CommandLineRunner {
 
     private UserGroup defaultUserGroup() {
         return UserGroup.builder()
-                .id(USER_GROUP_DEFAULT_ID)
-                .name(USER_GROUP_DEFAULT_NAME)
-                .build();
+            .id(USER_GROUP_DEFAULT_ID)
+            .name(USER_GROUP_DEFAULT_NAME)
+            .build();
     }
+
     private User adminUser() {
         return User.builder()
-                .id(adminId)
-                .password(passwordEncoder.encode(adminPassword))
-                .email("admin@gmail.com")
-                .emailNotification(false)
-                .slackNotification(false)
-                .slackWebhookUrl("admin-webhook-url")
-                .userGroup(defaultUserGroup())
-                .role(Role.ROLE_ADMIN)
-                .build();
+            .id(adminId)
+            .password(passwordEncoder.encode(adminPassword))
+            .email("admin@gmail.com")
+            .emailNotification(false)
+            .slackNotification(false)
+            .slackWebhookUrl("admin-webhook-url")
+            .userGroup(defaultUserGroup())
+            .role(Role.ROLE_ADMIN)
+            .build();
     }
 }

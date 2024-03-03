@@ -12,10 +12,10 @@ import org.benchmarker.user.model.User;
 public class UserRegisterDto {
 
     @NotBlank
-    @Size(min = 4, max=20)
+    @Size(min = 4, max = 20)
     private String id;
     @NotBlank
-    @Size(min = 4, max=20)
+    @Size(min = 4, max = 20)
     private String password;
     @NotBlank
     private String slackWebhookUrl;
@@ -26,12 +26,12 @@ public class UserRegisterDto {
 
     public User toEntity() {
         return User.builder()
-                .id(id)
-                .password(password)
-                .slackWebhookUrl(slackWebhookUrl)
-                .slackNotification(slackNotification)
-                .email(email)
-                .emailNotification(emailNotification)
-                .build();
+            .id(id)
+            .password(password)
+            .slackWebhookUrl(slackWebhookUrl)
+            .slackNotification(slackNotification)
+            .email(email)
+            .emailNotification(emailNotification)
+            .build();
     }
 }

@@ -7,8 +7,8 @@ import java.util.Optional;
 @AllArgsConstructor
 public enum Role {
 
-    ROLE_USER("USER","normal user"),
-    ROLE_ADMIN("ADMIN","admin user"),
+    ROLE_USER("USER", "normal user"),
+    ROLE_ADMIN("ADMIN", "admin user"),
     ;
     private final String role;
     private final String description;

@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>User List</title>
+  <meta charset="UTF-8">
+  <title>User List</title>
 </head>
 <body>
 <h1>User List</h1>
 <table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Password</th>
-        <th>Slack Webhook URL</th>
-        <th>Slack Notification</th>
-        <th>Email</th>
-        <th>Email Notification</th>
-        <th>Role</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="user : ${users}">
-        <td th:text="${user.id}"></td>
-        <td th:text="${user.slackWebhookUrl}"></td>
-        <td th:text="${user.slackNotification}"></td>
-        <td th:text="${user.email}"></td>
-        <td th:text="${user.emailNotification}"></td>
-        <td th:text="${user.role}"></td>
-    </tr>
-    </tbody>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Password</th>
+    <th>Slack Webhook URL</th>
+    <th>Slack Notification</th>
+    <th>Email</th>
+    <th>Email Notification</th>
+    <th>Role</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="user : ${users}">
+    <td th:text="${user.id}"></td>
+    <td th:text="${user.slackWebhookUrl}"></td>
+    <td th:text="${user.slackNotification}"></td>
+    <td th:text="${user.email}"></td>
+    <td th:text="${user.emailNotification}"></td>
+    <td th:text="${user.role}"></td>
+  </tr>
+  </tbody>
 </table>
 </body>
 </html>

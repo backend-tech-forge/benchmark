@@ -20,23 +20,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final BMUserDetailsService userDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtAuthFilter(BMUserDetailsService userDetailsService, JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthFilter(BMUserDetailsService userDetailsService,
+        JwtTokenProvider jwtTokenProvider) {
         this.userDetailsService = userDetailsService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String userId = jwtTokenProvider.validateTokenAndGetUserId(request, ACCESS_TOKEN_COOKIE_NAME);
-        if (userId != null){
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+        FilterChain filterChain) throws ServletException, IOException {
+        String userId = jwtTokenProvider.validateTokenAndGetUserId(request,
+            ACCESS_TOKEN_COOKIE_NAME);
+        if (userId != null) {
             log.info("userId : {}", userId);
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            log.info("SecurityContextHolder.getContext().getAuthentication() : {}", SecurityContextHolder.getContext().getAuthentication());
+            log.info("SecurityContextHolder.getContext().getAuthentication() : {}",
+                SecurityContextHolder.getContext().getAuthentication());
         }
 
         filterChain.doFilter(request, response);

@@ -46,7 +46,8 @@ public class UserContextTest {
         when(userContext.getCurrentUser()).thenCallRealMethod();
 
         // then
-        assertThrows(AuthenticationCredentialsNotFoundException.class, () -> userContext.getCurrentUser());
+        assertThrows(AuthenticationCredentialsNotFoundException.class,
+            () -> userContext.getCurrentUser());
     }
 
     @Test
@@ -61,6 +62,7 @@ public class UserContextTest {
         when(userContext.getCurrentUser()).thenCallRealMethod();
 
         // Testing
-        assertThrows(AuthenticationCredentialsNotFoundException.class, () -> userContext.getCurrentUser());
+        assertThrows(AuthenticationCredentialsNotFoundException.class,
+            () -> userContext.getCurrentUser());
     }
 }

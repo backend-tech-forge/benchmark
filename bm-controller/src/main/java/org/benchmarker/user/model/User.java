@@ -39,7 +39,8 @@ public class User extends BaseTime {
 
 
     @Builder
-    public User(String id, String password, String slackWebhookUrl, Boolean slackNotification, String email, Boolean emailNotification, Role role, UserGroup userGroup) {
+    public User(String id, String password, String slackWebhookUrl, Boolean slackNotification,
+        String email, Boolean emailNotification, Role role, UserGroup userGroup) {
         this.id = id;
         this.password = password;
         this.slackWebhookUrl = slackWebhookUrl;
@@ -67,6 +68,7 @@ public class User extends BaseTime {
             this.emailNotification = false;
         }
     }
+
     public User() {
 
     }
@@ -74,13 +76,13 @@ public class User extends BaseTime {
     @Override
     public String toString() {
         return "User{" +
-                "id='" + id + '\'' +
-                ", password='" + password + '\'' +
-                ", slackWebhookUrl='" + slackWebhookUrl + '\'' +
-                ", slackNotification=" + slackNotification +
-                ", email='" + email + '\'' +
-                ", emailNotification=" + emailNotification +
-                ", role=" + role +
-                '}';
+            "id='" + id + '\'' +
+            ", password='" + password + '\'' +
+            ", slackWebhookUrl='" + slackWebhookUrl + '\'' +
+            ", slackNotification=" + slackNotification +
+            ", email='" + email + '\'' +
+            ", emailNotification=" + emailNotification +
+            ", role=" + role +
+            '}';
     }
 }

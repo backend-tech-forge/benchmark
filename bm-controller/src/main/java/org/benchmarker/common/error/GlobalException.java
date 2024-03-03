@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class GlobalException extends RuntimeException {
+
     private final ErrorCode errorCode;
 
     public static ErrorCode toErrorCode(Throwable e) {
@@ -11,11 +12,11 @@ public class GlobalException extends RuntimeException {
         return customException.getErrorCode();
     }
 
-    public GlobalException(GlobalErrorResponse e){
+    public GlobalException(GlobalErrorResponse e) {
         this.errorCode = ErrorCode.valueOf(e.getMessage());
     }
 
-    public GlobalException(ErrorCode errorCode){
+    public GlobalException(ErrorCode errorCode) {
         this.errorCode = errorCode;
     }
 }

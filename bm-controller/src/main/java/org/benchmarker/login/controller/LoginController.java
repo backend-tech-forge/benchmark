@@ -23,16 +23,19 @@ import static org.benchmarker.security.constant.TokenConsts.ACCESS_TOKEN_COOKIE_
 @GlobalControllerModel
 @RequiredArgsConstructor
 public class LoginController {
+
     private final LoginService loginService;
 
     @GetMapping("/login")
-    public String showLoginForm(@ModelAttribute("loginRequestDto") LoginRequestInfo req, Model model) {
+    public String showLoginForm(@ModelAttribute("loginRequestDto") LoginRequestInfo req,
+        Model model) {
         return "login"; // login.html 템플릿을 렌더링
     }
 
     @PostMapping("/login")
-    public String login(@Validated @ModelAttribute("loginRequestDto") LoginRequestInfo req, BindingResult bindingResult,
-                        HttpServletResponse resp) {
+    public String login(@Validated @ModelAttribute("loginRequestDto") LoginRequestInfo req,
+        BindingResult bindingResult,
+        HttpServletResponse resp) {
         if (bindingResult.hasErrors()) {
             return "login";
         }

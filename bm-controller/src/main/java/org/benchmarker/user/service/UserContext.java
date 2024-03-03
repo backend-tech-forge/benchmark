@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class UserContext {
+
     /**
      * Get current user object from context.
      *
@@ -25,7 +26,8 @@ public class UserContext {
         }
         Object obj = auth.getPrincipal();
         if (!(obj instanceof BMUserDetails)) {
-            throw new AuthenticationCredentialsNotFoundException("Invalid authentication with " + obj);
+            throw new AuthenticationCredentialsNotFoundException(
+                "Invalid authentication with " + obj);
         }
         BMUserDetails securedUser = (BMUserDetails) obj;
         return securedUser.getUser();

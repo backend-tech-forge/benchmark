@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class BMUserDetailsService implements UserDetailsService {
+
     private final UserRepository userRepository;
 
     public BMUserDetailsService(UserRepository userRepository) {
@@ -22,7 +23,8 @@ public class BMUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
         log.info("loadByUsername : {}", userId);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + userId));
+            .orElseThrow(
+                () -> new UsernameNotFoundException("User not found with userId: " + userId));
 
         BMUserDetails userDetails = new BMUserDetails();
         userDetails.setUser(user);

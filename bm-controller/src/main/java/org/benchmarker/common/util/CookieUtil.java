@@ -8,10 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * CookieUtils
  */
 public class CookieUtil {
+
     /**
      * remove cookie by cookie name
      *
-     * @param response {@link HttpServletResponse}
+     * @param response   {@link HttpServletResponse}
      * @param cookieName {@link String}
      */
     public static void removeCookie(HttpServletResponse response, String cookieName) {
@@ -23,7 +24,7 @@ public class CookieUtil {
     /**
      * return cookie value by cookie name
      *
-     * @param request {@link HttpServletRequest}
+     * @param request    {@link HttpServletRequest}
      * @param cookieName {@link String}
      * @return cookieValue
      */

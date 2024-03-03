@@ -31,7 +31,7 @@ public class UserService extends AbstractUserService {
             throw new GlobalException(ErrorCode.USER_NOT_FOUND);
         });
         UserGroup defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID)
-                .orElseThrow(()->new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
         user.setUserGroup(defaultGroup);
         user.setPassword(passwordEncoder.encode(user.getPassword())); // bcrypt encoding
         return Optional.of(userRepository.save(user));
@@ -39,7 +39,8 @@ public class UserService extends AbstractUserService {
 
     @Override
     public User getUser(String id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         return user;
     }
 
@@ -51,7 +52,8 @@ public class UserService extends AbstractUserService {
     @Override
     @Transactional
     public Optional<User> updateUser(User user) throws Exception {
-        userRepository.findById(user.getId()).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        userRepository.findById(user.getId())
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         User save = userRepository.save(user);
         return Optional.of(save);
     }
@@ -59,7 +61,8 @@ public class UserService extends AbstractUserService {
     @Override
     @Transactional
     public void deleteUser(String id) {
-        userRepository.findById(id).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        userRepository.findById(id)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         userRepository.deleteById(id);
     }
 

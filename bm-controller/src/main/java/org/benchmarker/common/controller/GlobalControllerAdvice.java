@@ -39,6 +39,7 @@ public class GlobalControllerAdvice {
     public ResponseEntity<GlobalErrorResponse> handleGlobalException(GlobalException e) {
         return GlobalErrorResponse.toResponseEntity(e);
     }
+
     @ModelAttribute
     public void globalAttributes(Model model) {
         model.addAttribute("version", version);

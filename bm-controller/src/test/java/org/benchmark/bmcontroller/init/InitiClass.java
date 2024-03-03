@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Profile("test")
 public class InitiClass {
+
     @SpyBean
     protected UserService userService;
     @SpyBean

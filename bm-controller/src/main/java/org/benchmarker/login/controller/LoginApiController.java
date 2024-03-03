@@ -21,11 +21,13 @@ import static org.benchmarker.security.constant.TokenConsts.ACCESS_TOKEN_COOKIE_
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class LoginApiController {
+
     private final LoginService loginService;
     private final UserContext userContext;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestInfo req, HttpServletResponse resp) {
+    public ResponseEntity<String> login(@RequestBody LoginRequestInfo req,
+        HttpServletResponse resp) {
         String accessToken = loginService.login(req);
         Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken);
         resp.addCookie(cookie);

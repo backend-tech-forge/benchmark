@@ -12,18 +12,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserRepositoryTest extends InitiClass {
+
     @Test
     @DisplayName("정상 사용자 생성시 사용자 정보를 반환한다")
     void createUser() {
         // given
         User user = User.builder()
-                .id("test")
-                .password("password")
-                .build();
+            .id("test")
+            .password("password")
+            .build();
         UserGroup userGroup = UserGroup.builder()
-                .id("default")
-                .name("default")
-                .build();
+            .id("default")
+            .name("default")
+            .build();
         userGroupRepository.save(userGroup);
         UserGroup defaultUserGroup = userGroupRepository.findById("default").get();
         user.setUserGroup(defaultUserGroup);
@@ -42,9 +43,9 @@ class UserRepositoryTest extends InitiClass {
     void createUserWithoutGroup() {
         // given
         User user = User.builder()
-                .id("test")
-                .password("password")
-                .build();
+            .id("test")
+            .password("password")
+            .build();
 
         // when & then
         assertThrows(Exception.class, () -> userRepository.save(user));
@@ -55,22 +56,22 @@ class UserRepositoryTest extends InitiClass {
     void createUserWithDefaultValues() {
         // given
         UserGroup userGroup = UserGroup.builder()
-                .id("default")
-                .name("default")
-                .build();
+            .id("default")
+            .name("default")
+            .build();
         userGroupRepository.save(userGroup);
 
         User user = User.builder()
-                .id("test")
-                .userGroup(userGroup)
-                .password("password")
-                // default values
+            .id("test")
+            .userGroup(userGroup)
+            .password("password")
+            // default values
 //                .slackWebhookUrl("")
 //                .email("")
 //                .emailNotification(false)
 //                .slackNotification(false)
 //                .role(Role.ROLE_USER)
-                .build();
+            .build();
 
         // when & then
         User createdUser = userRepository.save(user);

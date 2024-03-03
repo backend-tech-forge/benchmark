@@ -33,9 +33,9 @@ public class WebSecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return username -> {
-            log.info("Finduser : {}",username);
+            log.info("Finduser : {}", username);
             Optional<User> findUser = userRepository.findById(username);
-            if(findUser.isEmpty()){
+            if (findUser.isEmpty()) {
                 return null;
             }
 
@@ -53,22 +53,24 @@ public class WebSecurityConfig {
             return userDetails;
         };
     }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(CsrfConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable) // disable form login
-                .logout(AbstractHttpConfigurer::disable) // disable default logout
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests.anyRequest().permitAll()
-                )
-                .httpBasic(AbstractHttpConfigurer::disable);
+            .csrf(CsrfConfigurer::disable)
+            .cors(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable) // disable form login
+            .logout(AbstractHttpConfigurer::disable) // disable default logout
+            .authorizeHttpRequests(authorizeRequests ->
+                authorizeRequests.anyRequest().permitAll()
+            )
+            .httpBasic(AbstractHttpConfigurer::disable);
 
-        http.addFilterBefore(new JwtAuthFilter(BMUserDetailsService, jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtAuthFilter(BMUserDetailsService, jwtTokenProvider),
+            UsernamePasswordAuthenticationFilter.class);
         http.exceptionHandling((exceptionHandling) -> exceptionHandling
-                .authenticationEntryPoint(new BMAuthenticationEntryPoint())
-                .accessDeniedHandler(new BMAccessDeniedHandler())
+            .authenticationEntryPoint(new BMAuthenticationEntryPoint())
+            .accessDeniedHandler(new BMAccessDeniedHandler())
         );
         return http.build();
     }

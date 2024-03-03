@@ -57,6 +57,7 @@ public class JwtTokenProvider {
      *      "exp": 1680865300
      *  }
      * </pre></blockquote>
+     *
      * @param authentication {@link Authentication}
      * @return Json-web-token
      */
@@ -68,21 +69,20 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(username);
         if (authorities != null) {
             claims.put(AUTHORITIES_KEY_NAME
-                    , authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+                , authorities.stream().map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.joining(",")));
         }
-
-
 
         Long expirationTimeLong = Long.parseLong(expirationTime);
         final Date createdDate = new Date();
         final Date expirationDate = new Date(createdDate.getTime() + expirationTimeLong);
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(createdDate)
-                .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+            .setClaims(claims)
+            .setSubject(username)
+            .setIssuedAt(createdDate)
+            .setExpiration(expirationDate)
+            .signWith(SignatureAlgorithm.HS512, secret)
+            .compact();
     }
 
     public String createAccessToken(String username, Role role) {
@@ -95,19 +95,21 @@ public class JwtTokenProvider {
         final Date createdDate = new Date();
         final Date expirationDate = new Date(createdDate.getTime() + expirationTimeLong);
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(createdDate)
-                .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+            .setClaims(claims)
+            .setSubject(username)
+            .setIssuedAt(createdDate)
+            .setExpiration(expirationDate)
+            .signWith(SignatureAlgorithm.HS512, secret)
+            .compact();
     }
 
     /**
      * Create Json-web-token with user's username and authorities
      *
-     * <p> Here, this method generate refreshToken. It has much longer expiration time than accessToken </p>
+     * <p> Here, this method generate refreshToken. It has much longer expiration time than
+     * accessToken </p>
      * <p> After generate Token, save it to redis cluster session </p>
+     *
      * @param authentication {@link Authentication}
      * @return Json-web-token
      */
@@ -118,39 +120,43 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(username);
         if (authorities != null) {
             claims.put(AUTHORITIES_KEY_NAME
-                    , authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+                , authorities.stream().map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.joining(",")));
         }
 
         Long expirationTimeLong = Long.parseLong(refreshExpirationTime);
         final Date createdDate = new Date();
         final Date expirationDate = new Date(createdDate.getTime() + expirationTimeLong);
         String refreshToken = Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(createdDate)
-                .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+            .setClaims(claims)
+            .setSubject(username)
+            .setIssuedAt(createdDate)
+            .setExpiration(expirationDate)
+            .signWith(SignatureAlgorithm.HS512, secret)
+            .compact();
 
         return refreshToken;
     }
 
     /**
      * Get {@link Authentication} from Json-web-token
+     *
      * @param token
      * @return {@link Authentication}
      */
     public Authentication getAuthentication(String token) {
 
-        Claims claims = Jwts.parserBuilder().setSigningKey(this.secret).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parserBuilder().setSigningKey(this.secret).build()
+            .parseClaimsJws(token).getBody();
 
         Object authoritiesClaim = claims.get(AUTHORITIES_KEY_NAME);
 
         // permission check
-        Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null ? AuthorityUtils.NO_AUTHORITIES
+        Collection<? extends GrantedAuthority> authorities =
+            authoritiesClaim == null ? AuthorityUtils.NO_AUTHORITIES
                 : AuthorityUtils.commaSeparatedStringToAuthorityList(authoritiesClaim.toString());
-        authorities.forEach(c->{
-            log.debug("JWT has these authorities={}",c.getAuthority());
+        authorities.forEach(c -> {
+            log.debug("JWT has these authorities={}", c.getAuthority());
         });
         User principal = new User(claims.getSubject(), "", authorities);
 
@@ -159,16 +165,17 @@ public class JwtTokenProvider {
 
     /**
      * Get Json-web-token from {@link HttpServletRequest} and validate it
+     *
      * @param token
      * @return true if token is valid, false if not
      */
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts
-                    .parserBuilder().setSigningKey(this.secret).build()
-                    .parseClaimsJws(token);
+                .parserBuilder().setSigningKey(this.secret).build()
+                .parseClaimsJws(token);
             //  parseClaimsJws will check expiration date. No need do here.
-            log.debug("JWT Owner: {}",claims.getBody().getSubject());
+            log.debug("JWT Owner: {}", claims.getBody().getSubject());
             log.debug("JWT Expiration: {}", claims.getBody().getExpiration());
             return true;
         } catch (JwtException | IllegalArgumentException e) {
@@ -181,11 +188,11 @@ public class JwtTokenProvider {
         String accessToken = CookieUtil.getCookieValue(request, cookieName);
         try {
             Jws<Claims> claims = Jwts
-                    .parserBuilder().setSigningKey(this.secret).build()
-                    .parseClaimsJws(accessToken);
+                .parserBuilder().setSigningKey(this.secret).build()
+                .parseClaimsJws(accessToken);
             //  parseClaimsJws will check expiration date. No need do here.
             String userId = claims.getBody().getSubject();
-            log.debug("JWT Owner: {}",claims.getBody().getSubject());
+            log.debug("JWT Owner: {}", claims.getBody().getSubject());
             log.debug("JWT Expiration: {}", claims.getBody().getExpiration());
             return userId;
         } catch (JwtException | IllegalArgumentException e) {
@@ -196,6 +203,7 @@ public class JwtTokenProvider {
 
     /**
      * Check {@link SecurityContextHolder} and get user's userId
+     *
      * @return user's userId
      */
     public static String getUserIdFromSpringSecurityContext() {

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class LoginService {
+
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
@@ -29,7 +30,7 @@ public class LoginService {
     @Transactional
     public String login(LoginRequestInfo req) {
         User user = userRepository.findById(req.getId())
-                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new GlobalException(ErrorCode.PASSWORD_NOT_MATCH);

@@ -1,6 +1,7 @@
 package org.benchmarker.security.constant;
 
 public interface TokenConsts {
+
     // cookie name for access token and refresh token
     String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
     String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";

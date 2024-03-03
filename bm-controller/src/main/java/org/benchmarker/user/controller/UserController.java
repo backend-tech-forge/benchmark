@@ -22,6 +22,7 @@ import java.util.List;
 @GlobalControllerModel
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
     private final UserContext userContext;
 
@@ -32,7 +33,8 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public String saveUser(@Validated UserRegisterDto userRegisterDto, BindingResult bindingResult, Model model) {
+    public String saveUser(@Validated UserRegisterDto userRegisterDto, BindingResult bindingResult,
+        Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", bindingResult.getAllErrors());
             return "user/userRegister";

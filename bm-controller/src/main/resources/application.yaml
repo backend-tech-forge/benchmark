@@ -24,7 +24,7 @@ spring:
     hikari:
       username: 'test'
       password: 'test'
-#      maximum-pool-size: 100
+  #      maximum-pool-size: 100
   jpa:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect

@@ -9,7 +9,7 @@ public enum ErrorCode {
      * 400
      */
     BAD_REQUEST(400, "잘못된 요청입니다"),
-    PASSWORD_NOT_MATCH(400,"패스워드 불일치" ),
+    PASSWORD_NOT_MATCH(400, "패스워드 불일치"),
 
     /**
      * 401

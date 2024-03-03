@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserApiController {
+
     private final IUserService userService;
     private final UserContext userContext;
 
