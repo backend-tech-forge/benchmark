@@ -21,12 +21,13 @@ class UserServiceTest extends InitiClass {
     public void createUser() {
         // Given
         User user = User.builder()
-                .id("test3")
-                .build();
+            .id("test")
+            .password("password")
+            .build();
         UserGroup userGroup = UserGroup.builder()
-                .id("default")
-                .name("default")
-                .build();
+            .id("default")
+            .name("default")
+            .build();
         userGroupRepository.save(userGroup);
         UserGroup defaultUserGroup = userGroupRepository.findById("default").get();
         user.setUserGroup(defaultUserGroup);
@@ -47,25 +48,25 @@ class UserServiceTest extends InitiClass {
     public void createUserException() {
         // Given
         UserGroup userGroup = UserGroup.builder()
-                .id("default")
-                .name("default")
-                .build();
+            .id("default")
+            .name("default")
+            .build();
         User user = User.builder()
-                .id("test")
-                .password("password")
-                .userGroup(userGroup)
-                .build();
+            .id("test")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
         userGroupRepository.save(userGroup);
         userService.createUser(user);
 
         User dupUser = User.builder()
-                .id("test")
-                .userGroup(userGroup)
-                .build();
+            .id("test")
+            .userGroup(userGroup)
+            .build();
 
         // When & Then
         GlobalException ex = assertThrows(GlobalException.class,
-                () -> userService.createUser(dupUser));
+            () -> userService.createUser(dupUser));
         assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
     }
 
@@ -74,14 +75,14 @@ class UserServiceTest extends InitiClass {
     public void updateUser() throws Exception {
         // Given
         UserGroup userGroup = UserGroup.builder()
-                .id("default")
-                .name("default")
-                .build();
+            .id("default")
+            .name("default")
+            .build();
         User user = User.builder()
-                .id("test3")
-                .password("password")
-                .userGroup(userGroup)
-                .build();
+            .id("test3")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
         userGroupRepository.save(userGroup);
         userRepository.save(user);
 
@@ -102,27 +103,26 @@ class UserServiceTest extends InitiClass {
     public void updateUserNonExistingUser() {
         // Given
         UserGroup userGroup = UserGroup.builder()
-                .id("default")
-                .name("default")
-                .build();
+            .id("default")
+            .name("default")
+            .build();
         User user = User.builder()
-                .id("test")
-                .password("password")
-                .userGroup(userGroup)
-                .build();
+            .id("test")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
         userGroupRepository.save(userGroup);
         userRepository.save(user);
 
-
         User nonExistUser = User.builder()
-                .id("nonExistingUser")
-                .password("password")
-                .userGroup(userGroup)
-                .build();
+            .id("nonExistingUser")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
 
         // When & Then
         assertThrows(GlobalException.class,
-                () -> userService.updateUser(nonExistUser));
+            () -> userService.updateUser(nonExistUser));
     }
 
     @Test
@@ -130,14 +130,14 @@ class UserServiceTest extends InitiClass {
     public void deleteUser() {
         // Given
         UserGroup userGroup = UserGroup.builder()
-                .id("default")
-                .name("default")
-                .build();
+            .id("default")
+            .name("default")
+            .build();
         User user = User.builder()
-                .id("test")
-                .password("password")
-                .userGroup(userGroup)
-                .build();
+            .id("test")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
         userGroupRepository.save(userGroup);
         userService.createUser(user);
 
@@ -153,20 +153,20 @@ class UserServiceTest extends InitiClass {
     public void deleteUserException() {
         // Given
         UserGroup userGroup = UserGroup.builder()
-                .id("default")
-                .name("default")
-                .build();
+            .id("default")
+            .name("default")
+            .build();
         User user = User.builder()
-                .id("test")
-                .password("password")
-                .userGroup(userGroup)
-                .build();
+            .id("test")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
         userGroupRepository.save(userGroup);
         userService.createUser(user);
 
         // When
         GlobalException ex = assertThrows(GlobalException.class,
-                () -> userService.deleteUser("nonExistingUser"));
+            () -> userService.deleteUser("nonExistingUser"));
 
         // Then
         assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);

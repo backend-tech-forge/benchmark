@@ -7,8 +7,8 @@ import java.util.Optional;
 @AllArgsConstructor
 public enum Role {
 
-    USER("USER","normal user"),
-    ADMIN("ADMIN","admin user"),
+    ROLE_USER("USER", "normal user"),
+    ROLE_ADMIN("ADMIN", "admin user"),
     ;
     private final String role;
     private final String description;
@@ -20,5 +20,13 @@ public enum Role {
             }
         }
         return Optional.empty();
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

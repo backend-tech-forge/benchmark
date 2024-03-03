@@ -33,13 +33,14 @@ public class User extends BaseTime {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
     private UserGroup userGroup;
 
 
     @Builder
-    public User(String id, String password, String slackWebhookUrl, Boolean slackNotification, String email, Boolean emailNotification, Role role, UserGroup userGroup) {
+    public User(String id, String password, String slackWebhookUrl, Boolean slackNotification,
+        String email, Boolean emailNotification, Role role, UserGroup userGroup) {
         this.id = id;
         this.password = password;
         this.slackWebhookUrl = slackWebhookUrl;
@@ -49,8 +50,16 @@ public class User extends BaseTime {
         this.role = role;
         this.userGroup = userGroup;
 
+        if (this.slackWebhookUrl == null) {
+            this.slackWebhookUrl = "";
+        }
+
+        if (this.email == null) {
+            this.email = "";
+        }
+
         if (this.role == null) {
-            this.role = Role.USER;
+            this.role = Role.ROLE_USER;
         }
         if (this.slackNotification == null) {
             this.slackNotification = false;
@@ -60,8 +69,20 @@ public class User extends BaseTime {
         }
     }
 
-
     public User() {
 
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "id='" + id + '\'' +
+            ", password='" + password + '\'' +
+            ", slackWebhookUrl='" + slackWebhookUrl + '\'' +
+            ", slackNotification=" + slackNotification +
+            ", email='" + email + '\'' +
+            ", emailNotification=" + emailNotification +
+            ", role=" + role +
+            '}';
     }
 }

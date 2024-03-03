@@ -1,0 +1,16 @@
+version: '3'
+services:
+  test-db:
+    container_name: test-db
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_USER=test
+      - POSTGRES_DB=test
+    ports:
+      - "5433:5433"
+    volumes:
+      - ./backups:/home/backups
+    command: -c wal_level=logical -p 5433
+    restart: always
+
