@@ -9,6 +9,7 @@ public enum ErrorCode {
      * 400
      */
     BAD_REQUEST(400, "잘못된 요청입니다"),
+    PASSWORD_NOT_MATCH(400, "패스워드 불일치"),
 
     /**
      * 401
@@ -31,6 +32,7 @@ public enum ErrorCode {
      */
     SERVER_DEFAULT_ERROR(500, "서버 내부오류"),
     ;
+
 
     private final int httpStatus;
     private final String message;

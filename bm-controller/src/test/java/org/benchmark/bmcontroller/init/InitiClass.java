@@ -10,18 +10,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Profile("test")
 public class InitiClass {
+
     @SpyBean
     protected UserService userService;
     @SpyBean
     protected UserRepository userRepository;
     @SpyBean
     protected UserGroupRepository userGroupRepository;
+    @SpyBean
+    protected PasswordEncoder passwordEncoder;
 
     @AfterEach
     void removeAll() {

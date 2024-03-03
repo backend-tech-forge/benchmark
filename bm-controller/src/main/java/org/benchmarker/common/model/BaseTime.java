@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.benchmarker.util.date.DateFormat;
+import org.benchmarker.common.util.DateUtil;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -24,23 +24,28 @@ public class BaseTime {
     protected LocalDateTime updatedAt;
 
     @PrePersist
-    public void onPrePersist(){
+    public void onPrePersist() {
         if (this.createdAt == null) {
-            this.createdAt = DateFormat.getCurrentTime();
+            this.createdAt = DateUtil.getCurrentTime();
         }
         this.updatedAt = this.createdAt;
     }
 
     @PreUpdate
-    public void onPreUpdate(){
-        this.updatedAt = DateFormat.getCurrentTime();
+    public void onPreUpdate() {
+        this.updatedAt = DateUtil.getCurrentTime();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BaseTime baseTime)) return false;
-        return Objects.equals(getCreatedAt(), baseTime.getCreatedAt()) && Objects.equals(getUpdatedAt(), baseTime.getUpdatedAt());
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BaseTime baseTime)) {
+            return false;
+        }
+        return Objects.equals(getCreatedAt(), baseTime.getCreatedAt()) && Objects.equals(
+            getUpdatedAt(), baseTime.getUpdatedAt());
     }
 
     @Override
@@ -51,9 +56,9 @@ public class BaseTime {
     @Override
     public String toString() {
         return "BaseTime{" +
-                "createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
+            "createdAt=" + createdAt +
+            ", updatedAt=" + updatedAt +
+            '}';
     }
 
 }

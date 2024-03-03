@@ -9,6 +9,7 @@ import org.benchmarker.common.model.BaseTime;
 @Getter
 @NoArgsConstructor
 public class UserGroup extends BaseTime {
+
     @Id
     private String id;
     @Column(name = "group_name")
@@ -19,6 +20,7 @@ public class UserGroup extends BaseTime {
     public UserGroup(String id, String name) {
         this.id = id;
         this.name = name;
+
         if (this.name == null) {
             this.name = "default";
         }
