@@ -2,6 +2,7 @@ package org.benchmarker.common.error;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import lombok.*;
 import org.springframework.http.ResponseEntity;
 
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
-public class GlobalErrorResponse {
+public class GlobalErrorResponse implements Serializable {
 
     private final LocalDateTime timestamp = LocalDateTime.now();
     private int status;

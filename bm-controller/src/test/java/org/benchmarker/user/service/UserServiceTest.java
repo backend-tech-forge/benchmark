@@ -1,6 +1,6 @@
 package org.benchmarker.user.service;
 
-import org.benchmark.bmcontroller.init.InitiClass;
+import org.util.initialize.InitiClass;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.model.User;
@@ -12,7 +12,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class UserServiceTest extends InitiClass {
 
@@ -44,7 +43,7 @@ class UserServiceTest extends InitiClass {
     }
 
     @Test
-    @DisplayName("중복 id 사용자를 생성하면 USER_NOT_FOUND 예외를 반환한다")
+    @DisplayName("중복 id 사용자를 생성하면 USER_ALREADY_EXIST 예외를 반환한다")
     public void createUserException() {
         // Given
         UserGroup userGroup = UserGroup.builder()
@@ -67,7 +66,7 @@ class UserServiceTest extends InitiClass {
         // When & Then
         GlobalException ex = assertThrows(GlobalException.class,
             () -> userService.createUser(dupUser));
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.USER_ALREADY_EXIST);
     }
 
     @Test

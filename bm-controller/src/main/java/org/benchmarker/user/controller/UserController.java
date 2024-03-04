@@ -3,6 +3,7 @@ package org.benchmarker.user.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.controller.annotation.GlobalControllerModel;
+import org.benchmarker.login.controller.dto.LoginRequestInfo;
 import org.benchmarker.user.controller.dto.UserRegisterDto;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.service.UserContext;
@@ -13,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
@@ -27,13 +29,12 @@ public class UserController {
     private final UserContext userContext;
 
     @GetMapping("/user")
-    public String user(Model model) {
-        model.addAttribute("userDto", new UserRegisterDto());
+    public String user(@ModelAttribute("userRegisterDto") UserRegisterDto userRegisterDto) {
         return "user/userRegister";
     }
 
     @PostMapping("/user")
-    public String saveUser(@Validated UserRegisterDto userRegisterDto, BindingResult bindingResult,
+    public String saveUser(@Validated @ModelAttribute("userRegisterDto") UserRegisterDto userRegisterDto, BindingResult bindingResult,
         Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", bindingResult.getAllErrors());
