@@ -10,14 +10,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 
+/**
+ * Manage user information with {@link org.springframework.security.core.context.SecurityContext}
+ */
 @Component
 @Slf4j
 public class UserContext {
 
     /**
-     * Get current user object from context.
+     * Get current user object from
+     * {@link org.springframework.security.core.context.SecurityContext}
      *
-     * @return current user;
+     * @return {@link User}
      */
     public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
