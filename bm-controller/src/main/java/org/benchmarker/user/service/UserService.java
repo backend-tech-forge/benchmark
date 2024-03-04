@@ -28,7 +28,7 @@ public class UserService extends AbstractUserService {
     @Transactional
     public Optional<User> createUser(User user) {
         userRepository.findById(user.getId()).ifPresent((u) -> {
-            throw new GlobalException(ErrorCode.USER_NOT_FOUND);
+            throw new GlobalException(ErrorCode.USER_ALREADY_EXIST);
         });
         UserGroup defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID)
             .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
@@ -38,7 +38,8 @@ public class UserService extends AbstractUserService {
     }
 
     @Override
-    public User getUser(String id) {
+    @Transactional
+    public User getUser(String currentUserId, String id) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         return user;

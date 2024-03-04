@@ -24,6 +24,17 @@ public class UserRegisterDto {
     private String email;
     private Boolean emailNotification;
 
+    @Builder
+    public UserRegisterDto(String id, String password, String slackWebhookUrl,
+        Boolean slackNotification, String email, Boolean emailNotification) {
+        this.id = id;
+        this.password = password;
+        this.slackWebhookUrl = slackWebhookUrl;
+        this.slackNotification = slackNotification;
+        this.email = email;
+        this.emailNotification = emailNotification;
+    }
+
     public User toEntity() {
         return User.builder()
             .id(id)

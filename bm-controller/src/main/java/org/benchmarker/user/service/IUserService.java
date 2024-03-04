@@ -9,7 +9,7 @@ public interface IUserService {
 
     Optional<User> createUser(User user);
 
-    User getUser(String id);
+    User getUser(String currentUserId, String id);
 
     List<User> getUsers();
 
