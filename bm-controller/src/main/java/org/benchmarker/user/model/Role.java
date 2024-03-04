@@ -3,6 +3,8 @@ package org.benchmarker.user.model;
 import lombok.AllArgsConstructor;
 
 import java.util.Optional;
+import org.benchmarker.common.error.ErrorCode;
+import org.benchmarker.common.error.GlobalException;
 
 @AllArgsConstructor
 public enum Role {
@@ -28,5 +30,12 @@ public enum Role {
 
     public String getDescription() {
         return description;
+    }
+
+    public Boolean isAdmin() {
+        if (this.equals(ROLE_ADMIN)) {
+            return true;
+        }
+        return false;
     }
 }
