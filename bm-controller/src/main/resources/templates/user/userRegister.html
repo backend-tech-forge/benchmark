@@ -1,13 +1,17 @@
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>User Form</title>
+  <title>User Registration</title>
 </head>
 <body>
-<h1>User Form</h1>
+<h1>User Registration</h1>
 <form th:action="@{/user}" th:object="${userRegisterDto}" method="post">
-  <div th:if="${errors}">
-    <p style="color: red" th:each="error : ${errors}" th:text="${error}"></p>
+  <div th:if="${#fields.hasErrors('*')}" style="color: red;">
+    <p>Please correct the following errors:</p>
+    <ul>
+      <li th:each="error : ${#fields.errors('*')}" th:text="${error}">Error</li>
+    </ul>
   </div>
 
   <label for="id">ID:</label>
@@ -17,7 +21,7 @@
   <input type="password" id="password" th:field="*{password}" required/><br/>
 
   <label for="slackWebhookUrl">Slack Webhook URL:</label>
-  <input type="text" id="slackWebhookUrl" th:field="*{slackWebhookUrl}"/><br/>
+  <input type="text" id="slackWebhookUrl" th:field="*{slackWebhookUrl}" required/><br/>
 
   <label for="slackNotification">Slack Notification:</label>
   <input type="checkbox" id="slackNotification" th:field="*{slackNotification}"/><br/>
@@ -28,7 +32,7 @@
   <label for="emailNotification">Email Notification:</label>
   <input type="checkbox" id="emailNotification" th:field="*{emailNotification}"/><br/>
 
-  <button type="submit">Save</button>
+  <button type="submit">Register</button>
 </form>
 </body>
 </html>
