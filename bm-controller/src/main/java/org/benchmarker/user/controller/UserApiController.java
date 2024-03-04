@@ -32,13 +32,20 @@ public class UserApiController {
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<UserInfo> getUser(@RequestParam String id) {
-        User user = userService.getUser(id);
-        return ResponseEntity.ok(UserInfo.from(user));
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<UserInfo> getUser(
+        @RequestParam(required = false, defaultValue = "") String id) {
+        User currentUser = userContext.getCurrentUser();
+        if (id.isEmpty()) {
+            return ResponseEntity.ok(UserInfo.from(currentUser));
+        } else {
+            User user = userService.getUser(currentUser.getId(), id);
+            return ResponseEntity.ok(UserInfo.from(user));
+        }
     }
 
     @GetMapping("/user/me")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<UserInfo> getUser() {
         User currentUser = userContext.getCurrentUser();
         return ResponseEntity.ok(UserInfo.from(currentUser));
