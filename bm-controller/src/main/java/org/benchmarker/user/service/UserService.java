@@ -39,9 +39,23 @@ public class UserService extends AbstractUserService {
 
     @Override
     @Transactional
-    public User getUser(String currentUserId, String id) {
+    public User getUser(String id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional
+    public User getUserIfSameGroup(String currentUserId, String id) {
+        User currentUser = userRepository.findById(currentUserId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         User user = userRepository.findById(id)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        if (!currentUser.getUserGroup().equals(user.getUserGroup())) {
+            throw new GlobalException(ErrorCode.USER_NOT_SAME_GROUP);
+        }
+
         return user;
     }
 
