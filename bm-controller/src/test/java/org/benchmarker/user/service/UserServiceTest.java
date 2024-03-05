@@ -19,17 +19,16 @@ class UserServiceTest extends InitiClass {
     @DisplayName("사용자를 생성하면 사용자 정보를 반환한다")
     public void createUser() {
         // Given
-        User user = User.builder()
-            .id("test")
-            .password("password")
-            .build();
+
         UserGroup userGroup = UserGroup.builder()
             .id("default")
             .name("default")
             .build();
-        userGroupRepository.save(userGroup);
-        UserGroup defaultUserGroup = userGroupRepository.findById("default").get();
-        user.setUserGroup(defaultUserGroup);
+        User user = User.builder()
+            .id("test")
+            .password("password")
+            .build();
+        user.setUserGroup(userGroup);
 
         // When
         Optional<User> createdUser = userService.createUser(user);
@@ -39,7 +38,7 @@ class UserServiceTest extends InitiClass {
         User savedUser = createdUser.get();
         assertThat(savedUser).isNotNull();
         assertThat(savedUser.getId()).isEqualTo(user.getId());
-        assertThat(savedUser.getUserGroup()).isEqualTo(defaultUserGroup);
+        assertThat(savedUser.getUserGroup()).isEqualTo(userGroup);
     }
 
     @Test
@@ -55,7 +54,6 @@ class UserServiceTest extends InitiClass {
             .password("password")
             .userGroup(userGroup)
             .build();
-        userGroupRepository.save(userGroup);
         userService.createUser(user);
 
         User dupUser = User.builder()
@@ -139,6 +137,7 @@ class UserServiceTest extends InitiClass {
             .password("password")
             .userGroup(userGroup)
             .build();
+
         userGroupRepository.save(userGroup);
         userRepository.save(user);
         userRepository.save(otherUser);
@@ -227,7 +226,7 @@ class UserServiceTest extends InitiClass {
             .password("password")
             .userGroup(userGroup)
             .build();
-        userGroupRepository.save(userGroup);
+
         userService.createUser(user);
 
         // When
@@ -250,7 +249,6 @@ class UserServiceTest extends InitiClass {
             .password("password")
             .userGroup(userGroup)
             .build();
-        userGroupRepository.save(userGroup);
         userService.createUser(user);
 
         // When
