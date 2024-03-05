@@ -12,6 +12,7 @@ import org.benchmarker.user.constant.UserConsts;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class UserGroup extends BaseTime {
 
     @Id
