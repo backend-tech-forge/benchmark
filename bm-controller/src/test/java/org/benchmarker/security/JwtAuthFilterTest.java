@@ -20,9 +20,6 @@ public class JwtAuthFilterTest {
 
     @InjectMocks
     private JwtAuthFilter jwtAuthFilter;
-
-    @Mock
-    private HttpServletRequest request;
     @Mock
     private BMUserDetails userDetails;
     @Mock
