@@ -35,9 +35,9 @@ public class LoginApiController {
     }
 
     @PostMapping("/logout")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<String> logout(HttpServletResponse resp) {
-        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, null);
+        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, "");
         cookie.setMaxAge(0);
         resp.addCookie(cookie);
         return ResponseEntity.ok(LOGOUT_SUCCESS);
