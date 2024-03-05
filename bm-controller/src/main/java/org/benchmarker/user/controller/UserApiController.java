@@ -51,13 +51,6 @@ public class UserApiController {
     }
 
 
-    @GetMapping("/user/me")
-    @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<UserInfo> getUser() {
-        User currentUser = userContext.getCurrentUser();
-        return ResponseEntity.ok(UserInfo.from(currentUser));
-    }
-
     @GetMapping("/users")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<List<UserInfo>> getUsers() {
