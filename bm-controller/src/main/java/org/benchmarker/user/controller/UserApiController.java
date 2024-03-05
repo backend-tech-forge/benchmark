@@ -50,7 +50,6 @@ public class UserApiController {
         }
     }
 
-
     @GetMapping("/users")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<List<UserInfo>> getUsers() {
