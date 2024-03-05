@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>User Registration</title>
+  <style>
+    #groupInfo {
+      display: none; /* 초기에는 숨김 상태로 설정 */
+    }
+  </style>
 </head>
 <body>
 <h1>User Registration</h1>
@@ -31,6 +36,32 @@
 
   <label for="emailNotification">Email Notification:</label>
   <input type="checkbox" id="emailNotification" th:field="*{emailNotification}"/><br/>
+
+  <!-- 버튼 클릭 시 화면에 표시될 입력란과 라벨 -->
+  <div id="groupInfo">
+    <label for="displayedGroupId">Displayed Group ID:</label>
+    <input type="text" id="displayedGroupId"/><br/>
+
+    <label for="displayedGroupDescription">Displayed Group Description:</label>
+    <input type="text" id="displayedGroupDescription"/><br/>
+  </div>
+
+  <!-- 버튼 클릭 시 toggleGroupInfo 함수 호출 -->
+  <button type="button" id="toggleButton">Add Group Info</button>
+
+  <script>
+    document.getElementById("toggleButton").addEventListener("click", function() {
+      var groupInfoDiv = document.getElementById("groupInfo");
+      if (groupInfoDiv.style.display === "none") {
+        groupInfoDiv.style.display = "block";
+      } else if (groupInfoDiv.style.display === "block") {
+        groupInfoDiv.style.display = "none";
+      }
+      else {
+        groupInfoDiv.style.display = "block";
+      }
+    });
+  </script>
 
   <button type="submit">Register</button>
 </form>
