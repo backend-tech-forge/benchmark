@@ -156,18 +156,9 @@ class UserApiControllerTest {
         }
 
         @Test
-        @WithMockUser(username = "", roles = "ANONYMOUS")
+        @WithMockUser(username = "anonymous_user", roles = "ANONYMOUS")
         @DisplayName("내 정보 조회 시 권한이 없으면 403 FORBIDDEN 반환한다")
         void test12() throws Exception {
-            // given
-            String userId = TestUserConsts.id;
-            User userStub = User.builder()
-                .id(userId)
-                .password(TestUserConsts.password)
-                .email(TestUserConsts.email)
-                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-                .build();
-
             // when & then
             when(userContext.getCurrentUser()).thenReturn(null);
 
@@ -221,12 +212,6 @@ class UserApiControllerTest {
             String otherUserId = "otherUserId";
             User userStub = User.builder()
                 .id(userId)
-                .password(TestUserConsts.password)
-                .email(TestUserConsts.email)
-                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-                .build();
-            User otherUser = User.builder()
-                .id("otherUserId")
                 .password(TestUserConsts.password)
                 .email(TestUserConsts.email)
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
