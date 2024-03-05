@@ -22,11 +22,12 @@ public class User extends BaseTime {
     private String slackWebhookUrl;
     @Column(name = "slack_notification")
 
+    @Builder.Default
     private Boolean slackNotification = false;
     @Column(name = "email")
     private String email;
     @Column(name = "email_notification")
-
+    @Builder.Default
     private Boolean emailNotification = false;
 
     @Column(name = "role")
