@@ -4,6 +4,14 @@ token:
   expiration_time: 86400000 # 1 day
   refresh_expiration_time: 604800000 # 7 days
 
+benchmark:
+  version: '1.0.0'
+  name: 'benchmark'
+  description: 'Benchmark application'
+  contact:
+    name: 'Gyumin Hwangbo'
+    email: 'ghkdqhrbals@gmail.com'
+
 # admin user
 admin:
   id: 'admin'
