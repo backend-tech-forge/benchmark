@@ -18,6 +18,7 @@ import org.benchmarker.user.controller.dto.UserInfo;
 import org.benchmarker.user.controller.dto.UserRegisterDto;
 import org.benchmarker.user.model.Role;
 import org.benchmarker.user.model.User;
+import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.service.UserContext;
 import org.benchmarker.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,6 +78,38 @@ class UserApiControllerTest {
                 .password(TestUserConsts.password)
                 .email(TestUserConsts.email)
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .build();
+            User user = userRegisterDto.toEntity();
+
+            // when
+            when(userService.createUser(any())).thenReturn(Optional.of(user));
+
+            // then
+            mockMvc.perform(post("/api/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(new ObjectMapper().writeValueAsString(userRegisterDto)))
+                .andDo(result -> {
+                    assertThat(result.getResponse().getStatus()).isEqualTo(200);
+                    UserInfo userInfo = objectMapper.readValue(
+                        result.getResponse().getContentAsString(StandardCharsets.UTF_8),
+                        UserInfo.class);
+                    assertThat(userInfo.getId()).isEqualTo(TestUserConsts.id);
+                    assertThat(userInfo.getEmail()).isEqualTo(TestUserConsts.email);
+                    assertThat(userInfo.getSlackWebhookUrl()).isEqualTo(
+                        TestUserConsts.slackWebhookUrl);
+                });
+        }
+
+        @Test
+        @DisplayName("valid 유저 생성 시 Group 또한 생성하고 200 UserInfo 응답을 반환한다")
+        void test35() throws Exception {
+            // Given
+            UserRegisterDto userRegisterDto = UserRegisterDto.builder()
+                .id(TestUserConsts.id)
+                .password(TestUserConsts.password)
+                .email(TestUserConsts.email)
+                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .userGroup(UserGroup.builder().id("newGroupId").name("group").build())
                 .build();
             User user = userRegisterDto.toEntity();
 
