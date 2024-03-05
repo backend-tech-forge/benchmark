@@ -98,6 +98,96 @@ class UserServiceTest extends InitiClass {
     }
 
     @Test
+    @DisplayName("사용자 정보 조회 시 사용자 정보를 반환한다")
+    public void getUser() throws Exception {
+        // Given
+        UserGroup userGroup = UserGroup.builder()
+            .id("default")
+            .name("default")
+            .build();
+        User user = User.builder()
+            .id("test3")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
+        userGroupRepository.save(userGroup);
+        userRepository.save(user);
+
+        // when
+        User findUser = userService.getUser(user.getId());
+
+        // then
+        assertThat(findUser).isNotNull();
+        assertThat(findUser.getId()).isEqualTo(user.getId());
+    }
+
+    @Test
+    @DisplayName("Group 내 사용자 정보 조회 시 사용자 정보를 반환한다")
+    public void getUserInSameGroup() throws Exception {
+        // given
+        UserGroup userGroup = UserGroup.builder()
+            .id("default")
+            .name("default")
+            .build();
+        User user = User.builder()
+            .id("test")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
+        User otherUser = User.builder()
+            .id("otherUser")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
+        userGroupRepository.save(userGroup);
+        userRepository.save(user);
+        userRepository.save(otherUser);
+
+        // when
+        User findUser = userService.getUser(otherUser.getId());
+
+        // then
+        assertThat(findUser).isNotNull();
+        assertThat(findUser.getId()).isEqualTo(otherUser.getId());
+        assertThat(findUser.getUserGroup()).isEqualTo(userGroup);
+    }
+
+    @Test
+    @DisplayName("사용자 정보 조회 시 group 이 다르면 GlobalException 에러를 반환한다")
+    public void getUserInNotSameGroup_ThrowException() throws Exception {
+        // given
+        UserGroup userGroup = UserGroup.builder()
+            .id("default")
+            .name("default")
+            .build();
+        User user = User.builder()
+            .id("test")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
+        UserGroup otherGroup = UserGroup.builder()
+            .id("otherGroup")
+            .name("default")
+            .build();
+        User otherUser = User.builder()
+            .id("otherUser")
+            .password("password")
+            .userGroup(otherGroup)
+            .build();
+        userGroupRepository.save(userGroup);
+        userRepository.save(user);
+        userGroupRepository.save(otherGroup);
+        userRepository.save(otherUser);
+
+        // when
+        ErrorCode errorCode = assertThrows((GlobalException.class),
+            () -> userService.getUserIfSameGroup(user.getId(),otherUser.getId())).getErrorCode();
+
+        // then
+        assertThat(errorCode).isEqualTo(ErrorCode.USER_NOT_SAME_GROUP);
+    }
+
+    @Test
     @DisplayName("존재하지 않는 사용자 정보를 업데이트하면 예외를 발생시킨다")
     public void updateUserNonExistingUser() {
         // Given
