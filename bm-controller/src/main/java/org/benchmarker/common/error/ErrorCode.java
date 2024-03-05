@@ -33,8 +33,7 @@ public enum ErrorCode {
     /**
      * 500
      */
-    SERVER_DEFAULT_ERROR(500, "서버 내부오류"),
-    ;
+    INTERNAL_SERVER_ERROR(500,"서버 내부 오류" );
 
 
     private final int httpStatus;
