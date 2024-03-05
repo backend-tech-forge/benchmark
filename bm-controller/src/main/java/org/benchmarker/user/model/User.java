@@ -18,7 +18,6 @@ import org.benchmarker.common.model.BaseTime;
 @Entity
 @Table(name = "APP_USER")
 @Builder
-@ToString
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class User extends BaseTime {
@@ -45,7 +44,7 @@ public class User extends BaseTime {
     private Role role = Role.ROLE_USER;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "group_id", referencedColumnName = "id")
     private UserGroup userGroup;
 
 }
