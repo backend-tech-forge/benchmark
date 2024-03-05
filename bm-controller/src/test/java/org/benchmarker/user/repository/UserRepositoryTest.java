@@ -38,6 +38,29 @@ class UserRepositoryTest extends InitiClass {
     }
 
     @Test
+    @DisplayName("새로운 그룹과 사용자 생성 시 사용자 정보를 반환한다")
+    void createUser2() {
+        // given
+        UserGroup userGroup = UserGroup.builder()
+            .id("default")
+            .name("default")
+            .build();
+        User user = User.builder()
+            .id("test")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
+
+        // when
+        User createdUser = userRepository.save(user);
+
+        // then
+        assertThat(createdUser).isNotNull();
+        assertThat(createdUser.getId()).isEqualTo(user.getId());
+        assertThat(createdUser.getUserGroup()).isEqualTo(userGroup);
+    }
+
+    @Test
     @DisplayName("사용자 그룹이 없을 때 사용자 생성시 에러를 반환한다")
     void createUserWithoutGroup() {
         // given
