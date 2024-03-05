@@ -3,8 +3,6 @@ package org.benchmarker.user.model;
 import lombok.AllArgsConstructor;
 
 import java.util.Optional;
-import org.benchmarker.common.error.ErrorCode;
-import org.benchmarker.common.error.GlobalException;
 
 @AllArgsConstructor
 public enum Role {
@@ -15,7 +13,7 @@ public enum Role {
     private final String role;
     private final String description;
 
-    public Optional<Role> fromString(String role) {
+    public static Optional<Role> fromString(String role) {
         for (Role r : Role.values()) {
             if (r.role.equals(role)) {
                 return Optional.of(r);
