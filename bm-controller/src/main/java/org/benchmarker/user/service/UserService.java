@@ -30,9 +30,20 @@ public class UserService extends AbstractUserService {
         userRepository.findById(user.getId()).ifPresent((u) -> {
             throw new GlobalException(ErrorCode.USER_ALREADY_EXIST);
         });
-        UserGroup defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID)
-            .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
-        user.setUserGroup(defaultGroup);
+        if (user.getUserGroup() == null) {
+            UserGroup defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID)
+                .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+            user.setUserGroup(defaultGroup);
+        }else{
+            userGroupRepository.findById(user.getUserGroup().getId()).ifPresentOrElse(
+                (group) -> {
+                    throw new GlobalException(ErrorCode.GROUP_ALREADY_EXIST);
+                },
+                () -> {
+                    userGroupRepository.save(user.getUserGroup());
+                }
+            );
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword())); // bcrypt encoding
         return Optional.of(userRepository.save(user));
     }
