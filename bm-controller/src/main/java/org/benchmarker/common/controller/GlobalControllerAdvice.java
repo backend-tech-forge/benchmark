@@ -1,6 +1,7 @@
 package org.benchmarker.common.controller;
 
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.benchmarker.common.controller.annotation.GlobalControllerModel;
 import org.benchmarker.common.error.GlobalErrorResponse;
@@ -20,6 +21,7 @@ import static org.benchmarker.common.util.NoOp.noOp;
  */
 @ControllerAdvice(annotations = GlobalControllerModel.class)
 @RequiredArgsConstructor
+@Getter
 public class GlobalControllerAdvice {
 
     @Value("${benchmark.version}")
