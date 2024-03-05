@@ -2,6 +2,7 @@ package org.benchmarker.common.model;
 
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
+@EqualsAndHashCode
 @MappedSuperclass
 public class BaseTime {
 
@@ -35,24 +37,7 @@ public class BaseTime {
     public void onPreUpdate() {
         this.updatedAt = DateUtil.getCurrentTime();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof BaseTime baseTime)) {
-            return false;
-        }
-        return Objects.equals(getCreatedAt(), baseTime.getCreatedAt()) && Objects.equals(
-            getUpdatedAt(), baseTime.getUpdatedAt());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getCreatedAt(), getUpdatedAt());
-    }
-
+    
     @Override
     public String toString() {
         return "BaseTime{" +
