@@ -1,7 +1,6 @@
 package org.benchmarker.security;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import org.benchmarker.user.controller.constant.TestUserConsts;
 import org.junit.jupiter.api.DisplayName;
@@ -29,9 +28,6 @@ public class JwtAuthFilterTest {
     @Mock
     private BMUserDetailsService userDetailsService;
     @Mock
-    private HttpServletResponse response;
-
-    @Mock
     private JwtTokenProvider jwtTokenProvider;
 
     @Test
@@ -47,9 +43,9 @@ public class JwtAuthFilterTest {
         when(userDetails.getAuthorities())
             .thenReturn((Collection) authenticationToken.getAuthorities());
 
-
         // when
-        jwtAuthFilter.doFilterInternal(null, null, (req, res) -> {});
+        jwtAuthFilter.doFilterInternal(null, null, (req, res) -> {
+        });
 
         // then
         verify(userDetailsService, times(1)).loadUserByUsername(userId);
@@ -64,7 +60,8 @@ public class JwtAuthFilterTest {
         when(jwtTokenProvider.validateTokenAndGetUserId(any(), any())).thenReturn(null);
 
         // when
-        jwtAuthFilter.doFilterInternal(null, null, (req, res) -> {});
+        jwtAuthFilter.doFilterInternal(null, null, (req, res) -> {
+        });
 
         // then
         verify(userDetailsService, never()).loadUserByUsername(any());
