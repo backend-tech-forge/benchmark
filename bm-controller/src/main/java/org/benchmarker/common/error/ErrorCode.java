@@ -10,6 +10,8 @@ public enum ErrorCode {
      */
     BAD_REQUEST(400, "잘못된 요청입니다"),
     PASSWORD_NOT_MATCH(400, "패스워드 불일치"),
+    USER_NOT_SAME_GROUP(400, "그룹이 다른 사용자입니다"),
+    GROUP_ALREADY_EXIST(400, "그룹이 이미 존재합니다"),
 
     /**
      * 401
@@ -25,13 +27,13 @@ public enum ErrorCode {
      * 404
      */
     USER_NOT_FOUND(404, "유저가 존재하지 않습니다"),
+    USER_ALREADY_EXIST(404, "유저가 이미 존재합니다"),
     GROUP_NOT_FOUND(404, "그룹이 존재하지 않습니다"),
 
     /**
      * 500
      */
-    SERVER_DEFAULT_ERROR(500, "서버 내부오류"),
-    ;
+    INTERNAL_SERVER_ERROR(500,"서버 내부 오류" );
 
 
     private final int httpStatus;
@@ -41,4 +43,5 @@ public enum ErrorCode {
         this.httpStatus = httpStatus;
         this.message = s;
     }
+
 }

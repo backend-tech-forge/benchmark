@@ -3,6 +3,7 @@ package org.benchmarker.security;
 
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.util.CookieUtil;
 import org.benchmarker.user.model.Role;
@@ -27,6 +28,7 @@ import static org.benchmarker.security.constant.TokenConsts.AUTHORITIES_KEY_NAME
  */
 @Slf4j
 @Component
+@Setter
 public class JwtTokenProvider {
 
     /**
@@ -52,7 +54,7 @@ public class JwtTokenProvider {
      * <blockquote><pre>
      *  {
      *      "sub": "userId",
-     *      "permissions": ["USER","ADMIN"],
+     *      "role": "USER",
      *      "iat": 1680778900,
      *      "exp": 1680865300
      *  }
@@ -65,7 +67,8 @@ public class JwtTokenProvider {
         String username = authentication.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        // Claims = sub + expiration + role
+
+        // Claims = sub + role
         Claims claims = Jwts.claims().setSubject(username);
         if (authorities != null) {
             claims.put(AUTHORITIES_KEY_NAME
@@ -201,19 +204,6 @@ public class JwtTokenProvider {
         return null;
     }
 
-    /**
-     * Check {@link SecurityContextHolder} and get user's userId
-     *
-     * @return user's userId
-     */
-    public static String getUserIdFromSpringSecurityContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-        return ((User) authentication.getPrincipal()).getUsername();
-    }
-
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
@@ -221,6 +211,4 @@ public class JwtTokenProvider {
         }
         return null;
     }
-
-
 }

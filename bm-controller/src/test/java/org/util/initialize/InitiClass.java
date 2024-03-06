@@ -1,4 +1,4 @@
-package org.benchmark.bmcontroller.init;
+package org.util.initialize;
 
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;

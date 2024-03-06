@@ -7,6 +7,11 @@ import org.benchmarker.user.model.User;
 import org.benchmarker.user.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,17 +28,37 @@ import java.util.Optional;
 @Slf4j
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // for @PreAuthorize
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final BMUserDetailsService BMUserDetailsService;
 
+    /**
+     * Hierarchical roles set
+     */
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
+        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER");
+        return hierarchy;
+    }
+
+    /**
+     * Make @PreAuthorize annotation to work with hierarchical roles
+     */
+    @Bean
+    static MethodSecurityExpressionHandler methodSecurityExpressionHandler(
+        RoleHierarchy roleHierarchy) {
+        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setRoleHierarchy(roleHierarchy);
+        return expressionHandler;
+    }
+
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return username -> {
-            log.info("Finduser : {}", username);
             Optional<User> findUser = userRepository.findById(username);
             if (findUser.isEmpty()) {
                 return null;

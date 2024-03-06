@@ -1,3 +1,17 @@
+# test profile
+token:
+  secret: '21edc783bca7b12425ccd76e9bb135d868b478286e1ea49965c9ae7138345fb3a5dc90cebae25c76d246529664bd223c81842fa37387b0d444986d30828288bb'
+  expiration_time: 86400000 # 1 day
+  refresh_expiration_time: 604800000 # 7 days
+
+benchmark:
+  version: '1.0.0'
+  name: 'benchmark'
+  description: 'Benchmark application'
+  contact:
+    name: 'Gyumin Hwangbo'
+    email: 'ghkdqhrbals@gmail.com'
+
 # admin user
 admin:
   id: 'admin'
@@ -23,3 +37,4 @@ spring:
         jdbc:
           time_zone: UTC
           batch_size: 50
+

@@ -28,19 +28,45 @@ public class UserService extends AbstractUserService {
     @Transactional
     public Optional<User> createUser(User user) {
         userRepository.findById(user.getId()).ifPresent((u) -> {
-            throw new GlobalException(ErrorCode.USER_NOT_FOUND);
+            throw new GlobalException(ErrorCode.USER_ALREADY_EXIST);
         });
-        UserGroup defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID)
-            .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
-        user.setUserGroup(defaultGroup);
+        if (user.getUserGroup() == null) {
+            UserGroup defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID)
+                .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+            user.setUserGroup(defaultGroup);
+        }else{
+            userGroupRepository.findById(user.getUserGroup().getId()).ifPresentOrElse(
+                (group) -> {
+                    throw new GlobalException(ErrorCode.GROUP_ALREADY_EXIST);
+                },
+                () -> {
+                    userGroupRepository.save(user.getUserGroup());
+                }
+            );
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword())); // bcrypt encoding
         return Optional.of(userRepository.save(user));
     }
 
     @Override
+    @Transactional
     public User getUser(String id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional
+    public User getUserIfSameGroup(String currentUserId, String id) {
+        User currentUser = userRepository.findById(currentUserId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         User user = userRepository.findById(id)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        if (!currentUser.getUserGroup().equals(user.getUserGroup())) {
+            throw new GlobalException(ErrorCode.USER_NOT_SAME_GROUP);
+        }
+
         return user;
     }
 

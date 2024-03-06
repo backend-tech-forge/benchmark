@@ -1,13 +1,17 @@
 package org.benchmarker.user.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.benchmarker.user.model.User;
+import org.benchmarker.user.model.UserGroup;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class UserRegisterDto {
 
@@ -24,8 +28,12 @@ public class UserRegisterDto {
     private String email;
     private Boolean emailNotification;
 
+    @JsonProperty(required = false)
+    private UserGroup userGroup;
+
+
     public User toEntity() {
-        return User.builder()
+        User user = User.builder()
             .id(id)
             .password(password)
             .slackWebhookUrl(slackWebhookUrl)
@@ -33,5 +41,9 @@ public class UserRegisterDto {
             .email(email)
             .emailNotification(emailNotification)
             .build();
+        if (userGroup != null) {
+            user.setUserGroup(userGroup);
+        }
+        return user;
     }
 }

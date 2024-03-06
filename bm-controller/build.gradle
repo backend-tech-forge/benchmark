@@ -1,21 +1,45 @@
 plugins {
+    id "org.asciidoctor.jvm.convert" version "3.3.2"
     id 'java'
+    id 'jacoco'
     id 'org.springframework.boot' version '3.2.3'
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
 group = 'org.benchmark'
-version = '0.0.1-SNAPSHOT'
+version = rootProject.getVersion()
+
+// define exclude classes for Jacoco test coverage report
+def excludeJacocoTestCoverageReport = [
+        'org/benchmarker/home/HomeController.class',
+        'org/benchmarker/user/controller/UserController.class',
+        'org/benchmarker/BmControllerApplication.class',
+        'org/benchmarker/login/controller/LoginController.class',
+        'org/benchmarker/common/util/NoOp.class',
+]
+
+jacoco {
+    toolVersion = "0.8.8"
+}
 
 java {
     sourceCompatibility = '17'
 }
 
 configurations {
+    asciidoctorExt
     compileOnly {
         extendsFrom annotationProcessor
     }
 }
+
+bootJar {
+    dependsOn asciidoctor
+    from("${asciidoctor.outputDir}/html5") {
+        into 'static/docs'
+    }
+}
+
 
 repositories {
     mavenCentral()
@@ -28,10 +52,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     implementation "io.jsonwebtoken:jjwt-api:0.11.1"
+    testImplementation 'org.testng:testng:7.1.0'
     runtimeOnly "io.jsonwebtoken:jjwt-impl:0.11.1"
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.11.1"
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
     testImplementation "org.testcontainers:testcontainers:1.19.3"
     testImplementation "org.testcontainers:junit-jupiter:1.19.3"
@@ -42,8 +70,86 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
 }
 
-tasks.named('test') {
+ext {
+    snippetsDir = file("build/generated-snippets")
+}
+
+test {
+    outputs.dir snippetsDir
     useJUnitPlatform()
+
+    jacoco {
+        excludes = ["org/benchmarker/home/HomeController.class",
+                    "org/benchmarker/user/controller/UserController.class",
+                    "org/benchmarker/BmControllerApplication.class"]
+    }
+    finalizedBy jacocoTestReport
+}
+
+/**
+ * REST Docs Setup
+ */
+
+tasks.register("restDocsTest", Test) {
+    outputs.dir snippetsDir
+    useJUnitPlatform {
+        includeTags("restDocs")
+    }
+
+    finalizedBy "asciidoctor"
+}
+
+tasks.register("apiBuild", GradleBuild) {
+    tasks = ["clean", "restDocsTest", "build"]
+}
+
+tasks.named("asciidoctor") {
+    dependsOn restDocsTest
+    dependsOn "test"
+
+    inputs.dir snippetsDir
+    configurations "asciidoctorExt"
+    baseDirFollowsSourceDir() // 원본파일작업은 .adoc 디렉터리 기준
+}
+
+/**
+ * Jacoco Test Coverage Setup
+ */
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+    }
+    // Set the path to the source files
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: excludeJacocoTestCoverageReport)
+    }))
+    finalizedBy 'jacocoTestCoverageVerification'
+}
+
+// task for Jacoco test coverage verification
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            // Set the path to the source files
+            classDirectories.setFrom(tasks.jacocoTestReport.classDirectories)
+            element = 'CLASS'
+            enabled = true
+
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+        }
+    }
 }

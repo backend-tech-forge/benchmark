@@ -13,7 +13,7 @@ public class GlobalException extends RuntimeException {
     }
 
     public GlobalException(GlobalErrorResponse e) {
-        this.errorCode = ErrorCode.valueOf(e.getMessage());
+        this.errorCode = ErrorCode.valueOf(e.getCode());
     }
 
     public GlobalException(ErrorCode errorCode) {

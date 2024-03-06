@@ -11,6 +11,8 @@ public interface IUserService {
 
     User getUser(String id);
 
+    User getUserIfSameGroup(String currentUserId, String id);
+
     List<User> getUsers();
 
     Optional<User> updateUser(User user) throws Exception;

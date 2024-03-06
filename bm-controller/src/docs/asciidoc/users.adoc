@@ -1,0 +1,16 @@
+== 사용자(User)
+사용자를 등록하고 사용자의
+
+=== 사용자 조회
+사용자 정보를 사용자 id(user_id)를 이용해서 검색할 수 있습니다.
+
+
+[discrete]
+==== 요청
+include::{snippets}/get-users/http-request.adoc[]
+
+[discrete]
+==== 응답
+include::{snippets}/get-users/http-response.adoc[]
+
+

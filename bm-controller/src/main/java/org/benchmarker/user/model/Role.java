@@ -13,7 +13,7 @@ public enum Role {
     private final String role;
     private final String description;
 
-    public Optional<Role> fromString(String role) {
+    public static Optional<Role> fromString(String role) {
         for (Role r : Role.values()) {
             if (r.role.equals(role)) {
                 return Optional.of(r);
@@ -28,5 +28,12 @@ public enum Role {
 
     public String getDescription() {
         return description;
+    }
+
+    public Boolean isAdmin() {
+        if (this.equals(ROLE_ADMIN)) {
+            return true;
+        }
+        return false;
     }
 }

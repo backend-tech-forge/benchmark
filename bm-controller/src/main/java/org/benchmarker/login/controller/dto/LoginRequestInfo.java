@@ -6,9 +6,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 public class LoginRequestInfo {
 
     private String id;
     private String password;
+
+    @Builder
+    public LoginRequestInfo(String id, String password) {
+        this.id = id;
+        this.password = password;
+    }
+
+    public LoginRequestInfo() {
+    }
 }

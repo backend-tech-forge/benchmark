@@ -1,12 +1,11 @@
 package org.benchmarker.user.repository;
 
-import org.benchmark.bmcontroller.init.InitiClass;
+import org.util.initialize.InitiClass;
 import org.benchmarker.user.model.Role;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +35,29 @@ class UserRepositoryTest extends InitiClass {
         assertThat(createdUser).isNotNull();
         assertThat(createdUser.getId()).isEqualTo(user.getId());
         assertThat(createdUser.getUserGroup()).isEqualTo(defaultUserGroup);
+    }
+
+    @Test
+    @DisplayName("새로운 그룹과 사용자 생성 시 사용자 정보를 반환한다")
+    void createUser2() {
+        // given
+        UserGroup userGroup = UserGroup.builder()
+            .id("default")
+            .name("default")
+            .build();
+        User user = User.builder()
+            .id("test")
+            .password("password")
+            .userGroup(userGroup)
+            .build();
+
+        // when
+        User createdUser = userRepository.save(user);
+
+        // then
+        assertThat(createdUser).isNotNull();
+        assertThat(createdUser.getId()).isEqualTo(user.getId());
+        assertThat(createdUser.getUserGroup()).isEqualTo(userGroup);
     }
 
     @Test
