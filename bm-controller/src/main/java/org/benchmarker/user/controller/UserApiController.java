@@ -27,9 +27,8 @@ public class UserApiController {
 
     @PostMapping("/user")
     public ResponseEntity<UserInfo> createUser(@RequestBody UserRegisterDto userRegisterDto) {
-        User user = userRegisterDto.toEntity();
-        Optional<User> savedUser = userService.createUser(user);
-        return ResponseEntity.ok(UserInfo.from(savedUser.get()));
+        Optional<UserInfo> userInfo = userService.createUser(userRegisterDto);
+        return ResponseEntity.ok(userInfo.get());
     }
 
     @GetMapping({"/user", "/user/{user_id}"})
@@ -38,14 +37,15 @@ public class UserApiController {
         @PathVariable(required = false) String user_id) {
         User currentUser = userContext.getCurrentUser();
         if (user_id == null) {
-            return ResponseEntity.ok(UserInfo.from(currentUser));
+            UserInfo userInfo = userService.getUser(currentUser.getId()).get();
+            return ResponseEntity.ok(userInfo);
         } else {
             if (currentUser.getRole().isAdmin()) {
-                User user = userService.getUser(user_id);
-                return ResponseEntity.ok(UserInfo.from(user));
+                Optional<UserInfo> userInfo = userService.getUser(user_id);
+                return ResponseEntity.ok(userInfo.get());
             } else {
-                User user = userService.getUserIfSameGroup(currentUser.getId(), user_id);
-                return ResponseEntity.ok(UserInfo.from(user));
+                UserInfo user = userService.getUserIfSameGroup(currentUser.getId(), user_id);
+                return ResponseEntity.ok(user);
             }
         }
     }
