@@ -1,10 +1,13 @@
 package org.benchmarker.prerun;
 
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.benchmarker.user.model.Role;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
+import org.benchmarker.user.model.UserGroupJoin;
+import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +30,7 @@ public class DataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
+    private final UserGroupJoinRepository userGroupJoinRepository;
     private final PasswordEncoder passwordEncoder;
     @Value("${admin.id}")
     private String adminId;
@@ -37,8 +41,14 @@ public class DataLoader implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
         // 데이터베이스에 초기 사용자 추가
-        userGroupRepository.save(defaultUserGroup());
-        userRepository.save(adminUser());
+        UserGroup group = userGroupRepository.save(defaultUserGroup());
+        User user = userRepository.save(adminUser());
+        userGroupJoinRepository.save(
+            UserGroupJoin.builder()
+                .user(user)
+                .userGroup(group)
+                .build()
+        );
     }
 
     private UserGroup defaultUserGroup() {
@@ -56,7 +66,6 @@ public class DataLoader implements CommandLineRunner {
             .emailNotification(false)
             .slackNotification(false)
             .slackWebhookUrl("admin-webhook-url")
-            .userGroup(defaultUserGroup())
             .role(Role.ROLE_ADMIN)
             .build();
     }
