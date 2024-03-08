@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.benchmarker.common.model.BaseTime;
 import org.benchmarker.user.constant.UserConsts;
+import java.util.List;
 
 @Entity
 @Setter
@@ -23,5 +24,7 @@ public class UserGroup extends BaseTime {
     @Builder.Default
     private String name = UserConsts.USER_GROUP_DEFAULT_NAME;
 
+    @OneToMany(mappedBy = "userGroup", fetch = FetchType.EAGER)
+    private List<UserGroupJoin> userGroupJoin;
 
 }
