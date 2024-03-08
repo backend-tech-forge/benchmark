@@ -1,5 +1,6 @@
 package org.util.initialize;
 
+import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
 import org.benchmarker.user.service.UserService;
@@ -14,8 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Profile("test")
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
 public class InitiClass {
 
     @SpyBean
@@ -26,9 +28,12 @@ public class InitiClass {
     protected UserGroupRepository userGroupRepository;
     @SpyBean
     protected PasswordEncoder passwordEncoder;
+    @SpyBean
+    protected UserGroupJoinRepository userGroupJoinRepository;
 
     @AfterEach
     void removeAll() {
+        userGroupJoinRepository.deleteAll();
         userRepository.deleteAll();
         userGroupRepository.deleteAll();
     }
