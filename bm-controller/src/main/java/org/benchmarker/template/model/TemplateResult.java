@@ -16,7 +16,7 @@ public class TemplateResult {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
@@ -41,4 +41,6 @@ public class TemplateResult {
 
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime updatedAt;
+
+    public TemplateResult() {}
 }

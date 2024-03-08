@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.benchmarker.common.model.BaseTime;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Setter
 @Getter
@@ -29,5 +31,8 @@ public class UserGroup extends BaseTime {
         }
     }
 
-
+    public void update(String userGroupName) {
+        this.id = userGroupName;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
