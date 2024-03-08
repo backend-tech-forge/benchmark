@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalErrorResponse;
@@ -49,7 +50,6 @@ class UserApiControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-
     @MockBean
     private UserService userService;
 
@@ -78,11 +78,18 @@ class UserApiControllerTest {
                 .password(TestUserConsts.password)
                 .email(TestUserConsts.email)
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .userGroup(List.of())
+                .build();
+            UserInfo userInfoBuilder = UserInfo.builder()
+                .id(TestUserConsts.id)
+                .email(TestUserConsts.email)
+                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .userGroup(List.of())
                 .build();
             User user = userRegisterDto.toEntity();
 
             // when
-            when(userService.createUser(any())).thenReturn(Optional.of(user));
+            when(userService.createUser(any())).thenReturn(Optional.of(userInfoBuilder));
 
             // then
             mockMvc.perform(post("/api/user")
@@ -104,17 +111,27 @@ class UserApiControllerTest {
         @DisplayName("valid 유저 생성 시 Group 또한 생성하고 200 UserInfo 응답을 반환한다")
         void test35() throws Exception {
             // Given
+            UserGroup userGroup = UserGroup.builder()
+                .id("newGroupId")
+                .name("group")
+                .build();
             UserRegisterDto userRegisterDto = UserRegisterDto.builder()
                 .id(TestUserConsts.id)
                 .password(TestUserConsts.password)
                 .email(TestUserConsts.email)
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-                .userGroup(UserGroup.builder().id("newGroupId").name("group").build())
+                .userGroup(List.of(userGroup))
+                .build();
+            UserInfo userInfoBuilder = UserInfo.builder()
+                .id(TestUserConsts.id)
+                .email(TestUserConsts.email)
+                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .userGroup(List.of(userGroup))
                 .build();
             User user = userRegisterDto.toEntity();
 
             // when
-            when(userService.createUser(any())).thenReturn(Optional.of(user));
+            when(userService.createUser(any())).thenReturn(Optional.of(userInfoBuilder));
 
             // then
             mockMvc.perform(post("/api/user")
@@ -176,6 +193,14 @@ class UserApiControllerTest {
                 .build();
 
             // when & then
+            when(userService.getUser(userId)).thenReturn(Optional.of(UserInfo.builder()
+                .id(userId)
+                .email(TestUserConsts.email)
+                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .slackNotification(false)
+                .emailNotification(false)
+                .userGroup(List.of(UserGroup.builder().id("default").name("default").build()))
+                .build()));
             when(userContext.getCurrentUser()).thenReturn(userStub);
 
             mockMvc.perform(get("/api/user"))
@@ -209,6 +234,7 @@ class UserApiControllerTest {
         void test13() throws Exception {
             // given
             String userId = TestUserConsts.id;
+            String otherUserId = "otherUserId";
             User userStub = User.builder()
                 .id(userId)
                 .password(TestUserConsts.password)
@@ -216,7 +242,7 @@ class UserApiControllerTest {
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
                 .build();
             User otherUser = User.builder()
-                .id("anotherId")
+                .id(otherUserId)
                 .password(TestUserConsts.password)
                 .email(TestUserConsts.email)
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
@@ -224,12 +250,20 @@ class UserApiControllerTest {
 
             // when & then
             when(userContext.getCurrentUser()).thenReturn(userStub);
-            when(userService.getUserIfSameGroup(TestUserConsts.id, userId)).thenReturn(otherUser);
+            when(userService.getUserIfSameGroup(TestUserConsts.id, otherUserId)).thenReturn(
+                UserInfo.builder()
+                    .id(otherUserId)
+                    .email(TestUserConsts.email)
+                    .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                    .slackNotification(false)
+                    .emailNotification(false)
+                    .userGroup(List.of(UserGroup.builder().id("default").name("default").build()))
+                    .build());
 
-            mockMvc.perform(get("/api/user"))
+            mockMvc.perform(get("/api/user/"+otherUserId))
                 .andDo(result -> {
                 }).andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(TestUserConsts.id))
+                .andExpect(jsonPath("$.id").value(otherUserId))
                 .andExpect(jsonPath("$.email").value(TestUserConsts.email))
                 .andExpect(jsonPath("$.slack_webhook_url").value(TestUserConsts.slackWebhookUrl))
                 .andExpect(jsonPath("$.slack_notification").value(false))
@@ -277,16 +311,18 @@ class UserApiControllerTest {
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
                 .role(Role.ROLE_ADMIN)
                 .build();
-            User otherUser = User.builder()
-                .id("otherUserId")
-                .password(TestUserConsts.password)
+            UserInfo userInfoStub = UserInfo.builder()
+                .id(otherUserId)
                 .email(TestUserConsts.email)
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .slackNotification(false)
+                .emailNotification(false)
+                .userGroup(List.of(UserGroup.builder().id("default").name("default").build()))
                 .build();
 
             // when & then
             when(userContext.getCurrentUser()).thenReturn(userStub);
-            when(userService.getUser(otherUserId)).thenReturn(otherUser);
+            when(userService.getUser(otherUserId)).thenReturn(Optional.of(userInfoStub));
 
             mockMvc.perform(get("/api/user/" + otherUserId))
                 .andExpect(status().is(200))
