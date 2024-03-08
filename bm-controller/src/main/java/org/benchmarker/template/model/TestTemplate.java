@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.user.model.UserGroup;
 
@@ -79,20 +78,5 @@ public class TestTemplate {
         this.cpuLimit = testTemplate.getCpuLimit();
 
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public TestTemplateResponseDto convertToResponseDto() {
-
-        return TestTemplateResponseDto.builder()
-                .id(this.id)
-                .userGroupName(this.userGroup.getName())
-                .method(this.method)
-                .url(this.url)
-                .body(this.body)
-                .vuser(this.vuser)
-                .maxRequest(this.maxRequest)
-                .maxDuration(this.maxDuration)
-                .cpuLimit(this.cpuLimit)
-                .build();
     }
 }
