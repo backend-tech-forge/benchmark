@@ -1,5 +1,8 @@
 package org.benchmarker.user.repository;
 
+import java.util.List;
+import java.util.Optional;
+import org.benchmarker.user.model.UserGroupJoin;
 import org.util.initialize.InitiClass;
 import org.benchmarker.user.model.Role;
 import org.benchmarker.user.model.User;
@@ -24,31 +27,34 @@ class UserRepositoryTest extends InitiClass {
             .id("default")
             .name("default")
             .build();
-        userGroupRepository.save(userGroup);
-        UserGroup defaultUserGroup = userGroupRepository.findById("default").get();
-        user.setUserGroup(defaultUserGroup);
 
         // when
+        UserGroup group = userGroupRepository.save(userGroup);
         User createdUser = userRepository.save(user);
+        userGroupJoinRepository.save(UserGroupJoin.builder()
+            .user(createdUser)
+            .userGroup(group)
+            .build());
+
+        Optional<User> findUser = userRepository.findById(user.getId());
 
         // then
-        assertThat(createdUser).isNotNull();
-        assertThat(createdUser.getId()).isEqualTo(user.getId());
-        assertThat(createdUser.getUserGroup()).isEqualTo(defaultUserGroup);
+        assertThat(findUser).isNotEmpty();
+
+        assertThat(findUser.get().getId()).isEqualTo(user.getId());
+        assertThat(findUser.get().getUserGroupJoin().get(0).getUserGroup().getId()).isEqualTo(
+            userGroup.getId());
+        assertThat(findUser.get().getId()).isEqualTo(user.getId());
+        assertThat(findUser.get().getRole()).isEqualTo(Role.ROLE_USER);
     }
 
     @Test
     @DisplayName("새로운 그룹과 사용자 생성 시 사용자 정보를 반환한다")
     void createUser2() {
         // given
-        UserGroup userGroup = UserGroup.builder()
-            .id("default")
-            .name("default")
-            .build();
         User user = User.builder()
             .id("test")
             .password("password")
-            .userGroup(userGroup)
             .build();
 
         // when
@@ -57,35 +63,14 @@ class UserRepositoryTest extends InitiClass {
         // then
         assertThat(createdUser).isNotNull();
         assertThat(createdUser.getId()).isEqualTo(user.getId());
-        assertThat(createdUser.getUserGroup()).isEqualTo(userGroup);
-    }
-
-    @Test
-    @DisplayName("사용자 그룹이 없을 때 사용자 생성시 에러를 반환한다")
-    void createUserWithoutGroup() {
-        // given
-        User user = User.builder()
-            .id("test")
-            .password("password")
-            .build();
-
-        // when & then
-        assertThrows(Exception.class, () -> userRepository.save(user));
     }
 
     @Test
     @DisplayName("default 값으로 사용자 생성시 성공한다")
     void createUserWithDefaultValues() {
         // given
-        UserGroup userGroup = UserGroup.builder()
-            .id("default")
-            .name("default")
-            .build();
-        userGroupRepository.save(userGroup);
-
         User user = User.builder()
             .id("test")
-            .userGroup(userGroup)
             .password("password")
             // default values
 //                .slackWebhookUrl("")
