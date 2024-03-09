@@ -86,7 +86,6 @@ class UserApiControllerTest {
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
                 .userGroup(List.of())
                 .build();
-            User user = userRegisterDto.toEntity();
 
             // when
             when(userService.createUser(any())).thenReturn(Optional.of(userInfoBuilder));
@@ -241,12 +240,6 @@ class UserApiControllerTest {
                 .email(TestUserConsts.email)
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
                 .build();
-            User otherUser = User.builder()
-                .id(otherUserId)
-                .password(TestUserConsts.password)
-                .email(TestUserConsts.email)
-                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-                .build();
 
             // when & then
             when(userContext.getCurrentUser()).thenReturn(userStub);
@@ -260,7 +253,7 @@ class UserApiControllerTest {
                     .userGroup(List.of(UserGroup.builder().id("default").name("default").build()))
                     .build());
 
-            mockMvc.perform(get("/api/users/"+otherUserId))
+            mockMvc.perform(get("/api/users/" + otherUserId))
                 .andDo(result -> {
                 }).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(otherUserId))
