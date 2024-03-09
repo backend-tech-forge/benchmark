@@ -18,7 +18,7 @@ public interface IUserService {
 
     List<User> getUsers();
 
-    Optional<UserInfo> updateUser(UserUpdateDto user) throws Exception;
+    Optional<UserInfo> updateUser(UserUpdateDto user);
 
     void deleteUser(String id);
 }
