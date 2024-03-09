@@ -4,8 +4,11 @@ package org.benchmarker.user.controller;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.common.error.ErrorCode;
+import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.controller.dto.UserInfo;
 import org.benchmarker.user.controller.dto.UserRegisterDto;
+import org.benchmarker.user.controller.dto.UserUpdateDto;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.service.IUserService;
 import org.benchmarker.user.service.UserContext;
@@ -31,7 +34,7 @@ public class UserApiController {
         return ResponseEntity.ok(userInfo.get());
     }
 
-    @GetMapping({"/user", "/user/{user_id}"})
+    @GetMapping({"/user", "/users/{user_id}"})
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<UserInfo> getUser(
         @PathVariable(required = false) String user_id) {
@@ -48,6 +51,21 @@ public class UserApiController {
                 return ResponseEntity.ok(user);
             }
         }
+    }
+
+    @PatchMapping("/user")
+    public ResponseEntity<UserInfo> updateUser(@RequestBody UserUpdateDto userUpdateDto) {
+        UserInfo userInfo = userService.updateUser(userUpdateDto)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        return ResponseEntity.ok(userInfo);
+    }
+
+    @DeleteMapping({"/user", "/users/{user_id}"})
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<Void> deleteUser() {
+        User currentUser = userContext.getCurrentUser();
+        userService.deleteUser(currentUser.getId());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/users")
