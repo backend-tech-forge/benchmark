@@ -260,7 +260,7 @@ class UserApiControllerTest {
                     .userGroup(List.of(UserGroup.builder().id("default").name("default").build()))
                     .build());
 
-            mockMvc.perform(get("/api/user/"+otherUserId))
+            mockMvc.perform(get("/api/users/"+otherUserId))
                 .andDo(result -> {
                 }).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(otherUserId))
@@ -289,7 +289,7 @@ class UserApiControllerTest {
             when(userService.getUserIfSameGroup(userId, otherUserId)).thenThrow(
                 new GlobalException(ErrorCode.USER_NOT_SAME_GROUP));
 
-            mockMvc.perform(get("/api/user/" + otherUserId))
+            mockMvc.perform(get("/api/users/" + otherUserId))
                 .andDo(result -> {
                 })
                 .andExpect(status().is(ErrorCode.USER_NOT_SAME_GROUP.getHttpStatus()))
@@ -324,7 +324,7 @@ class UserApiControllerTest {
             when(userContext.getCurrentUser()).thenReturn(userStub);
             when(userService.getUser(otherUserId)).thenReturn(Optional.of(userInfoStub));
 
-            mockMvc.perform(get("/api/user/" + otherUserId))
+            mockMvc.perform(get("/api/users/" + otherUserId))
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.id").value(otherUserId))
                 .andExpect(jsonPath("$.email").value(TestUserConsts.email))
