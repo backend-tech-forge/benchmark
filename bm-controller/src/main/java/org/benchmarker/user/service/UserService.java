@@ -182,6 +182,7 @@ public class UserService extends AbstractUserService {
     public void deleteUser(String id) {
         userRepository.findById(id)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        userGroupJoinRepository.deleteByUserId(id);
         userRepository.deleteById(id);
     }
 
