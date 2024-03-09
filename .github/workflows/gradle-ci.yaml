@@ -1,8 +1,5 @@
 name: CI with test coverage
 
-permissions:
-  checks: write
-
 on:
   pull_request:
     branches:
