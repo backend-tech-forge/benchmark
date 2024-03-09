@@ -12,5 +12,6 @@ public interface UserGroupJoinRepository extends JpaRepository<UserGroupJoin, Lo
 
     List<UserGroupJoin> findByUserId(String userId);
     Optional<UserGroupJoin> findByUserAndUserGroup(User user, UserGroup userGroup);
+    void deleteByUserId(String userId);
 
 }
