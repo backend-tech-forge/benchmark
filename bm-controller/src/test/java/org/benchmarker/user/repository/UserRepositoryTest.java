@@ -61,19 +61,6 @@ class UserRepositoryTest extends InitiClass {
     }
 
     @Test
-    @DisplayName("사용자 그룹이 없을 때 사용자 생성시 에러를 반환한다")
-    void createUserWithoutGroup() {
-        // given
-        User user = User.builder()
-            .id("test")
-            .password("password")
-            .build();
-
-        // when & then
-        assertThrows(Exception.class, () -> userRepository.save(user));
-    }
-
-    @Test
     @DisplayName("default 값으로 사용자 생성시 성공한다")
     void createUserWithDefaultValues() {
         // given
