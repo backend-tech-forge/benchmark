@@ -9,6 +9,7 @@ import org.benchmarker.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.template.model.TestTemplate;
 import org.benchmarker.template.repository.TestTemplateRepository;
 import org.benchmarker.template.service.TestTemplateService;
+import org.benchmarker.user.controller.constant.TestUserConsts;
 import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -75,6 +77,7 @@ class TestTemplateApiControllerTest {
 
     @Test
     @DisplayName("탬플릿 생성 호출하는 테스트")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void createTemplate() throws Exception {
 
         //given
@@ -122,6 +125,7 @@ class TestTemplateApiControllerTest {
 
     @Test
     @DisplayName("존재 하지 않는 그룹과 함께 템플릿 생성 호출할 경우 에러 처리")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void createUserGroupException() throws Exception {
         //given
 
@@ -153,6 +157,7 @@ class TestTemplateApiControllerTest {
 
     @Test
     @DisplayName("템플릿 조회 테스트")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void getTemplate() throws Exception {
         // given
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
@@ -197,6 +202,7 @@ class TestTemplateApiControllerTest {
 
     @Test
     @DisplayName("템플릿 업데이트 테스트")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void updateTemplate() throws Exception {
         //given
         TestTemplateUpdateDto reqTestTemplate = TestTemplateUpdateDto.builder()
@@ -250,6 +256,7 @@ class TestTemplateApiControllerTest {
 
     @Test
     @DisplayName("템플릿 삭제 테스트")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void deleteTemplate() throws Exception {
 
         // when
