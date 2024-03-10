@@ -14,9 +14,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class GroupAddDto {
-
+    // group id
     @JsonProperty("id")
     private String id;
+    // group name
     @JsonProperty("name")
     private String name;
 
