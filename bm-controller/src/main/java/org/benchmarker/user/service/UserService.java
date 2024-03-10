@@ -13,6 +13,7 @@ import org.benchmarker.user.controller.dto.UserUpdateDto;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.model.UserGroupJoin;
+import org.benchmarker.user.model.enums.GroupRole;
 import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
@@ -41,6 +42,7 @@ public class UserService extends AbstractUserService {
         userRepository.findById(req.getId()).ifPresent((u) -> {
             throw new GlobalException(ErrorCode.USER_ALREADY_EXIST);
         });
+        // if userGroup is empty, save user with default userGroup
         if (req.getUserGroup().isEmpty()) {
             Optional<UserGroup> defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID)
                 .or(() -> Optional.of(userGroupRepository.save(UserGroup.builder()
@@ -64,8 +66,8 @@ public class UserService extends AbstractUserService {
                 .userGroup(Collections.singletonList(defaultGroup.get()))
                 .build());
         } else {
+            // if userGroup is not empty, save user with userGroup as LEADER
             List<UserGroup> userGroups = new ArrayList<>();
-            // save user group
             req.getUserGroup().forEach(group ->
                 {
                     userGroupRepository.findById(group.getId()).ifPresentOrElse(
@@ -79,17 +81,15 @@ public class UserService extends AbstractUserService {
                     );
                 }
             );
-            // save user
             User saveUser = req.toEntity();
             saveUser.setPassword(passwordEncoder.encode(saveUser.getPassword()));
             User save = userRepository.save(saveUser);
-
-            // save user group join
             userGroups.forEach(group ->
                 {
                     userGroupJoinRepository.save(UserGroupJoin.builder()
                         .user(save)
                         .userGroup(group)
+                        .role(GroupRole.LEADER)
                         .build());
                 }
             );
@@ -161,7 +161,7 @@ public class UserService extends AbstractUserService {
                     .userGroup(userGroup)
                     .build());
                 userGroupJoins.add(saved);
-            }else{
+            } else {
                 userGroupJoins.add(findJoins.get());
                 noOp();
             }
