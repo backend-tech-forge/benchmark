@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,6 +101,96 @@ class TestTemplateServiceTest {
             testTemplateService.createTemplate(request);
         });
 
+    }
+
+    @Test
+    @DisplayName("존재하는 템플릿을 검색한다")
+    public void getTemplate() {
+        //given
+        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        UserGroup tempGroup = userGroupRepository.save(userGroup);
+
+        TestTemplateRequestDto request = TestTemplateRequestDto.builder()
+                .url("test.com")
+                .method("get")
+                .body("")
+                .userGroupName("userGroup")
+                .vuser(3)
+                .cpuLimit(3)
+                .maxRequest(3)
+                .maxDuration(3)
+                .build();
+        TestTemplate template = testTemplateService.createTemplate(request).get();
+
+        //when
+        TestTemplate schTemplate = testTemplateService.getTemplate(template.getId());
+
+        //then
+        assertThat(schTemplate.getUrl()).isEqualTo(request.getUrl());
+        assertThat(schTemplate.getMethod()).isEqualTo(request.getMethod());
+        assertThat(schTemplate.getBody()).isEqualTo(request.getBody());
+        assertThat(schTemplate.getVuser()).isEqualTo(request.getVuser());
+        assertThat(schTemplate.getCpuLimit()).isEqualTo(request.getCpuLimit());
+        assertThat(schTemplate.getMaxRequest()).isEqualTo(request.getMaxRequest());
+        assertThat(schTemplate.getMaxDuration()).isEqualTo(request.getMaxDuration());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 템플릿 조회시 에러가 발생한다.")
+    public void getNotFoundTemplateException() {
+        //given
+        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        UserGroup tempGroup = userGroupRepository.save(userGroup);
+
+        TestTemplateRequestDto request = TestTemplateRequestDto.builder()
+                .url("test.com")
+                .method("get")
+                .body("")
+                .userGroupName("userGroup")
+                .vuser(3)
+                .cpuLimit(3)
+                .maxRequest(3)
+                .maxDuration(3)
+                .build();
+        TestTemplate template = testTemplateService.createTemplate(request).get();
+
+        // When & Then
+        assertThrows(GlobalException.class, () -> {
+            testTemplateService.getTemplate(template.getId() + 1);
+        });
+    }
+
+    @Test
+    @DisplayName("템플릿 목록을 조회 한다.")
+    public void getTemplates() {
+
+        //given
+        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        UserGroup tempGroup = userGroupRepository.save(userGroup);
+
+        List<TestTemplate> testTemplates = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+
+            TestTemplateRequestDto request = TestTemplateRequestDto.builder()
+                    .url("test.com" + i)
+                    .method("get")
+                    .body("")
+                    .userGroupName("userGroup")
+                    .vuser(i)
+                    .cpuLimit(i)
+                    .maxRequest(i)
+                    .maxDuration(i)
+                    .build();
+
+            testTemplates.add(request.toEntity());
+        }
+        testTemplateRepository.saveAll(testTemplates);
+
+        //when
+        List<TestTemplate> templates = testTemplateService.getTemplates();
+
+        //then
+        assertThat(templates.size()).isEqualTo(5);
     }
 
     @Test
