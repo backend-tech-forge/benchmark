@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.model.BaseTime;
 import java.util.List;
+import org.benchmarker.user.model.enums.Role;
 
 @Slf4j
 @Setter
