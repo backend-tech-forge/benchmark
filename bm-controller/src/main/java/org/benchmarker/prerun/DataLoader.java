@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.benchmarker.user.model.Role;
+import org.benchmarker.user.model.enums.Role;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.model.UserGroupJoin;
@@ -60,8 +60,8 @@ public class DataLoader implements CommandLineRunner {
             Optional<UserGroup> group = userGroupRepository.findById(USER_GROUP_DEFAULT_ID);
             group.ifPresent(userGroup -> userGroupJoinRepository.save(
                 UserGroupJoin.builder()
-                    .user(adminUser.get())
-                    .userGroup(defaultGroup.get())
+                    .user(adminUser())
+                    .userGroup(defaultUserGroup())
                     .build()
             ));
         }
