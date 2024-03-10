@@ -9,6 +9,7 @@ import org.benchmarker.user.service.GroupService;
 import org.benchmarker.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +30,29 @@ public class GroupApiController {
     @PostMapping("/group")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<GroupInfo> createGroup(@RequestBody GroupAddDto dto) {
-        return ResponseEntity.ok(groupService.createGroup(dto));
+        String userId = userContext.getCurrentUser().getId();
+        GroupInfo group = groupService.createGroup(dto, userId);
+        return ResponseEntity.ok(group);
+    }
+
+    @PostMapping("/api/groups/{group_id}/users/{user_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<GroupInfo> addUserToGroup(@PathVariable String group_id,
+        @PathVariable String user_id) {
+        if (userContext.getCurrentUser().getRole().isAdmin()) {
+            return ResponseEntity.ok(groupService.addUserToGroupAdmin(group_id, user_id));
+        }
+        return ResponseEntity.ok(
+            groupService.addUserToGroup(group_id, userContext.getCurrentUser().getId(), user_id));
+    }
+
+    @DeleteMapping("/api/groups/{group_id}/users/{user_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<GroupInfo> deleteUserFromGroup(@PathVariable String group_id,
+        @PathVariable String user_id) {
+        return ResponseEntity.ok(
+            groupService.deleteUserFromGroup(group_id, userContext.getCurrentUser().getId(),
+                user_id, userContext.getCurrentUser().getRole().isAdmin()));
     }
 
     @GetMapping("/groups/{group_id}")
