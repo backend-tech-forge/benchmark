@@ -3,14 +3,12 @@ package org.util.initialize;
 import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
+import org.benchmarker.user.service.GroupService;
 import org.benchmarker.user.service.UserService;
 import org.junit.After;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -30,6 +28,9 @@ public class InitiClass {
     protected PasswordEncoder passwordEncoder;
     @SpyBean
     protected UserGroupJoinRepository userGroupJoinRepository;
+
+    @SpyBean
+    protected GroupService groupService;
 
     @AfterEach
     void removeAll() {
