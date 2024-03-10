@@ -35,10 +35,10 @@ public class GroupApiController {
         return ResponseEntity.ok(group);
     }
 
-    @PostMapping("/api/groups/{group_id}/users/{user_id}")
+    @PostMapping("/groups/{group_id}/users/{user_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<GroupInfo> addUserToGroup(@PathVariable String group_id,
-        @PathVariable String user_id) {
+    public ResponseEntity<GroupInfo> addUserToGroup(@PathVariable(name = "group_id") String group_id,
+        @PathVariable(name = "user_id") String user_id) {
         if (userContext.getCurrentUser().getRole().isAdmin()) {
             return ResponseEntity.ok(groupService.addUserToGroupAdmin(group_id, user_id));
         }
@@ -46,10 +46,11 @@ public class GroupApiController {
             groupService.addUserToGroup(group_id, userContext.getCurrentUser().getId(), user_id));
     }
 
-    @DeleteMapping("/api/groups/{group_id}/users/{user_id}")
+    @DeleteMapping("/groups/{group_id}/users/{user_id}")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<GroupInfo> deleteUserFromGroup(@PathVariable String group_id,
         @PathVariable String user_id) {
+        log.info("deleteUserFromGroup");
         return ResponseEntity.ok(
             groupService.deleteUserFromGroup(group_id, userContext.getCurrentUser().getId(),
                 user_id, userContext.getCurrentUser().getRole().isAdmin()));
