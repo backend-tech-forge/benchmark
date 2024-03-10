@@ -12,6 +12,10 @@ public interface UserGroupJoinRepository extends JpaRepository<UserGroupJoin, Lo
 
     List<UserGroupJoin> findByUserId(String userId);
     Optional<UserGroupJoin> findByUserAndUserGroup(User user, UserGroup userGroup);
+    @Query("SELECT ugj FROM UserGroupJoin ugj WHERE ugj.userGroup.id = :groupId")
+    List<UserGroupJoin> findByUserGroupId(String groupId);
+    @Query("SELECT ugj FROM UserGroupJoin ugj WHERE ugj.user.id = :userId AND ugj.userGroup.id = :groupId")
+    Optional<UserGroupJoin> findByUserIdAndUserGroupId(String userId, String groupId);
     void deleteByUserId(String userId);
 
 }
