@@ -1,6 +1,9 @@
 package org.benchmarker.user.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +18,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.user.model.enums.GroupRole;
+import org.hibernate.annotations.ColumnDefault;
 
 @Slf4j
 @Setter
@@ -36,4 +41,11 @@ public class UserGroupJoin {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "group_id", referencedColumnName = "id")
     private UserGroup userGroup;
+
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'MEMBER'")
+    @Builder.Default
+    private GroupRole role = GroupRole.MEMBER;
+
 }
