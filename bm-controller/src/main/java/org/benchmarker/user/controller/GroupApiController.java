@@ -1,0 +1,58 @@
+package org.benchmarker.user.controller;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.user.controller.dto.GroupAddDto;
+import org.benchmarker.user.controller.dto.GroupInfo;
+import org.benchmarker.user.controller.dto.GroupUpdateDto;
+import org.benchmarker.user.service.GroupService;
+import org.benchmarker.user.service.UserContext;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Slf4j
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+public class GroupApiController {
+
+    private final GroupService groupService;
+    private final UserContext userContext;
+
+    @PostMapping("/group")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<GroupInfo> createGroup(@RequestBody GroupAddDto dto) {
+        return ResponseEntity.ok(groupService.createGroup(dto));
+    }
+
+    @GetMapping("/groups/{group_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<GroupInfo> getGroup(@PathVariable String group_id) {
+        if (userContext.getCurrentUser().getRole().isAdmin()) {
+            return ResponseEntity.ok(groupService.getGroupInfoAdmin(group_id));
+        }
+        return ResponseEntity.ok(
+            groupService.getGroupInfo(group_id, userContext.getCurrentUser().getId())
+        );
+    }
+
+    @PatchMapping("/groups/{group_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<GroupInfo> updateGroup(@PathVariable String group_id,
+        @RequestBody GroupUpdateDto dto) {
+        if (userContext.getCurrentUser().getRole().isAdmin()) {
+            return ResponseEntity.ok(groupService.updateGroupA(dto, group_id));
+        } else {
+            return ResponseEntity.ok(
+                groupService.updateGroupU(dto, group_id, userContext.getCurrentUser().getId()));
+        }
+    }
+
+}
