@@ -23,10 +23,13 @@ public class UserRegisterDto {
     @Size(min = 4, max = 20)
     private String password;
     @NotBlank
+    @JsonProperty("slack_webhook_url")
     private String slackWebhookUrl;
+    @JsonProperty("slack_notification")
     private Boolean slackNotification;
     @Email
     private String email;
+    @JsonProperty("email_notification")
     private Boolean emailNotification;
 
     @JsonProperty("groups")
