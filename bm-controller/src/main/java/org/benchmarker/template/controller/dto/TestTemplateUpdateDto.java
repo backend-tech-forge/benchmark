@@ -26,4 +26,5 @@ public class TestTemplateUpdateDto {
     private Integer maxDuration;
 
     private Integer cpuLimit;
+
 }

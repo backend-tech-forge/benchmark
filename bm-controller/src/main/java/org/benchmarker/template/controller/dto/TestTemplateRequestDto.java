@@ -35,7 +35,7 @@ public class TestTemplateRequestDto {
 
     @NotNull
     private Integer cpuLimit;
-
+  
     public TestTemplate toEntity() {
         return TestTemplate.builder()
                 .userGroup(UserGroup.builder().name(this.userGroupName).build())

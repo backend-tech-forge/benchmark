@@ -36,5 +36,4 @@ public class TemplateResult extends BaseTime {
     private Integer tps_avg;
 
     private Integer mttbfb_avg;
-
 }

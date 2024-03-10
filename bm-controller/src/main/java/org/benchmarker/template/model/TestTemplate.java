@@ -43,6 +43,7 @@ public class TestTemplate extends BaseTime {
     @Column(nullable = false)
     private Integer cpuLimit;
 
+
     public void update(TestTemplateUpdateDto testTemplate) {
 
         this.userGroup.update(testTemplate.getUserGroupName());
