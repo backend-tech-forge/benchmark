@@ -132,7 +132,7 @@ class TestTemplateApiControllerTest {
                 .userGroupName("notGroup")
                 .vuser(3)
                 .cpuLimit(3)
-                .maxRequest(3)
+                .maxRequest(4)
                 .maxDuration(3)
                 .build();
 
