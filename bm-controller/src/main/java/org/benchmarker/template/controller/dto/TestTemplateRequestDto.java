@@ -1,5 +1,7 @@
 package org.benchmarker.template.controller.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.benchmarker.template.model.TestTemplate;
 import org.benchmarker.user.model.UserGroup;
@@ -11,20 +13,27 @@ import org.benchmarker.user.model.UserGroup;
 @AllArgsConstructor
 public class TestTemplateRequestDto {
 
+    @NotBlank
     private String userGroupName;
 
+    @NotBlank
     private String url;
 
+    @NotBlank
     private String method;
 
     private String body;
 
+    @NotNull
     private Integer vuser;
 
+    @NotNull
     private Integer maxRequest;
 
+    @NotNull
     private Integer maxDuration;
 
+    @NotNull
     private Integer cpuLimit;
 
     public TestTemplate toEntity() {
