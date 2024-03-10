@@ -2,6 +2,7 @@ package org.benchmarker.user.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -17,7 +18,7 @@ import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.controller.constant.TestUserConsts;
 import org.benchmarker.user.controller.dto.UserInfo;
 import org.benchmarker.user.controller.dto.UserRegisterDto;
-import org.benchmarker.user.model.Role;
+import org.benchmarker.user.model.enums.Role;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.service.UserContext;
@@ -331,7 +332,6 @@ class UserApiControllerTest {
     @Nested
     @DisplayName("유저리스트 조회")
     class test01 {
-
         @Test
         @WithMockUser(username = TestUserConsts.id, roles = "USER")
         @DisplayName("USER 권한으로 전체 유저리스트 조회 시 403 FORBIDDEN 에러 반환")
@@ -361,7 +361,57 @@ class UserApiControllerTest {
                     assertThat(result.getResponse().getStatus()).isEqualTo(200);
                 });
         }
+    }
 
+    @Nested
+    @DisplayName("유저 삭제")
+    class test04 {
+        @Test
+        @WithMockUser(username = TestUserConsts.id, roles = "USER")
+        @DisplayName("현재 유저 삭제 시 200 OK 를 반환한다")
+        void test41() throws Exception {
+            // given
+            String userId = TestUserConsts.id;
+            User userStub = User.builder()
+                .id(userId)
+                .password(TestUserConsts.password)
+                .email(TestUserConsts.email)
+                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .build();
+
+            // when & then
+            when(userContext.getCurrentUser()).thenReturn(userStub);
+            doNothing().when(userService).deleteUser(any());
+
+            mockMvc.perform(delete("/api/user"))
+                .andDo(result -> {
+                })
+                .andExpect(status().is(200));
+        }
+
+        @Test
+        @WithMockUser(username = TestUserConsts.id, roles = "ADMIN")
+        @DisplayName("ADMIN 이 유저 지정 삭제 시 200 OK 를 반환한다")
+        void test42() throws Exception {
+            // given
+            String userId = TestUserConsts.id;
+            String otherUserId = "otherUserId";
+            User userStub = User.builder()
+                .id(userId)
+                .password(TestUserConsts.password)
+                .email(TestUserConsts.email)
+                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
+                .build();
+
+            // when & then
+            when(userContext.getCurrentUser()).thenReturn(userStub);
+            doNothing().when(userService).deleteUser(any());
+
+            mockMvc.perform(delete("/api/users/"+otherUserId))
+                .andDo(result -> {
+                })
+                .andExpect(status().is(200));
+        }
     }
 
 }
