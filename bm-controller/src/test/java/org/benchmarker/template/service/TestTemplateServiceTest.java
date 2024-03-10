@@ -2,6 +2,7 @@ package org.benchmarker.template.service;
 
 import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.template.controller.dto.TestTemplateRequestDto;
+import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.template.model.TestTemplate;
 import org.benchmarker.template.repository.TestTemplateRepository;
@@ -26,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Profile("템플릿 관련 테스트")
 class TestTemplateServiceTest {
-
 
     @Autowired
     private TestTemplateRepository testTemplateRepository;
@@ -62,17 +62,17 @@ class TestTemplateServiceTest {
                 .build();
 
         //when
-        Optional<TestTemplate> template = testTemplateService.createTemplate(request);
+        Optional<TestTemplateResponseDto> template = testTemplateService.createTemplate(request);
 
         //then
         assertThat(template).isNotEmpty();
-        TestTemplate testTemplate = template.get();
+        TestTemplateResponseDto testTemplate = template.get();
         assertThat(testTemplate).isNotNull();
 
         assertThat(testTemplate.getUrl()).isEqualTo(request.getUrl());
         assertThat(testTemplate.getMethod()).isEqualTo(request.getMethod());
         assertThat(testTemplate.getBody()).isEqualTo(request.getBody());
-        assertThat(testTemplate.getUserGroup()).isEqualTo(userGroup);
+        assertThat(testTemplate.getUserGroupName()).isEqualTo(userGroup.getName());
         assertThat(testTemplate.getVuser()).isEqualTo(request.getVuser());
         assertThat(testTemplate.getCpuLimit()).isEqualTo(request.getCpuLimit());
         assertThat(testTemplate.getMaxRequest()).isEqualTo(request.getMaxRequest());
@@ -120,10 +120,10 @@ class TestTemplateServiceTest {
                 .maxRequest(3)
                 .maxDuration(3)
                 .build();
-        TestTemplate template = testTemplateService.createTemplate(request).get();
+        TestTemplateResponseDto template = testTemplateService.createTemplate(request).get();
 
         //when
-        TestTemplate schTemplate = testTemplateService.getTemplate(template.getId());
+        TestTemplateResponseDto schTemplate = testTemplateService.getTemplate(template.getId());
 
         //then
         assertThat(schTemplate.getUrl()).isEqualTo(request.getUrl());
@@ -152,7 +152,7 @@ class TestTemplateServiceTest {
                 .maxRequest(3)
                 .maxDuration(3)
                 .build();
-        TestTemplate template = testTemplateService.createTemplate(request).get();
+        TestTemplateResponseDto template = testTemplateService.createTemplate(request).get();
 
         // When & Then
         assertThrows(GlobalException.class, () -> {
@@ -187,7 +187,7 @@ class TestTemplateServiceTest {
         testTemplateRepository.saveAll(testTemplates);
 
         //when
-        List<TestTemplate> templates = testTemplateService.getTemplates();
+        List<TestTemplateResponseDto> templates = testTemplateService.getTemplates();
 
         //then
         assertThat(templates.size()).isEqualTo(5);
@@ -210,7 +210,7 @@ class TestTemplateServiceTest {
                 .maxRequest(3)
                 .maxDuration(3)
                 .build();
-        TestTemplate template = testTemplateService.createTemplate(request).get();
+        TestTemplateResponseDto template = testTemplateService.createTemplate(request).get();
 
         TestTemplateUpdateDto updateRequest = TestTemplateUpdateDto.builder()
                 .id(template.getId())
@@ -225,7 +225,7 @@ class TestTemplateServiceTest {
                 .build();
 
         //when
-        TestTemplate updateTestTemplate = testTemplateService.updateTemplate(updateRequest).get();
+        TestTemplateResponseDto updateTestTemplate = testTemplateService.updateTemplate(updateRequest).get();
 
         //then
         assertThat(updateTestTemplate).isNotNull();
@@ -233,7 +233,7 @@ class TestTemplateServiceTest {
         assertThat(updateTestTemplate.getUrl()).isEqualTo(updateRequest.getUrl());
         assertThat(updateTestTemplate.getMethod()).isEqualTo(updateRequest.getMethod());
         assertThat(updateTestTemplate.getBody()).isEqualTo(updateRequest.getBody());
-        assertThat(updateTestTemplate.getUserGroup()).isEqualTo(tempGroup);
+        assertThat(updateTestTemplate.getUserGroupName()).isEqualTo(tempGroup.getName());
         assertThat(updateTestTemplate.getVuser()).isEqualTo(updateRequest.getVuser());
         assertThat(updateTestTemplate.getCpuLimit()).isEqualTo(updateRequest.getCpuLimit());
         assertThat(updateTestTemplate.getMaxRequest()).isEqualTo(updateRequest.getMaxRequest());
@@ -256,7 +256,7 @@ class TestTemplateServiceTest {
                 .maxRequest(3)
                 .maxDuration(3)
                 .build();
-        TestTemplate template = testTemplateService.createTemplate(request).get();
+        TestTemplateResponseDto template = testTemplateService.createTemplate(request).get();
 
         TestTemplateUpdateDto updateRequest = TestTemplateUpdateDto.builder()
                 .id(template.getId() + 1)
@@ -292,7 +292,7 @@ class TestTemplateServiceTest {
                 .maxRequest(3)
                 .maxDuration(3)
                 .build();
-        TestTemplate template = testTemplateService.createTemplate(request).get();
+        TestTemplateResponseDto template = testTemplateService.createTemplate(request).get();
 
         //when
         testTemplateService.deleteTemplate(template.getId());
@@ -317,7 +317,7 @@ class TestTemplateServiceTest {
                 .maxRequest(3)
                 .maxDuration(3)
                 .build();
-        TestTemplate template = testTemplateService.createTemplate(request).get();
+        TestTemplateResponseDto template = testTemplateService.createTemplate(request).get();
 
         // When & Then
         assertThrows(GlobalException.class, () -> {
