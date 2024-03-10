@@ -18,6 +18,7 @@ import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.controller.constant.TestUserConsts;
 import org.benchmarker.user.controller.dto.UserInfo;
 import org.benchmarker.user.controller.dto.UserRegisterDto;
+import org.benchmarker.user.helper.UserHelper;
 import org.benchmarker.user.model.enums.Role;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
@@ -128,7 +129,6 @@ class UserApiControllerTest {
                 .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
                 .userGroup(List.of(userGroup))
                 .build();
-            User user = userRegisterDto.toEntity();
 
             // when
             when(userService.createUser(any())).thenReturn(Optional.of(userInfoBuilder));
@@ -185,12 +185,7 @@ class UserApiControllerTest {
         void test11() throws Exception {
             // given
             String userId = TestUserConsts.id;
-            User userStub = User.builder()
-                .id(userId)
-                .password(TestUserConsts.password)
-                .email(TestUserConsts.email)
-                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-                .build();
+            User userStub = UserHelper.createDefaultUser(userId);
 
             // when & then
             when(userService.getUser(userId)).thenReturn(Optional.of(UserInfo.builder()
@@ -235,12 +230,7 @@ class UserApiControllerTest {
             // given
             String userId = TestUserConsts.id;
             String otherUserId = "otherUserId";
-            User userStub = User.builder()
-                .id(userId)
-                .password(TestUserConsts.password)
-                .email(TestUserConsts.email)
-                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-                .build();
+            User userStub = UserHelper.createDefaultUser(userId);
 
             // when & then
             when(userContext.getCurrentUser()).thenReturn(userStub);
@@ -271,12 +261,7 @@ class UserApiControllerTest {
             // given
             String userId = TestUserConsts.id;
             String otherUserId = "otherUserId";
-            User userStub = User.builder()
-                .id(userId)
-                .password(TestUserConsts.password)
-                .email(TestUserConsts.email)
-                .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-                .build();
+            User userStub = UserHelper.createDefaultUser(userId);
 
             // when & then
             when(userContext.getCurrentUser()).thenReturn(userStub);
