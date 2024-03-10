@@ -1,5 +1,7 @@
 package org.benchmarker.user.controller.constant;
 
+import org.benchmarker.user.model.enums.Role;
+
 public interface TestUserConsts {
 
     String id = "test_id";
@@ -10,4 +12,5 @@ public interface TestUserConsts {
     String groupName = "test_group_name";
     Boolean slackNotification = false;
     Boolean emailNotification = false;
+    Role role = Role.ROLE_USER;
 }
