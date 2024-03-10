@@ -14,6 +14,7 @@ import org.benchmarker.user.service.IUserService;
 import org.benchmarker.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class UserApiController {
     private final UserContext userContext;
 
     @PostMapping("/user")
-    public ResponseEntity<UserInfo> createUser(@RequestBody UserRegisterDto userRegisterDto) {
+    public ResponseEntity<UserInfo> createUser(@Validated @RequestBody UserRegisterDto userRegisterDto) {
         Optional<UserInfo> userInfo = userService.createUser(userRegisterDto);
         return ResponseEntity.ok(userInfo.get());
     }
@@ -60,9 +61,16 @@ public class UserApiController {
         return ResponseEntity.ok(userInfo);
     }
 
-    @DeleteMapping({"/user", "/users/{user_id}"})
+    @DeleteMapping("/users/{user_id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<Void> deleteUserById(@PathVariable("user_id") String userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/user")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<Void> deleteUser() {
+    public ResponseEntity<Void> deleteCurrentUser() {
         User currentUser = userContext.getCurrentUser();
         userService.deleteUser(currentUser.getId());
         return ResponseEntity.ok().build();
@@ -75,4 +83,5 @@ public class UserApiController {
         List<UserInfo> userInfo = users.stream().map(UserInfo::from).collect(Collectors.toList());
         return ResponseEntity.ok(userInfo);
     }
+
 }
