@@ -127,8 +127,8 @@ class TestTemplateApiControllerTest {
     @DisplayName("존재 하지 않는 그룹과 함께 템플릿 생성 호출할 경우 에러 처리")
     @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void createUserGroupException() throws Exception {
-        //given
 
+        //given
         TestTemplateRequestDto request = TestTemplateRequestDto.builder()
                 .url("test.com")
                 .method("get")
@@ -153,6 +153,41 @@ class TestTemplateApiControllerTest {
                 .andExpect(status().is(ErrorCode.GROUP_NOT_FOUND.getHttpStatus()))
                 .andExpect(jsonPath("$.message").value(ErrorCode.GROUP_NOT_FOUND.getMessage()))
                 .andExpect(jsonPath("$.code").value(ErrorCode.GROUP_NOT_FOUND.name()));
+    }
+
+    @Test
+    @DisplayName("필수 값을 넣지 않고 템플릿 생성 호출할 경우 에러 처리")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
+    public void createTemplateWithoutRequiredFieldsThrowsException() throws Exception {
+
+        //given
+        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        userGroupRepository.save(userGroup);
+
+        TestTemplateRequestDto request = TestTemplateRequestDto.builder()
+//                .url("test.com")
+                .method("get")
+                .body("")
+                .userGroupName("userGroup")
+                .vuser(3)
+                .cpuLimit(3)
+                .maxRequest(3)
+                .maxDuration(3)
+                .build();
+
+        TestTemplate testTemplate = request.toEntity();
+
+        // when
+        when(testTemplateService.createTemplate(any())).thenThrow(new GlobalException(ErrorCode.BAD_REQUEST));
+
+        // then
+        mockMvc.perform(post("/api/template")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().is(ErrorCode.BAD_REQUEST.getHttpStatus()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.BAD_REQUEST.getMessage()))
+                .andExpect(jsonPath("$.code").value(ErrorCode.BAD_REQUEST.name()));
     }
 
     @Test
@@ -252,6 +287,36 @@ class TestTemplateApiControllerTest {
                     assertThat(resTemplate.getMaxRequest()).isEqualTo(resTestTemplate.getMaxRequest());
                     assertThat(resTemplate.getMaxDuration()).isEqualTo(resTestTemplate.getMaxDuration());
                 });
+    }
+
+    @Test
+    @DisplayName("템플릿 업데이트시 필수 정보 없이 호출 하면 에러 발생하기")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
+    public void updateTemplateWithoutRequiredFieldsThrowsException() throws Exception {
+        //given
+        TestTemplateUpdateDto reqTestTemplate = TestTemplateUpdateDto.builder()
+                .id(10)
+//                .url("test.com")
+                .method("get")
+                .body("")
+                .userGroupName("userGroup")
+                .vuser(3)
+                .cpuLimit(3)
+                .maxRequest(3)
+                .maxDuration(3)
+                .build();
+
+        // when
+        when(testTemplateService.updateTemplate(any())).thenThrow(new GlobalException(ErrorCode.BAD_REQUEST));
+
+        // then
+        mockMvc.perform(patch("/api/template")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reqTestTemplate)))
+                .andDo(print())
+                .andExpect(status().is(ErrorCode.BAD_REQUEST.getHttpStatus()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.BAD_REQUEST.getMessage()))
+                .andExpect(jsonPath("$.code").value(ErrorCode.BAD_REQUEST.name()));
     }
 
     @Test
