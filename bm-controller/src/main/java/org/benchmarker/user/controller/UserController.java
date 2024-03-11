@@ -41,8 +41,7 @@ public class UserController {
             return "user/userRegister";
         }
 
-        User user = userRegisterDto.toEntity();
-        userService.createUser(user);
+        userService.createUser(userRegisterDto);
         return "redirect:/home";
     }
 

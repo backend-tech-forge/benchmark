@@ -6,7 +6,7 @@ package org.benchmarker.common.util;
 public abstract class NoOp {
 
     /**
-     * No operation.
+     * <p> Do nothing and return nothing.
      */
     public static void noOp() {
     }
