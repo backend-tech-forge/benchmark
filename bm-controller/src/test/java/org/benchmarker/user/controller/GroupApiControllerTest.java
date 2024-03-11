@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,6 +58,7 @@ class GroupApiControllerTest {
         RestDocumentationContextProvider restDocumentation) {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
             .apply(documentationConfiguration(restDocumentation))
+            .alwaysDo(print())
             .build();
     }
 
@@ -193,7 +195,7 @@ class GroupApiControllerTest {
 
         // when
         when(userContext.getCurrentUser()).thenReturn(defaultUser);
-        when(groupService.updateGroupU(any(), any(), any())).thenReturn(infoStub);
+        when(groupService.updateGroupUser(any(), any(), any())).thenReturn(infoStub);
 
         // then
         mockMvc.perform(patch("/api/groups/{group_id}", groupId)
