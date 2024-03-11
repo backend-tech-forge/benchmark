@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.user.controller.dto.GroupAddDto;
 import org.benchmarker.user.controller.dto.GroupInfo;
 import org.benchmarker.user.controller.dto.GroupUpdateDto;
+import org.benchmarker.user.model.enums.GroupRole;
 import org.benchmarker.user.service.GroupService;
 import org.benchmarker.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
@@ -37,13 +38,16 @@ public class GroupApiController {
 
     @PostMapping("/groups/{group_id}/users/{user_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<GroupInfo> addUserToGroup(@PathVariable(name = "group_id") String group_id,
+    public ResponseEntity<GroupInfo> addUserToGroup(
+        @PathVariable(name = "group_id") String group_id,
         @PathVariable(name = "user_id") String user_id) {
         if (userContext.getCurrentUser().getRole().isAdmin()) {
-            return ResponseEntity.ok(groupService.addUserToGroupAdmin(group_id, user_id));
+            return ResponseEntity.ok(
+                groupService.addUserToGroupAdmin(group_id, user_id, GroupRole.MEMBER));
         }
         return ResponseEntity.ok(
-            groupService.addUserToGroup(group_id, userContext.getCurrentUser().getId(), user_id));
+            groupService.addUserToGroup(group_id, userContext.getCurrentUser().getId(), user_id,
+                GroupRole.MEMBER));
     }
 
     @DeleteMapping("/groups/{group_id}/users/{user_id}")
@@ -72,10 +76,10 @@ public class GroupApiController {
     public ResponseEntity<GroupInfo> updateGroup(@PathVariable String group_id,
         @RequestBody GroupUpdateDto dto) {
         if (userContext.getCurrentUser().getRole().isAdmin()) {
-            return ResponseEntity.ok(groupService.updateGroupA(dto, group_id));
+            return ResponseEntity.ok(groupService.updateGroupAdmin(dto, group_id));
         } else {
             return ResponseEntity.ok(
-                groupService.updateGroupU(dto, group_id, userContext.getCurrentUser().getId()));
+                groupService.updateGroupUser(dto, group_id, userContext.getCurrentUser().getId()));
         }
     }
 
