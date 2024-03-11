@@ -6,6 +6,7 @@ import lombok.*;
 import org.benchmarker.common.model.BaseTime;
 import org.benchmarker.user.constant.UserConsts;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
 @Setter
@@ -28,5 +29,4 @@ public class UserGroup extends BaseTime {
     @OneToMany(mappedBy = "userGroup", fetch = FetchType.EAGER)
     @JsonIgnore
     private List<UserGroupJoin> userGroupJoin;
-
 }

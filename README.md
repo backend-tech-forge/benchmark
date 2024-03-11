@@ -20,19 +20,24 @@ This is a simple http benchmark tool that can be used to **test the performance 
 ## API design
 
 
-| Method | URL                      | Description                                         | Role |
-| --- |--------------------------|-----------------------------------------------------| --- |
-| POST | /api/user                | Create a user                                       | ADMIN / USER |
-| GET | /api/user                | Get the user information                            | ADMIN / USER |
-| PUT | /api/user                | Update the user information                         | ADMIN / USER |
-| POST | /api/group               | Create a group                                      | ADMIN |
-| GET | /api/groups              | Get the list of groups                              | ADMIN |
-| GET | /api/group/{group_id}    | Get the group information                           | ADMIN |
-| POST | /api/benchmark           | Run a benchmark test                                | ADMIN / USER |
-| GET | /api/benchmark/result/{test_id} | Get the result of a benchmark test                  | ADMIN / USER |
-| GET | /api/benchmark/results   | Get the list of benchmark test results within group | ADMIN / USER |
-| POST | /login                   | Login                                               | ADMIN / USER |
-| POST | /logout                  | Logout                                              | ADMIN / USER |
+| Method | URL                            | Description                                         | Role |
+|--------|--------------------------------|-----------------------------------------------------| --- |
+| POST   | /api/user                      | Create a user                                       | ADMIN / USER |
+| GET    | /api/user                      | Get the user information                            | ADMIN / USER |
+| PUT    | /api/user                      | Update the user information                         | ADMIN / USER |
+| POST   | /api/group                     | Create a group                                      | ADMIN |
+| GET    | /api/groups                    | Get the list of groups                              | ADMIN |
+| GET    | /api/group/{group_id}          | Get the group information                           | ADMIN |
+| POST   | /api/template                  | Create a template                                   | ADMIN / USER |
+| GET    | /api/templates                 | Get the list of template                            | ADMIN / USER |
+| GET    | /api/template/{template_id}    | Get the template information                        | ADMIN / USER |
+| PATCH  | /api/template/{template_id}    | Update a template                                   | ADMIN / USER |
+| DELETE | /api/template/{template_id}    | Delete a template                                   | ADMIN / USER |
+| POST   | /api/benchmark                 | Run a benchmark test                                | ADMIN / USER |
+| GET    | /api/benchmark/result/{test_id} | Get the result of a benchmark test                  | ADMIN / USER |
+| GET    | /api/benchmark/results         | Get the list of benchmark test results within group | ADMIN / USER |
+| POST   | /login                         | Login                                               | ADMIN / USER |
+| POST   | /logout                        | Logout                                              | ADMIN / USER |
 
 
 * User roles

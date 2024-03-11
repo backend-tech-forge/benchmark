@@ -31,6 +31,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "유저가 존재하지 않습니다"),
     USER_ALREADY_EXIST(404, "유저가 이미 존재합니다"),
     GROUP_NOT_FOUND(404, "그룹이 존재하지 않습니다"),
+    TEMPLATE_NOT_FOUND(404, "탬플릿이 존재하지 않습니다"),
 
     /**
      * 500
