@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,18 +23,21 @@ public class UserRegisterDto {
     @Size(min = 4, max = 20)
     private String password;
     @NotBlank
+    @JsonProperty("slack_webhook_url")
     private String slackWebhookUrl;
+    @JsonProperty("slack_notification")
     private Boolean slackNotification;
     @Email
     private String email;
+    @JsonProperty("email_notification")
     private Boolean emailNotification;
 
-    @JsonProperty(required = false)
-    private UserGroup userGroup;
+    @JsonProperty("groups")
+    private List<UserGroup> userGroup;
 
 
     public User toEntity() {
-        User user = User.builder()
+        return User.builder()
             .id(id)
             .password(password)
             .slackWebhookUrl(slackWebhookUrl)
@@ -41,9 +45,5 @@ public class UserRegisterDto {
             .email(email)
             .emailNotification(emailNotification)
             .build();
-        if (userGroup != null) {
-            user.setUserGroup(userGroup);
-        }
-        return user;
     }
 }

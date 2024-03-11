@@ -7,10 +7,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.model.BaseTime;
-
+import java.util.List;
+import org.benchmarker.user.model.enums.Role;
 
 @Slf4j
 @Setter
@@ -43,8 +43,6 @@ public class User extends BaseTime {
     @Builder.Default
     private Role role = Role.ROLE_USER;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "group_id", referencedColumnName = "id")
-    private UserGroup userGroup;
-
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<UserGroupJoin> userGroupJoin;
 }

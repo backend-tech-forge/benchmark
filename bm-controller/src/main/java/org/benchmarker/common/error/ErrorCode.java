@@ -12,6 +12,8 @@ public enum ErrorCode {
     PASSWORD_NOT_MATCH(400, "패스워드 불일치"),
     USER_NOT_SAME_GROUP(400, "그룹이 다른 사용자입니다"),
     GROUP_ALREADY_EXIST(400, "그룹이 이미 존재합니다"),
+    USER_NOT_IN_GROUP(400, "그룹에 속해있지 않은 사용자입니다"),
+    USER_ALREADY_IN_GROUP(400, "그룹에 이미 속해있는 사용자입니다"),
 
     /**
      * 401
@@ -34,7 +36,7 @@ public enum ErrorCode {
     /**
      * 500
      */
-    INTERNAL_SERVER_ERROR(500,"서버 내부 오류" );
+    INTERNAL_SERVER_ERROR(500,"서버 내부 오류" ), ;
 
 
     private final int httpStatus;
