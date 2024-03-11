@@ -8,7 +8,6 @@ import org.benchmarker.user.controller.dto.UserUpdateDto;
 import org.util.initialize.InitiClass;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalException;
-import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
