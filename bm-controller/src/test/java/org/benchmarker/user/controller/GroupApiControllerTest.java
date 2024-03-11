@@ -112,7 +112,7 @@ class GroupApiControllerTest {
             .build();
 
         // when
-        when(groupService.addUserToGroupAdmin(anyString(), anyString())).thenReturn(infoStub);
+        when(groupService.addUserToGroupAdmin(anyString(), anyString(),any())).thenReturn(infoStub);
         when(userContext.getCurrentUser()).thenReturn(userStub);
 
         // then
