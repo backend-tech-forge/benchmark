@@ -2,6 +2,7 @@ package org.benchmarker.user.helper;
 
 import org.benchmarker.user.controller.constant.TestUserConsts;
 import org.benchmarker.user.model.User;
+import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.model.enums.Role;
 
 /**
@@ -53,6 +54,31 @@ public abstract class UserHelper {
             .slackNotification(TestUserConsts.slackNotification)
             .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
             .role(TestUserConsts.role)
+            .build();
+    }
+
+    /**
+     * Create default user group
+     *
+     * @return default user group
+     */
+    public static UserGroup createDefaultUserGroup() {
+        return UserGroup.builder()
+            .id(TestUserConsts.groupId)
+            .name(TestUserConsts.groupName)
+            .build();
+    }
+
+    /**
+     * Create default user group with id
+     *
+     * @param groupId
+     * @return default user group
+     */
+    public static UserGroup createDefaultUserGroup(String groupId) {
+        return UserGroup.builder()
+            .id(groupId)
+            .name(TestUserConsts.groupName)
             .build();
     }
 }
