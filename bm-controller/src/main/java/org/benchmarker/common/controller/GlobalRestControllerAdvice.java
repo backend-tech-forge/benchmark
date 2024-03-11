@@ -1,14 +1,13 @@
 package org.benchmarker.common.controller;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
-
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalErrorResponse;
 import org.benchmarker.common.error.GlobalException;
-import org.benchmarker.security.BMAccessDeniedHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -24,5 +23,15 @@ public class GlobalRestControllerAdvice {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<GlobalErrorResponse> handlerResponseEntity(AccessDeniedException e) {
         return GlobalErrorResponse.toResponseEntity(ErrorCode.FORBIDDEN);
+    }
+
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            IllegalStateException.class,
+            ConstraintViolationException.class,
+            MethodArgumentNotValidException.class,
+    })
+    public ResponseEntity<GlobalErrorResponse> handleBadRequestException(Exception e) {
+        return GlobalErrorResponse.toResponseEntity(ErrorCode.BAD_REQUEST);
     }
 }

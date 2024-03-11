@@ -1,45 +1,41 @@
 package org.benchmarker.template.controller.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.benchmarker.template.model.TestTemplate;
 import org.benchmarker.user.model.UserGroup;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class TestTemplateRequestDto {
 
+    @NotBlank
     private String userGroupName;
 
+    @NotBlank
     private String url;
 
+    @NotBlank
     private String method;
 
     private String body;
 
+    @NotNull
     private Integer vuser;
 
+    @NotNull
     private Integer maxRequest;
 
+    @NotNull
     private Integer maxDuration;
 
+    @NotNull
     private Integer cpuLimit;
-
-    @Builder
-    public TestTemplateRequestDto(String userGroupName, String url, String method, String body, Integer vuser, Integer maxRequest, Integer maxDuration, Integer cpuLimit) {
-        this.userGroupName = userGroupName;
-        this.url = url;
-        this.method = method;
-        this.body = body;
-        this.vuser = vuser;
-        this.maxRequest = maxRequest;
-        this.maxDuration = maxDuration;
-        this.cpuLimit = cpuLimit;
-    }
-
+  
     public TestTemplate toEntity() {
         return TestTemplate.builder()
                 .userGroup(UserGroup.builder().name(this.userGroupName).build())
