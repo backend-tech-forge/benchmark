@@ -27,6 +27,13 @@ public class GroupService {
     private final UserRepository userRepository;
     private final UserGroupJoinRepository userGroupJoinRepository;
 
+    /**
+     * Create a group and become a leader of the group
+     *
+     * @param dto    {@link GroupAddDto}
+     * @param userId {@link String}
+     * @return {@link GroupInfo}
+     */
     @Transactional
     public GroupInfo createGroup(GroupAddDto dto, String userId) {
         groupRepository.findById(dto.getId()).ifPresent((u) -> {
@@ -38,6 +45,8 @@ public class GroupService {
             .name(dto.getName())
             .build();
         UserGroup save = groupRepository.save(userGroup);
+        addUserToGroupAdmin(save.getId(), userId, GroupRole.LEADER);
+
         return GroupInfo.builder()
             .id(save.getId())
             .name(save.getName())
@@ -45,6 +54,14 @@ public class GroupService {
             .build();
     }
 
+    /**
+     * ADMIN ONLY
+     *
+     * <p>Get group info for admin
+     *
+     * @param group_id
+     * @return {@link GroupInfo}
+     */
     @Transactional
     public GroupInfo getGroupInfoAdmin(String group_id) {
         return groupRepository.findById(group_id).map((g) -> GroupInfo.builder()
@@ -54,10 +71,20 @@ public class GroupService {
             .build()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
     }
 
+    /**
+     * Get group info for user
+     *
+     * @param groupId
+     * @param userId
+     * @return {@link GroupInfo}
+     */
     @Transactional
     public GroupInfo getGroupInfo(String groupId, String userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        groupRepository.findById(groupId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+
         // if user is not in the group, throw exception
         if (user.getUserGroupJoin().stream()
             .noneMatch((j) -> j.getUserGroup().getId().equals(groupId))) {
@@ -70,8 +97,17 @@ public class GroupService {
             .build()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
     }
 
+    /**
+     * ADMIN ONLY
+     *
+     * <p>Update group name for admin
+     *
+     * @param dto
+     * @param groupId
+     * @return {@link GroupInfo}
+     */
     @Transactional
-    public GroupInfo updateGroupA(GroupUpdateDto dto, String groupId) {
+    public GroupInfo updateGroupAdmin(GroupUpdateDto dto, String groupId) {
         UserGroup userGroup = groupRepository.findById(groupId).orElseThrow(() ->
             new GlobalException(ErrorCode.GROUP_NOT_FOUND));
         userGroup.setName(dto.getName());
@@ -82,8 +118,16 @@ public class GroupService {
             .build();
     }
 
+    /**
+     * Update group name for user
+     *
+     * @param dto
+     * @param groupId
+     * @param userId
+     * @return {@link GroupInfo}
+     */
     @Transactional
-    public GroupInfo updateGroupU(GroupUpdateDto dto, String groupId, String userId) {
+    public GroupInfo updateGroupUser(GroupUpdateDto dto, String groupId, String userId) {
         Optional<UserGroupJoin> findJoin = userGroupJoinRepository.findByUserIdAndUserGroupId(
             userId, groupId);
         if (findJoin.isEmpty()) {
@@ -100,10 +144,30 @@ public class GroupService {
             .build();
     }
 
+    /**
+     * Add user to group
+     *
+     * @param groupId
+     * @param myId
+     * @param userId
+     * @return {@link GroupInfo}
+     */
     @Transactional
-    public GroupInfo addUserToGroup(String groupId, String myId, String userId) {
+    public GroupInfo addUserToGroup(String groupId, String myId, String userId, GroupRole role) {
         userRepository.findById(myId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        // check user is in the group and has LEADER role
+        userGroupJoinRepository.findByUserIdAndUserGroupId(myId, groupId).ifPresentOrElse(
+            (u) -> {
+                if (u.getRole() != GroupRole.LEADER) {
+                    throw new GlobalException(ErrorCode.FORBIDDEN);
+                }
+            },
+            () -> {
+                throw new GlobalException(ErrorCode.USER_NOT_IN_GROUP);
+            });
+
+        // join user to the group
         User toAddUser = userRepository.findById(userId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         UserGroup foundGroup = groupRepository.findById(groupId)
@@ -117,7 +181,7 @@ public class GroupService {
         UserGroupJoin userGroupJoin = UserGroupJoin.builder()
             .user(toAddUser)
             .userGroup(foundGroup)
-            .role(GroupRole.MEMBER)
+            .role(role)
             .build();
         userGroupJoinRepository.save(userGroupJoin);
         return GroupInfo.builder()
@@ -127,8 +191,17 @@ public class GroupService {
             .build();
     }
 
+    /**
+     * ADMIN ONLY
+     *
+     * <p>Add user to group
+     *
+     * @param groupId
+     * @param userId
+     * @return
+     */
     @Transactional
-    public GroupInfo addUserToGroupAdmin(String groupId, String userId) {
+    public GroupInfo addUserToGroupAdmin(String groupId, String userId, GroupRole role) {
         User toAddUser = userRepository.findById(userId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         UserGroup foundGroup = groupRepository.findById(groupId)
@@ -142,7 +215,7 @@ public class GroupService {
         UserGroupJoin userGroupJoin = UserGroupJoin.builder()
             .user(toAddUser)
             .userGroup(foundGroup)
-            .role(GroupRole.MEMBER) // default role, can be changed later
+            .role(role) // default role, can be changed later
             .build();
         userGroupJoinRepository.save(userGroupJoin);
         return GroupInfo.builder()
@@ -157,9 +230,11 @@ public class GroupService {
             .map(UserGroupJoin::getUser).map(User::getId).collect(Collectors.toList());
     }
 
-    public GroupInfo deleteUserFromGroup(String groupId, String myId, String userId, boolean isAdmin) {
+    @Transactional
+    public GroupInfo deleteUserFromGroup(String groupId, String myId, String userId,
+        boolean isAdmin) {
         if (isAdmin) {
-            userGroupJoinRepository.deleteByUserId(userId);
+            userGroupJoinRepository.deleteAllByUserIdAAndUserGroupId(userId, groupId);
             UserGroup foundGroup = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
             return GroupInfo.builder()
@@ -174,7 +249,8 @@ public class GroupService {
         if (foundJoin.isEmpty() || foundJoin.get().getRole() != GroupRole.LEADER) {
             throw new GlobalException(ErrorCode.FORBIDDEN);
         }
-        userGroupJoinRepository.deleteByUserId(userId);
+        UserGroupJoin join = foundJoin.get();
+        userGroupJoinRepository.delete(join);
         UserGroup foundGroup = groupRepository.findById(groupId)
             .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
         return GroupInfo.builder()
