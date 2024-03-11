@@ -4,6 +4,7 @@ package org.benchmarker.user.controller.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,8 @@ import org.benchmarker.user.model.UserGroupJoin;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class UserInfo {
 
@@ -30,21 +33,9 @@ public class UserInfo {
     @JsonProperty("groups")
     private List<UserGroup> userGroup;
 
-    @Builder
-    public UserInfo(String id, String slackWebhookUrl, Boolean slackNotification, String email,
-        Boolean emailNotification, List<UserGroup> userGroup) {
-        this.id = id;
-        this.slackWebhookUrl = slackWebhookUrl;
-        this.slackNotification = slackNotification;
-        this.email = email;
-        this.emailNotification = emailNotification;
-        this.userGroup = userGroup;
-    }
-
-
     /**
      * Convert User to UserInfo
-     *
+     * <p>
      * Need to run in the same transaction
      *
      * @param user
