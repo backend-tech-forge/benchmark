@@ -1,21 +1,21 @@
 package org.benchmarker.template.model;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.common.model.BaseTime;
 import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.user.model.UserGroup;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Setter
 @Getter
 @Entity
-public class TestTemplate {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TestTemplate extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,29 +43,6 @@ public class TestTemplate {
     @Column(nullable = false)
     private Integer cpuLimit;
 
-    @Column(columnDefinition = "timestamp(6)")
-    protected LocalDateTime createdAt;
-
-    @Column(columnDefinition = "timestamp(6)")
-    protected LocalDateTime updatedAt;
-
-    public TestTemplate() {
-
-    }
-
-    @Builder
-    public TestTemplate(UserGroup userGroup, String url, String method, String body, Integer vuser, Integer maxRequest, Integer maxDuration, Integer cpuLimit) {
-        this.userGroup = userGroup;
-        this.url = url;
-        this.method = method;
-        this.body = body;
-        this.vuser = vuser;
-        this.maxRequest = maxRequest;
-        this.maxDuration = maxDuration;
-        this.cpuLimit = cpuLimit;
-
-        this.createdAt = LocalDateTime.now();
-    }
 
     public void update(TestTemplateUpdateDto testTemplate) {
 
@@ -77,8 +54,6 @@ public class TestTemplate {
         this.maxRequest = testTemplate.getMaxRequest();
         this.maxDuration = testTemplate.getMaxDuration();
         this.cpuLimit = testTemplate.getCpuLimit();
-
-        this.updatedAt = LocalDateTime.now();
     }
 
     public TestTemplateResponseDto convertToResponseDto() {
