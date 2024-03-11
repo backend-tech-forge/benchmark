@@ -1,11 +1,9 @@
 package org.benchmarker.user.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.benchmarker.common.model.BaseTime;
 import org.benchmarker.user.constant.UserConsts;
-import java.util.List;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,7 +24,9 @@ public class UserGroup extends BaseTime {
     @Builder.Default
     private String name = UserConsts.USER_GROUP_DEFAULT_NAME;
 
-    @OneToMany(mappedBy = "userGroup", fetch = FetchType.EAGER)
-    @JsonIgnore
-    private List<UserGroupJoin> userGroupJoin;
+    public void update(String userGroupName) {
+        this.id = userGroupName;
+    }
+
 }
+
