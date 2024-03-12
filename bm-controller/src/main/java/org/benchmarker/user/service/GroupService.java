@@ -10,6 +10,7 @@ import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.controller.dto.GroupAddDto;
 import org.benchmarker.user.controller.dto.GroupInfo;
 import org.benchmarker.user.controller.dto.GroupUpdateDto;
+import org.benchmarker.user.controller.dto.UserGroupRoleInfo;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.model.UserGroupJoin;
@@ -17,6 +18,9 @@ import org.benchmarker.user.model.enums.GroupRole;
 import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,7 +54,7 @@ public class GroupService {
         return GroupInfo.builder()
             .id(save.getId())
             .name(save.getName())
-            .users(List.of(userId))
+            .users(getUserInfoInGroup(save.getId()))
             .build();
     }
 
@@ -67,7 +71,7 @@ public class GroupService {
         return groupRepository.findById(group_id).map((g) -> GroupInfo.builder()
             .id(g.getId())
             .name(g.getName())
-            .users(getUserIdsInGroup(group_id))
+            .users(getUserInfoInGroup(group_id))
             .build()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
     }
 
@@ -93,8 +97,67 @@ public class GroupService {
         return groupRepository.findById(groupId).map((g) -> GroupInfo.builder()
             .id(g.getId())
             .name(g.getName())
-            .users(getUserIdsInGroup(groupId))
+            .users(getUserInfoInGroup(groupId))
             .build()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+    }
+
+    @Transactional
+    public List<GroupInfo> getAllGroupInfo(String userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        List<GroupInfo> groupInfos = user.getUserGroupJoin().stream()
+            .map(UserGroupJoin::getUserGroup)
+            .map((g) -> GroupInfo.builder()
+                .id(g.getId())
+                .name(g.getName())
+                .users(getUserInfoInGroup(g.getId()))
+                .build())
+            .map((g) -> GroupInfo.builder()
+                .id(g.getId())
+                .name(g.getName())
+                .users(getUserInfoInGroup(g.getId()))
+                .build())
+            .collect(Collectors.toList());
+        return groupInfos;
+    }
+
+    @Transactional
+    public Page<GroupInfo> getAllGroupInfo(String userId, Pageable pageable) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        List<GroupInfo> groupInfos = user.getUserGroupJoin().stream()
+            .map(UserGroupJoin::getUserGroup)
+            .map((g) -> GroupInfo.builder()
+                .id(g.getId())
+                .name(g.getName())
+                .users(getUserInfoInGroup(g.getId()))
+                .build())
+            .collect(Collectors.toList());
+        return new PageImpl<>(groupInfos, pageable, groupInfos.size());
+    }
+
+    @Transactional
+    public List<GroupInfo> getAllGroupInfoAdmin() {
+        List<GroupInfo> groupInfos = groupRepository.findAll().stream()
+            .map((g) -> GroupInfo.builder()
+                .id(g.getId())
+                .name(g.getName())
+                .users(getUserInfoInGroup(g.getId()))
+                .build())
+            .collect(Collectors.toList());
+        return groupInfos;
+    }
+
+    @Transactional
+    public Page<GroupInfo> getAllGroupInfoAdmin(Pageable pageable) {
+        Page<UserGroup> groupPage = groupRepository.findAll(pageable);
+        return groupPage.map(g -> {
+            return GroupInfo.builder()
+                .id(g.getId())
+                .name(g.getName())
+                .users(getUserInfoInGroup(g.getId()))
+                .build();
+        });
     }
 
     /**
@@ -114,7 +177,7 @@ public class GroupService {
         return GroupInfo.builder()
             .id(userGroup.getId())
             .name(userGroup.getName())
-            .users(getUserIdsInGroup(userGroup.getId()))
+            .users(getUserInfoInGroup(userGroup.getId()))
             .build();
     }
 
@@ -140,7 +203,7 @@ public class GroupService {
         return GroupInfo.builder()
             .id(userGroup.getId())
             .name(userGroup.getName())
-            .users(getUserIdsInGroup(userGroup.getId()))
+            .users(getUserInfoInGroup(userGroup.getId()))
             .build();
     }
 
@@ -187,7 +250,7 @@ public class GroupService {
         return GroupInfo.builder()
             .id(foundGroup.getId())
             .name(foundGroup.getName())
-            .users(getUserIdsInGroup(foundGroup.getId()))
+            .users(getUserInfoInGroup(foundGroup.getId()))
             .build();
     }
 
@@ -221,13 +284,8 @@ public class GroupService {
         return GroupInfo.builder()
             .id(foundGroup.getId())
             .name(foundGroup.getName())
-            .users(getUserIdsInGroup(foundGroup.getId()))
+            .users(getUserInfoInGroup(foundGroup.getId()))
             .build();
-    }
-
-    private List<String> getUserIdsInGroup(String groupId) {
-        return userGroupJoinRepository.findByUserGroupId(groupId).stream()
-            .map(UserGroupJoin::getUser).map(User::getId).collect(Collectors.toList());
     }
 
     @Transactional
@@ -238,25 +296,62 @@ public class GroupService {
             UserGroup foundGroup = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
             return GroupInfo.builder()
-                .id(foundGroup.getId())
-                .name(foundGroup.getName())
-                .users(getUserIdsInGroup(foundGroup.getId()))
+                .id(groupId)
+                .name("deleted")
+                .users(getUserInfoInGroup(foundGroup.getId()))
                 .build();
         }
         // check if user is in the group and has permission to delete = LEADER
         Optional<UserGroupJoin> foundJoin = userGroupJoinRepository.findByUserIdAndUserGroupId(
             myId, groupId);
         if (foundJoin.isEmpty() || foundJoin.get().getRole() != GroupRole.LEADER) {
+            System.out.println("foundJoin: " + foundJoin);
             throw new GlobalException(ErrorCode.FORBIDDEN);
         }
-        UserGroupJoin join = foundJoin.get();
-        userGroupJoinRepository.delete(join);
+        UserGroupJoin extractUser = userGroupJoinRepository.findByUserIdAndUserGroupId(userId, groupId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_IN_GROUP));
+        
+        userGroupJoinRepository.delete(extractUser);
         UserGroup foundGroup = groupRepository.findById(groupId)
             .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
         return GroupInfo.builder()
             .id(foundGroup.getId())
             .name(foundGroup.getName())
-            .users(getUserIdsInGroup(foundGroup.getId()))
+            .users(getUserInfoInGroup(foundGroup.getId()))
             .build();
     }
+
+    @Transactional
+    public void deleteGroup(String groupId, String myId) {
+        UserGroup foundGroup = groupRepository.findById(groupId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+        UserGroupJoin join = userGroupJoinRepository.findByUserIdAndUserGroupId(
+            myId, groupId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_IN_GROUP));
+
+        if (!join.getRole().isLeader()){
+            throw new GlobalException(ErrorCode.FORBIDDEN);
+        }
+        userGroupJoinRepository.deleteAllByUserGroupId(groupId);
+        groupRepository.delete(foundGroup);
+    }
+
+    @Transactional
+    public void deleteGroupAdmin(String groupId) {
+        UserGroup foundGroup = groupRepository.findById(groupId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+        userGroupJoinRepository.deleteAllByUserGroupId(groupId);
+        groupRepository.delete(foundGroup);
+    }
+
+    private List<UserGroupRoleInfo> getUserInfoInGroup(String groupId) {
+        return userGroupJoinRepository.findByUserGroupId(groupId).stream()
+            .map((userGroupJoin -> {
+                User user = userGroupJoin.getUser();
+                return UserGroupRoleInfo.builder()
+                    .id(user.getId())
+                    .role(userGroupJoin.getRole())
+                    .build();
+            })).collect(Collectors.toList());
+    }
+
 }
