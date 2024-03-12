@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
+  <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 <body>
+<div class="container">
 <h1>Login</h1>
 <form th:action="@{/login}" th:object="${loginRequestDto}" method="post">
   <label for="username">Username:</label>
@@ -15,5 +17,6 @@
 
   <button type="submit">Login</button>
 </form>
+</div>
 </body>
 </html>
