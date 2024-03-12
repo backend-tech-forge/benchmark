@@ -26,6 +26,11 @@ public interface UserGroupJoinRepository extends JpaRepository<UserGroupJoin, Lo
     @Query("DELETE FROM UserGroupJoin ugj WHERE ugj.user.id = :userId AND ugj.userGroup.id = :groupId")
     void deleteAllByUserIdAAndUserGroupId(@Param("userId") String userId, @Param("groupId") String groupId);
 
+    @Modifying
     @Query("DELETE FROM UserGroupJoin ugj WHERE ugj.user.id = :userId")
-    void deleteAllByUserId(@Param("userId") String id);
+    void deleteAllByUserId(@Param("userId") String userId);
+
+    @Modifying
+    @Query("DELETE FROM UserGroupJoin ugj WHERE ugj.userGroup.id = :groupId")
+    void deleteAllByUserGroupId(@Param("groupId") String groupId);
 }
