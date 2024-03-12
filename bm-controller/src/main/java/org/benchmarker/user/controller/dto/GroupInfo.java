@@ -23,5 +23,5 @@ public class GroupInfo {
     @JsonProperty("name")
     private String name;
     @JsonProperty("users")
-    private List<String> users; // This is a list of user ids
+    private List<UserGroupRoleInfo> users; // This is a list of user ids
 }
