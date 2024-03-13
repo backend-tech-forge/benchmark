@@ -35,12 +35,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
 
-        // check request and url is null
-        if (request == null || request.getRequestURI() == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         for (MethodUrlPair methodUrlPair : WHITE_LIST_URLS) {
             if (methodUrlPair.getMethod().contains(request.getMethod()) &&
                 methodUrlPair.getUrl().equals(request.getRequestURI())) {
