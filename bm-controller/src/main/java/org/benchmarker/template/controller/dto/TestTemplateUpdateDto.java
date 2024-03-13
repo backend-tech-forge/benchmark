@@ -11,7 +11,7 @@ public class TestTemplateUpdateDto {
 
     private Integer id;
 
-    private String userGroupName;
+    private String userGroupId;
 
     private String url;
 

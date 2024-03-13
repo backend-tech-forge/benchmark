@@ -46,7 +46,7 @@ public class TestTemplate extends BaseTime {
 
     public void update(TestTemplateUpdateDto testTemplate) {
 
-        this.userGroup.update(testTemplate.getUserGroupName());
+        this.userGroup.update(testTemplate.getUserGroupId());
         this.url = testTemplate.getUrl();
         this.method = testTemplate.getMethod();
         this.body = testTemplate.getBody();
@@ -60,7 +60,7 @@ public class TestTemplate extends BaseTime {
 
         return TestTemplateResponseDto.builder()
                 .id(this.id)
-                .userGroupName(this.userGroup.getName())
+                .userGroupId(this.userGroup.getId())
                 .method(this.method)
                 .url(this.url)
                 .body(this.body)
