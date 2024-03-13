@@ -14,7 +14,7 @@ import org.benchmarker.user.model.UserGroup;
 public class TestTemplateRequestDto {
 
     @NotBlank
-    private String userGroupName;
+    private String userGroupId;
 
     @NotBlank
     private String url;
@@ -35,10 +35,10 @@ public class TestTemplateRequestDto {
 
     @NotNull
     private Integer cpuLimit;
-
+  
     public TestTemplate toEntity() {
         return TestTemplate.builder()
-                .userGroup(UserGroup.builder().name(this.userGroupName).build())
+                .userGroup(UserGroup.builder().id(this.userGroupId).build())
                 .url(this.url)
                 .method(this.method)
                 .body(this.body)

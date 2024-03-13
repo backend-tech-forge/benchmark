@@ -4,7 +4,7 @@ import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.login.controller.dto.LoginRequestInfo;
 import org.benchmarker.security.JwtTokenProvider;
 import org.benchmarker.user.controller.constant.TestUserConsts;
-import org.benchmarker.user.model.Role;
+import org.benchmarker.user.model.enums.Role;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;

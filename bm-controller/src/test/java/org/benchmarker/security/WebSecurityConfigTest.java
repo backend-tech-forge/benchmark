@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import org.benchmarker.user.model.Role;
+import org.benchmarker.user.model.enums.Role;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;

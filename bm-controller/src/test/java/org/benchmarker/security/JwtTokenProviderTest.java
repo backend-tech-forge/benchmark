@@ -7,7 +7,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.benchmarker.security.constant.TokenConsts;
 import org.benchmarker.user.controller.constant.TestUserConsts;
-import org.benchmarker.user.model.Role;
+import org.benchmarker.user.model.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

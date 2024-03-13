@@ -4,13 +4,17 @@ package org.benchmarker.user.controller;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.common.error.ErrorCode;
+import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.controller.dto.UserInfo;
 import org.benchmarker.user.controller.dto.UserRegisterDto;
+import org.benchmarker.user.controller.dto.UserUpdateDto;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.service.IUserService;
 import org.benchmarker.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,28 +30,50 @@ public class UserApiController {
     private final UserContext userContext;
 
     @PostMapping("/user")
-    public ResponseEntity<UserInfo> createUser(@RequestBody UserRegisterDto userRegisterDto) {
-        User user = userRegisterDto.toEntity();
-        Optional<User> savedUser = userService.createUser(user);
-        return ResponseEntity.ok(UserInfo.from(savedUser.get()));
+    public ResponseEntity<UserInfo> createUser(@Validated @RequestBody UserRegisterDto userRegisterDto) {
+        Optional<UserInfo> userInfo = userService.createUser(userRegisterDto);
+        return ResponseEntity.ok(userInfo.get());
     }
 
-    @GetMapping({"/user", "/user/{user_id}"})
+    @GetMapping({"/user", "/users/{user_id}"})
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<UserInfo> getUser(
         @PathVariable(required = false) String user_id) {
         User currentUser = userContext.getCurrentUser();
         if (user_id == null) {
-            return ResponseEntity.ok(UserInfo.from(currentUser));
+            UserInfo userInfo = userService.getUser(currentUser.getId()).get();
+            return ResponseEntity.ok(userInfo);
         } else {
             if (currentUser.getRole().isAdmin()) {
-                User user = userService.getUser(user_id);
-                return ResponseEntity.ok(UserInfo.from(user));
+                Optional<UserInfo> userInfo = userService.getUser(user_id);
+                return ResponseEntity.ok(userInfo.get());
             } else {
-                User user = userService.getUserIfSameGroup(currentUser.getId(), user_id);
-                return ResponseEntity.ok(UserInfo.from(user));
+                UserInfo user = userService.getUserIfSameGroup(currentUser.getId(), user_id);
+                return ResponseEntity.ok(user);
             }
         }
+    }
+
+    @PatchMapping("/user")
+    public ResponseEntity<UserInfo> updateUser(@RequestBody UserUpdateDto userUpdateDto) {
+        UserInfo userInfo = userService.updateUser(userUpdateDto)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        return ResponseEntity.ok(userInfo);
+    }
+
+    @DeleteMapping("/users/{user_id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<Void> deleteUserById(@PathVariable("user_id") String userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/user")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<Void> deleteCurrentUser() {
+        User currentUser = userContext.getCurrentUser();
+        userService.deleteUser(currentUser.getId());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/users")
@@ -57,4 +83,5 @@ public class UserApiController {
         List<UserInfo> userInfo = users.stream().map(UserInfo::from).collect(Collectors.toList());
         return ResponseEntity.ok(userInfo);
     }
+
 }

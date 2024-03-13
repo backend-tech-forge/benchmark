@@ -1,4 +1,4 @@
-package org.benchmarker.user.model;
+package org.benchmarker.user.model.enums;
 
 import lombok.AllArgsConstructor;
 

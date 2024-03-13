@@ -1,5 +1,8 @@
 package org.benchmarker.user.service;
 
+import org.benchmarker.user.controller.dto.UserInfo;
+import org.benchmarker.user.controller.dto.UserRegisterDto;
+import org.benchmarker.user.controller.dto.UserUpdateDto;
 import org.benchmarker.user.model.User;
 
 import java.util.*;
@@ -7,15 +10,15 @@ import java.util.*;
 
 public interface IUserService {
 
-    Optional<User> createUser(User user);
+    Optional<UserInfo> createUser(UserRegisterDto userRegisterDto);
 
-    User getUser(String id);
+    Optional<UserInfo> getUser(String id);
 
-    User getUserIfSameGroup(String currentUserId, String id);
+    UserInfo getUserIfSameGroup(String currentUserId, String id);
 
     List<User> getUsers();
 
-    Optional<User> updateUser(User user) throws Exception;
+    Optional<UserInfo> updateUser(UserUpdateDto user);
 
     void deleteUser(String id);
 }
