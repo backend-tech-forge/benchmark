@@ -17,8 +17,8 @@ public class TestTemplateResponseDto {
     private Integer id;
 
     @NotBlank
-    @JsonProperty("user_group_name")
-    private String userGroupName;
+    @JsonProperty("user_group_id")
+    private String userGroupId;
 
     @NotBlank
     @JsonProperty("url")

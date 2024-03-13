@@ -88,7 +88,7 @@ class TestTemplateApiControllerTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -115,7 +115,7 @@ class TestTemplateApiControllerTest {
                     assertThat(resTemplate.getUrl()).isEqualTo(request.getUrl());
                     assertThat(resTemplate.getMethod()).isEqualTo(request.getMethod());
                     assertThat(resTemplate.getBody()).isEqualTo(request.getBody());
-                    assertThat(resTemplate.getUserGroupName()).isEqualTo(userGroup.getName());
+                    assertThat(resTemplate.getUserGroupId()).isEqualTo(userGroup.getName());
                     assertThat(resTemplate.getVuser()).isEqualTo(request.getVuser());
                     assertThat(resTemplate.getCpuLimit()).isEqualTo(request.getCpuLimit());
                     assertThat(resTemplate.getMaxRequest()).isEqualTo(request.getMaxRequest());
@@ -133,7 +133,7 @@ class TestTemplateApiControllerTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("notGroup")
+                .userGroupId("notGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(4)
@@ -168,7 +168,7 @@ class TestTemplateApiControllerTest {
 //                .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -203,7 +203,7 @@ class TestTemplateApiControllerTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -227,7 +227,7 @@ class TestTemplateApiControllerTest {
                     assertThat(resTemplate.getUrl()).isEqualTo(resTestTemplate.getUrl());
                     assertThat(resTemplate.getMethod()).isEqualTo(resTestTemplate.getMethod());
                     assertThat(resTemplate.getBody()).isEqualTo(resTestTemplate.getBody());
-                    assertThat(resTemplate.getUserGroupName()).isEqualTo(userGroup.getName());
+                    assertThat(resTemplate.getUserGroupId()).isEqualTo(userGroup.getName());
                     assertThat(resTemplate.getVuser()).isEqualTo(resTestTemplate.getVuser());
                     assertThat(resTemplate.getCpuLimit()).isEqualTo(resTestTemplate.getCpuLimit());
                     assertThat(resTemplate.getMaxRequest()).isEqualTo(resTestTemplate.getMaxRequest());
@@ -245,7 +245,7 @@ class TestTemplateApiControllerTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -257,7 +257,7 @@ class TestTemplateApiControllerTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -299,7 +299,7 @@ class TestTemplateApiControllerTest {
 //                .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
