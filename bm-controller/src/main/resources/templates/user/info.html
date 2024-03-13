@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>User Info</title>
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+</head>
+<body>
+<div th:replace="fragments/currentUserFragment :: currentUser"></div>
+<div class="container">
+
+<h1>User Info</h1>
+
+<div th:if="${userInfo != null}">
+    <table>
+      <tbody>
+      <tr>
+        <th>User ID</th>
+        <td th:text="${userInfo.id}"></td>
+      </tr>
+      <tr>
+        <th>Slack Webhook URL</th>
+        <td th:text="${userInfo.slackWebhookUrl}"></td>
+      </tr>
+      <tr>
+        <th>Slack Notification</th>
+        <td th:text="${userInfo.slackNotification} ? 'Enabled' : 'Disabled'"></td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td th:text="${userInfo.email}"></td>
+      </tr>
+      <tr>
+        <th>Email Notification</th>
+        <td th:text="${userInfo.emailNotification} ? 'Enabled' : 'Disabled'"></td>
+      </tr>
+      </tbody>
+    </table>
+
+
+  <h1>User Groups</h1>
+  <table>
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="group : ${userInfo.userGroup}">
+      <!-- 각 그룹의 ID와 이름을 표시 -->
+      <td th:text="${group.id}"></td>
+      <td th:text="${group.name}"></td>
+      <!-- 각 그룹에 대한 링크 추가 -->
+      <td>
+        <a th:href="'/groups/' + ${group.id}"
+           th:text="'View Details'"></a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+</body>
+</html>

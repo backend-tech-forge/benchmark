@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>User Registration</title>
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+  <style>
+    #groupInfo {
+      display: none; /* 초기에는 숨김 상태로 설정 */
+    }
+  </style>
+</head>
+<body>
+<h1>User Registration</h1>
+<div class="container">
+<form th:action="@{/user}" th:object="${userRegisterDto}" method="post">
+  <div th:if="${#fields.hasErrors('*')}" style="color: red;">
+    <p>Please correct the following errors:</p>
+    <ul>
+      <li th:each="error : ${#fields.errors('*')}" th:text="${error}">Error</li>
+    </ul>
+  </div>
+  <button type="button" id="addUserGroupButton">Add User Group</button>
+  <label for="id">ID:</label>
+  <input type="text" id="id" th:field="*{id}" required/><br/>
+
+  <label for="password">Password:</label>
+  <input type="password" id="password" th:field="*{password}" required/><br/>
+
+  <label for="slackWebhookUrl">Slack Webhook URL:</label>
+  <input type="text" id="slackWebhookUrl" th:field="*{slackWebhookUrl}" required/><br/>
+
+  <div style="display: flex;">
+    <label style="align-items: center;" for="slackNotification">Slack Notification:
+      <input type="checkbox" id="slackNotification" th:field="*{slackNotification}"/>
+    </label>
+  </div>
+  <br/>
+
+  <label for="email">Email:</label>
+  <input type="text" id="email" th:field="*{email}" required/><br/>
+
+
+  <div style="display: flex;">
+    <label for="emailNotification">Email Notification:
+      <input type="checkbox" id="emailNotification" th:field="*{emailNotification}"/>
+    </label>
+  </div>
+  <br/>
+
+  <!-- 버튼 클릭 시 화면에 표시될 입력란과 라벨 -->
+
+
+  <div id="userGroupFields"></div>
+
+  <script>
+    var userGroupCount = 0;
+
+    function addUserGroup() {
+      var userGroupFieldsDiv = document.getElementById("userGroupFields");
+
+      // Check if userGroup already exists, if so, return
+      if (userGroupFieldsDiv.querySelector('div[id^="userGroup"]')) {
+        return;
+      }
+
+      var newUserGroupDiv = document.createElement("div");
+      newUserGroupDiv.innerHTML =
+          '<div id="userGroup0">' +
+          '<label for="userGroup[0].id">Group ID:</label>' +
+          '<input type="text" id="userGroup[0].id" name="userGroup[0].id"><br/>' +
+          '<label for="userGroup[0].name">Group Name:</label>' +
+          '<input type="text" id="userGroup[0].name" name="userGroup[0].name">' +
+          '<button type="button" id="deleteUserGroupButton" onclick="removeUserGroup()">Remove User Group</button>' +
+          '</div>';
+      userGroupFieldsDiv.appendChild(newUserGroupDiv);
+    }
+
+    function removeUserGroup() {
+      var userGroupToRemove = document.getElementById("userGroup0");
+      userGroupToRemove.parentNode.removeChild(userGroupToRemove);
+    }
+
+    document.getElementById("addUserGroupButton").addEventListener("click", addUserGroup);
+  </script>
+
+  <button type="submit">Register</button>
+</form>
+</div>
+</body>
+</html>
