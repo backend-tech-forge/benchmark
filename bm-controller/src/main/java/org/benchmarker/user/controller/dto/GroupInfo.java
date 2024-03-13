@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * {@link GroupInfo} is a DTO class for the GroupInfo object.
+ */
 @Getter
 @Setter
 @Builder

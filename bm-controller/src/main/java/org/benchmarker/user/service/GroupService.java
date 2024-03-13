@@ -23,6 +23,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * {@link GroupService} is a service that can manage user groups
+ */
 @Service
 @RequiredArgsConstructor
 public class GroupService {
@@ -32,7 +35,7 @@ public class GroupService {
     private final UserGroupJoinRepository userGroupJoinRepository;
 
     /**
-     * Create a group and become a leader of the group
+     * Create a group and become a {@link GroupRole#LEADER} of the group
      *
      * @param dto    {@link GroupAddDto}
      * @param userId {@link String}
@@ -59,7 +62,7 @@ public class GroupService {
     }
 
     /**
-     * ADMIN ONLY
+     * <strong>ADMIN ONLY</strong>
      *
      * <p>Get group info for admin
      *
@@ -76,11 +79,16 @@ public class GroupService {
     }
 
     /**
-     * Get group info for user
+     * Get a {@link GroupInfo} by userId and groupId
+     *
+     * <p>if user does not participate in the group, {@link ErrorCode#USER_NOT_IN_GROUP} occurred</p>
      *
      * @param groupId
      * @param userId
      * @return {@link GroupInfo}
+     * @throws GlobalException <p>{@link ErrorCode#USER_NOT_IN_GROUP}</p>
+     *                         <p>{@link ErrorCode#GROUP_NOT_FOUND}</p>
+     *                         <p>{@link ErrorCode#USER_NOT_IN_GROUP}</p>
      */
     @Transactional
     public GroupInfo getGroupInfo(String groupId, String userId) {
@@ -101,6 +109,12 @@ public class GroupService {
             .build()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
     }
 
+    /**
+     * Get all participate {@link GroupInfo} of user
+     *
+     * @param userId
+     * @return {@link List} of {@link GroupInfo}
+     */
     @Transactional
     public List<GroupInfo> getAllGroupInfo(String userId) {
         User user = userRepository.findById(userId)
@@ -148,6 +162,14 @@ public class GroupService {
         return groupInfos;
     }
 
+    /**
+     * <strong>ADMIN ONLY</strong>
+     *
+     * <p>Get all group info for admin with pageable
+     *
+     * @param pageable
+     * @return {@link Page} of {@link GroupInfo}
+     */
     @Transactional
     public Page<GroupInfo> getAllGroupInfoAdmin(Pageable pageable) {
         Page<UserGroup> groupPage = groupRepository.findAll(pageable);
@@ -161,7 +183,7 @@ public class GroupService {
     }
 
     /**
-     * ADMIN ONLY
+     * <strong>ADMIN ONLY</strong>
      *
      * <p>Update group name for admin
      *
@@ -213,6 +235,7 @@ public class GroupService {
      * @param groupId
      * @param myId
      * @param userId
+     * @param role    {@link GroupRole}
      * @return {@link GroupInfo}
      */
     @Transactional
@@ -255,13 +278,13 @@ public class GroupService {
     }
 
     /**
-     * ADMIN ONLY
+     * <strong>ADMIN ONLY</strong>
      *
      * <p>Add user to group
      *
      * @param groupId
      * @param userId
-     * @return
+     * @return {@link GroupInfo}
      */
     @Transactional
     public GroupInfo addUserToGroupAdmin(String groupId, String userId, GroupRole role) {
@@ -288,6 +311,15 @@ public class GroupService {
             .build();
     }
 
+    /**
+     * Delete user from group
+     *
+     * @param groupId
+     * @param myId
+     * @param userId
+     * @param isAdmin
+     * @return {@link GroupInfo}
+     */
     @Transactional
     public GroupInfo deleteUserFromGroup(String groupId, String myId, String userId,
         boolean isAdmin) {
@@ -308,9 +340,10 @@ public class GroupService {
             System.out.println("foundJoin: " + foundJoin);
             throw new GlobalException(ErrorCode.FORBIDDEN);
         }
-        UserGroupJoin extractUser = userGroupJoinRepository.findByUserIdAndUserGroupId(userId, groupId)
+        UserGroupJoin extractUser = userGroupJoinRepository.findByUserIdAndUserGroupId(userId,
+                groupId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_IN_GROUP));
-        
+
         userGroupJoinRepository.delete(extractUser);
         UserGroup foundGroup = groupRepository.findById(groupId)
             .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
@@ -328,13 +361,19 @@ public class GroupService {
         UserGroupJoin join = userGroupJoinRepository.findByUserIdAndUserGroupId(
             myId, groupId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_IN_GROUP));
 
-        if (!join.getRole().isLeader()){
+        if (!join.getRole().isLeader()) {
             throw new GlobalException(ErrorCode.FORBIDDEN);
         }
         userGroupJoinRepository.deleteAllByUserGroupId(groupId);
         groupRepository.delete(foundGroup);
     }
 
+    /**
+     * <strong>ADMIN ONLY</strong>
+     * <p>Delete group and participate info in the group
+     *
+     * @param groupId
+     */
     @Transactional
     public void deleteGroupAdmin(String groupId) {
         UserGroup foundGroup = groupRepository.findById(groupId)
@@ -343,6 +382,12 @@ public class GroupService {
         groupRepository.delete(foundGroup);
     }
 
+    /**
+     * Get all {@link UserGroupRoleInfo} in the group
+     *
+     * @param groupId
+     * @return {@link List} of {@link UserGroupRoleInfo}
+     */
     private List<UserGroupRoleInfo> getUserInfoInGroup(String groupId) {
         return userGroupJoinRepository.findByUserGroupId(groupId).stream()
             .map((userGroupJoin -> {

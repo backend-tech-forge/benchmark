@@ -124,6 +124,7 @@ public class UserService extends AbstractUserService {
     /**
      * Get user by id if user is in the same group as current user
      * <p>if user not found or not same group, throw exception
+     *
      * @param currentUserId
      * @param id
      * @return {@link UserInfo}
