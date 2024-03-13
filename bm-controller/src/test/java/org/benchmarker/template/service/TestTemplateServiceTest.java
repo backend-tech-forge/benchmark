@@ -54,7 +54,7 @@ class TestTemplateServiceTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -72,7 +72,7 @@ class TestTemplateServiceTest {
         assertThat(testTemplate.getUrl()).isEqualTo(request.getUrl());
         assertThat(testTemplate.getMethod()).isEqualTo(request.getMethod());
         assertThat(testTemplate.getBody()).isEqualTo(request.getBody());
-        assertThat(testTemplate.getUserGroupName()).isEqualTo(userGroup.getName());
+        assertThat(testTemplate.getUserGroupId()).isEqualTo(userGroup.getName());
         assertThat(testTemplate.getVuser()).isEqualTo(request.getVuser());
         assertThat(testTemplate.getCpuLimit()).isEqualTo(request.getCpuLimit());
         assertThat(testTemplate.getMaxRequest()).isEqualTo(request.getMaxRequest());
@@ -89,7 +89,7 @@ class TestTemplateServiceTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup2")
+                .userGroupId("userGroup2")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -114,7 +114,7 @@ class TestTemplateServiceTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -146,7 +146,7 @@ class TestTemplateServiceTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -175,7 +175,7 @@ class TestTemplateServiceTest {
                     .url("test.com" + i)
                     .method("get")
                     .body("")
-                    .userGroupName("userGroup")
+                    .userGroupId("userGroup")
                     .vuser(i)
                     .cpuLimit(i)
                     .maxRequest(i)
@@ -204,7 +204,7 @@ class TestTemplateServiceTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -217,7 +217,7 @@ class TestTemplateServiceTest {
                 .url("update.com")
                 .method("post")
                 .body("data=sample")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(4)
                 .cpuLimit(4)
                 .maxRequest(4)
@@ -233,7 +233,7 @@ class TestTemplateServiceTest {
         assertThat(updateTestTemplate.getUrl()).isEqualTo(updateRequest.getUrl());
         assertThat(updateTestTemplate.getMethod()).isEqualTo(updateRequest.getMethod());
         assertThat(updateTestTemplate.getBody()).isEqualTo(updateRequest.getBody());
-        assertThat(updateTestTemplate.getUserGroupName()).isEqualTo(tempGroup.getName());
+        assertThat(updateTestTemplate.getUserGroupId()).isEqualTo(tempGroup.getName());
         assertThat(updateTestTemplate.getVuser()).isEqualTo(updateRequest.getVuser());
         assertThat(updateTestTemplate.getCpuLimit()).isEqualTo(updateRequest.getCpuLimit());
         assertThat(updateTestTemplate.getMaxRequest()).isEqualTo(updateRequest.getMaxRequest());
@@ -250,7 +250,7 @@ class TestTemplateServiceTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -263,7 +263,7 @@ class TestTemplateServiceTest {
                 .url("update.com")
                 .method("post")
                 .body("data=sample")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(4)
                 .cpuLimit(4)
                 .maxRequest(4)
@@ -286,7 +286,7 @@ class TestTemplateServiceTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -311,7 +311,7 @@ class TestTemplateServiceTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupName("userGroup")
+                .userGroupId("userGroup")
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
