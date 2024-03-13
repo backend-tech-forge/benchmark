@@ -119,20 +119,14 @@ public class GroupService {
     public List<GroupInfo> getAllGroupInfo(String userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
-        List<GroupInfo> groupInfos = user.getUserGroupJoin().stream()
+        return user.getUserGroupJoin().stream()
             .map(UserGroupJoin::getUserGroup)
             .map((g) -> GroupInfo.builder()
                 .id(g.getId())
                 .name(g.getName())
                 .users(getUserInfoInGroup(g.getId()))
                 .build())
-            .map((g) -> GroupInfo.builder()
-                .id(g.getId())
-                .name(g.getName())
-                .users(getUserInfoInGroup(g.getId()))
-                .build())
             .collect(Collectors.toList());
-        return groupInfos;
     }
 
     @Transactional
