@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Project Information</title>
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+</head>
+<body>
+<div th:fragment="projectInfo">
+  <table>
+    <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Value</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>Version</td>
+      <td th:text="${version}"></td>
+    </tr>
+    <tr>
+      <td>Project Name</td>
+      <td th:text="${projectName}"></td>
+    </tr>
+    <tr>
+      <td>Project Description</td>
+      <td th:text="${projectDesc}"></td>
+    </tr>
+
+    <tr th:each="c : ${contributor}">
+      <td>Contributor</td>
+      <td th:text="${c.name + ' (' + c.email + ')'}">Contributor Name and Email</td>
+    </tr>
+
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

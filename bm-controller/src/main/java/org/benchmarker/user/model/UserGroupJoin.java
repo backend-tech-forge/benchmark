@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.user.model.enums.GroupRole;
 import org.hibernate.annotations.ColumnDefault;
@@ -27,6 +28,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Entity
 @Table(name = "USER_GROUP_JOIN")
 @Builder
+@ToString
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class UserGroupJoin {

@@ -1,27 +1,24 @@
 package org.benchmarker.user.controller.dto;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.benchmarker.user.model.UserGroup;
+import lombok.ToString;
+import org.benchmarker.user.model.enums.GroupRole;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
+@ToString
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-public class UserUpdateDto {
-
+public class UserGroupRoleInfo {
+    @JsonProperty("id")
     private String id;
-    private String password;
-    private String slackWebhookUrl;
-    private Boolean slackNotification;
-    private String email;
-    private Boolean emailNotification;
-    private List<UserGroup> userGroup;
-
+    @JsonProperty("role")
+    private GroupRole role;
 }

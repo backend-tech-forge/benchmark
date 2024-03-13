@@ -1,0 +1,26 @@
+/* 테이블 스타일 */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+/* 링크 스타일 */
+a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+/* 링크에 호버 스타일 */
+a:hover {
+  text-decoration: underline;
+}

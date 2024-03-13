@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Group Information</title>
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+
+</head>
+<body>
+<div th:replace="fragments/currentUserFragment :: currentUser"></div>
+
+<div class="container">
+<h1>Participated Group Information</h1>
+<h4>
+  <a th:href="@{'/groups/' + ${groupInfo.id}}"
+     th:text="'Group ID: ' + ${groupInfo.id} + ' Group Name: ' + ${groupInfo.name}">users and their
+    id and role</a>
+</h4>
+
+
+<span id="errorMsg" style="color: red;"></span>
+
+<div>
+  <input type="text" id="userIdInput" placeholder="Enter User ID">
+  <button th:attr="onclick='addUserToGroup(\'' + ${groupInfo.id} + '\')'">Add User to Group</button>
+</div>
+
+<div th:if="${groupInfo != null}">
+  <table>
+    <thead>
+    <tr>
+      <th>Joined user ID</th>
+      <th>Joined user ROLE</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${groupInfo.users}">
+      <td th:text="${user.id}"></td>
+      <td th:text="${user.role}"></td>
+      <td>
+        <button class="button-delete" th:unless="${user.id == currentUser.id}" th:attr="onclick='removeUserFromGroup(\'' + ${groupInfo.id} + '\', \'' + ${user.id} + '\')'">Remove User</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function addUserToGroup(groupId) {
+    var userId = document.getElementById('userIdInput').value;
+    var url = '/api/groups/' + groupId + '/users/' + userId;
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          console.error('Error:', data);
+          throw new Error(data.message || 'Failed to remove user from group');
+        });
+      }
+      // Redirect to current URL on success
+      window.location.href = window.location.href;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('errorMsg').innerText = error.message;
+    });
+  }
+
+  function removeUserFromGroup(groupId, userId) {
+    var url = '/api/groups/' + groupId + '/users/' + userId;
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          console.error('Error:', data);
+          throw new Error(data.message || 'Failed to remove user from group');
+        });
+      }
+      // Redirect to current URL on success
+      window.location.href = window.location.href;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('errorMsg').innerText = error.message;
+      // Handle error, e.g., display error message to user
+    });
+  }
+</script>
+</div>
+</div>
+</body>
+</html>
