@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.controller.annotation.GlobalControllerModel;
 import org.benchmarker.user.controller.dto.UserInfo;
 import org.benchmarker.user.controller.dto.UserRegisterDto;
+import org.benchmarker.user.controller.dto.UserUpdateDto;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.service.UserContext;
@@ -19,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -70,6 +72,35 @@ public class UserController {
 
         userService.createUser(userRegisterDto);
         return "redirect:/home";
+    }
+
+    @GetMapping("/user/update")
+    @PreAuthorize("hasAnyRole('USER')")
+    public String updateUser(Model model) {
+        User currentUser = userContext.getCurrentUser();
+        UserInfo userInfo = userService.getUser(currentUser.getId()).get();
+        model.addAttribute("userUpdateDto", UserUpdateDto.builder()
+            .id(userInfo.getId())
+            .email(userInfo.getEmail())
+            .slackNotification(userInfo.getSlackNotification())
+            .slackWebhookUrl(userInfo.getSlackWebhookUrl())
+            .emailNotification(userInfo.getEmailNotification())
+            .userGroup(userInfo.getUserGroup())
+            .build());
+        return "user/updateInfo";
+    }
+
+    @PostMapping("/user/update")
+    @PreAuthorize("hasAnyRole('USER')")
+    public String updateUser(@Validated @ModelAttribute("userUpdateDto") UserUpdateDto userRegisterDto, BindingResult bindingResult,
+        Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errors", bindingResult.getAllErrors());
+            return "user/updateInfo";
+        }
+
+        userService.updateUser(userRegisterDto);
+        return "redirect:/user";
     }
 
 }
