@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Update User Info</title>
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+</head>
+<body>
+<div class="container">
+
+  <h1>Update User Info</h1>
+  <form th:action="@{/user/update}" method="post">
+    <input type="hidden" name="id" th:value="${userUpdateDto.id}" />
+    <input type="hidden" th:value="${userUpdateDto.password}" />
+    <div>
+      <label for="slackWebhookUrl">Slack Webhook URL:</label>
+      <input type="text" id="slackWebhookUrl" name="slackWebhookUrl" th:value="${userUpdateDto.slackWebhookUrl}" />
+    </div>
+    <div style="display: flex;">
+      <label for="slackNotification">Slack Notification:</label>
+      <input type="checkbox" id="slackNotification" name="slackNotification" th:checked="${userUpdateDto.slackNotification}" />
+    </div>
+    <div>
+      <label for="email">Email:</label>
+      <input type="text" id="email" name="email" th:value="${userUpdateDto.email}" />
+    </div>
+    <div style="display: flex;">
+      <label for="emailNotification">Email Notification:</label>
+      <input type="checkbox" id="emailNotification" name="emailNotification" th:checked="${userUpdateDto.emailNotification}" />
+    </div>
+    <!-- Additional fields for user group if needed -->
+    <!-- <div th:each="group : ${userUpdateDto.userGroup}">
+        <input type="hidden" name="userGroup" th:value="${group.id}" />
+    </div> -->
+    <button class="addUserGroupButton" type="submit">Update</button>
+  </form>
+</div>
+</body>
+</html>
