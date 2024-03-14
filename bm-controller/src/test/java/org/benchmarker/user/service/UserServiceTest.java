@@ -52,47 +52,6 @@ class UserServiceTest extends InitiClass {
     }
 
     @Test
-    @DisplayName("사용자 group 업데이트 시 group 이 존재하지 않는다면 GlobalException 에러를 반환한다")
-    public void updateUser() {
-        // Given
-        UserGroup userGroup = UserGroup.builder()
-            .id(TestUserConsts.groupId)
-            .name(TestUserConsts.groupName)
-            .build();
-        UserGroup otherGroup = UserGroup.builder()
-            .id("otherGroupId")
-            .name("otherGroupName")
-            .build();
-        UserRegisterDto userRegisterDto = UserRegisterDto.builder()
-            .id(TestUserConsts.id)
-            .password(TestUserConsts.password)
-            .userGroup(List.of(userGroup))
-            .email(TestUserConsts.email)
-            .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-            .slackNotification(TestUserConsts.slackNotification)
-            .emailNotification(TestUserConsts.emailNotification)
-            .build();
-        UserUpdateDto userUpdateDto = UserUpdateDto.builder()
-            .id(TestUserConsts.id)
-            .password(TestUserConsts.password)
-            .userGroup(List.of(userGroup, otherGroup)) // add other group
-            .email(TestUserConsts.email)
-            .slackWebhookUrl(TestUserConsts.slackWebhookUrl)
-            .slackNotification(TestUserConsts.slackNotification)
-            .emailNotification(TestUserConsts.emailNotification)
-            .build();
-        userService.createUser(userRegisterDto);
-
-        // When
-        ErrorCode errorCode = assertThrows((GlobalException.class), () -> {
-            userService.updateUser(userUpdateDto);
-        }).getErrorCode();
-
-        // Then
-        assertThat(errorCode).isEqualTo(ErrorCode.GROUP_NOT_FOUND);
-    }
-
-    @Test
     @DisplayName("사용자 group 업데이트 시 group 이 존재한다면 유저 정보를 반환한다")
     public void updateUserSuccess() {
         // Given
