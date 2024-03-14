@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmark.bmagent.schedule.ScheduledTaskService;
 import org.benchmark.bmagent.service.AbstractSseManageService;
+import org.benchmark.util.RandomUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -30,7 +31,7 @@ public class SseManageService extends AbstractSseManageService {
 
         scheduledTaskService.start(id, () -> {
             log.info("SSE send");
-            send(id, "SSE data for template ID: " + id);
+            send(id, RandomUtils.generateRandomTestResult());
         }, 0, 1, TimeUnit.SECONDS);
 
         return emitter;
@@ -48,7 +49,7 @@ public class SseManageService extends AbstractSseManageService {
     }
 
     @Override
-    public void send(Long id, String data) {
+    public void send(Long id, Object data) {
         try {
             SseEmitter emitter = sseEmitterHashMap.get(id);
             if (emitter != null) {
