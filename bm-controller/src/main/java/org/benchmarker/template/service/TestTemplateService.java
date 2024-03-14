@@ -26,7 +26,7 @@ public class TestTemplateService extends AbstractTestTemplateService {
     public Optional<TestTemplateResponseDto> createTemplate(TestTemplateRequestDto reqTestTemplate) {
 
         // 등록되어 있는 그룹인지만 검증
-        userGroupRepository.findById(reqTestTemplate.getUserGroupName()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+        userGroupRepository.findById(reqTestTemplate.getUserGroupId()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
 
         TestTemplate testTemplate = reqTestTemplate.toEntity();
         return Optional.of(testTemplateRepository.save(testTemplate).convertToResponseDto());
