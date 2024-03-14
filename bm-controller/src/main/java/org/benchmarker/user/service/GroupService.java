@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalException;
+import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
+import org.benchmarker.template.model.TestTemplate;
+import org.benchmarker.template.repository.TestTemplateRepository;
+import org.benchmarker.template.service.ITestTemplateService;
 import org.benchmarker.user.controller.dto.GroupAddDto;
 import org.benchmarker.user.controller.dto.GroupInfo;
 import org.benchmarker.user.controller.dto.GroupUpdateDto;
@@ -18,6 +22,7 @@ import org.benchmarker.user.model.enums.GroupRole;
 import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
+import org.benchmarker.user.util.UserServiceUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +38,8 @@ public class GroupService {
     private final UserGroupRepository groupRepository;
     private final UserRepository userRepository;
     private final UserGroupJoinRepository userGroupJoinRepository;
+    private final ITestTemplateService testTemplateService;
+    private final UserServiceUtils userServiceUtils;
 
     /**
      * Create a group and become a {@link GroupRole#LEADER} of the group
@@ -66,47 +73,25 @@ public class GroupService {
      *
      * <p>Get group info for admin
      *
-     * @param group_id
-     * @return {@link GroupInfo}
-     */
-    @Transactional
-    public GroupInfo getGroupInfoAdmin(String group_id) {
-        return groupRepository.findById(group_id).map((g) -> GroupInfo.builder()
-            .id(g.getId())
-            .name(g.getName())
-            .users(getUserInfoInGroup(group_id))
-            .build()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
-    }
-
-    /**
-     * Get a {@link GroupInfo} by userId and groupId
-     *
-     * <p>if user does not participate in the group, {@link ErrorCode#USER_NOT_IN_GROUP} occurred</p>
-     *
      * @param groupId
-     * @param userId
      * @return {@link GroupInfo}
-     * @throws GlobalException <p>{@link ErrorCode#USER_NOT_IN_GROUP}</p>
-     *                         <p>{@link ErrorCode#GROUP_NOT_FOUND}</p>
-     *                         <p>{@link ErrorCode#USER_NOT_IN_GROUP}</p>
      */
     @Transactional
-    public GroupInfo getGroupInfo(String groupId, String userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
-        groupRepository.findById(groupId)
-            .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+    public GroupInfo getGroupInfoAdmin(String groupId) {
 
-        // if user is not in the group, throw exception
-        if (user.getUserGroupJoin().stream()
-            .noneMatch((j) -> j.getUserGroup().getId().equals(groupId))) {
-            throw new GlobalException(ErrorCode.USER_NOT_IN_GROUP);
-        }
+        List<TestTemplateResponseDto> templates = testTemplateService.getTemplates(groupId);
+
         return groupRepository.findById(groupId).map((g) -> GroupInfo.builder()
             .id(g.getId())
             .name(g.getName())
             .users(getUserInfoInGroup(groupId))
+            .templates(templates)
             .build()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+    }
+
+    @Transactional
+    public GroupInfo getGroupInfo(String groupId, String userId) {
+        return userServiceUtils.getGroupInfo(groupId, userId);
     }
 
     /**
