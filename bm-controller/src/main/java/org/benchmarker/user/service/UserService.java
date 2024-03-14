@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static org.benchmarker.common.util.NoOp.noOp;
 import static org.benchmarker.user.constant.UserConsts.USER_GROUP_DEFAULT_ID;
 import static org.benchmarker.user.constant.UserConsts.USER_GROUP_DEFAULT_NAME;
 
@@ -165,29 +164,10 @@ public class UserService extends AbstractUserService {
         User user = userRepository.findById(req.getId())
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         ArrayList<UserGroupJoin> userGroupJoins = new ArrayList<>();
-        req.getUserGroup().forEach(group -> {
-            UserGroup userGroup = userGroupRepository.findById(group.getId())
-                .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
-            // find UserAndGroups check if userGroupJoin already exists, do nothing
-            // if userGroupJoin does not exist, save userGroupJoin
-            Optional<UserGroupJoin> findJoins = userGroupJoinRepository.findByUserAndUserGroup(
-                user, userGroup);
-            if (findJoins.isEmpty()) {
-                UserGroupJoin saved = userGroupJoinRepository.save(UserGroupJoin.builder()
-                    .user(user)
-                    .userGroup(userGroup)
-                    .build());
-                userGroupJoins.add(saved);
-            } else {
-                userGroupJoins.add(findJoins.get());
-                noOp();
-            }
-        });
         user.setEmail(req.getEmail());
         user.setEmailNotification(req.getEmailNotification());
         user.setSlackWebhookUrl(req.getSlackWebhookUrl());
         user.setSlackNotification(req.getSlackNotification());
-        user.setUserGroupJoin(userGroupJoins);
         User save = userRepository.save(user);
 
         UserInfo info = UserInfo.from(save);
