@@ -32,5 +32,5 @@ public interface ISseManageService extends SseManageConsts {
      * @param id Long
      * @param message string
      */
-    void send(Long id, String message);
+    void send(Long id, Object message);
 }
