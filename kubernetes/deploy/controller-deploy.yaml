@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: controller-service
+  template:
+    metadata:
+      labels:
+        app: controller-service
+    spec:
+      containers:
+        - env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: spring_datasource_url
+              value: "jdbc:postgresql://benchmark-db:5433/test"
+            - name: spring_datasource_hikari_password
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+            - name: spring_datasource_hikari_username
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: token_secret
+              valueFrom:
+                secretKeyRef:
+                  name: token-secret
+                  key: secret
+            - name: token_expiration_time
+              valueFrom:
+                secretKeyRef:
+                  name: token-secret
+                  key: exp
+          image: ghkdqhrbals/bm-controller:amd64
+          name: bm-controller
+      restartPolicy: Always
