@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-service
+  template:
+    metadata:
+      labels:
+        app: agent-service
+    spec:
+      containers:
+        - env:
+            - name: SERVER_PORT
+              value: "8081"
+          image: ghkdqhrbals/bm-agent:amd64
+          name: bm-agent
+      restartPolicy: Always
