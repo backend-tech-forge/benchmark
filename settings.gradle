@@ -1,3 +1,4 @@
 rootProject.name = 'benchmark'
 include ':bm-controller'
 include ':bm-agent'
+include ':bm-common'
