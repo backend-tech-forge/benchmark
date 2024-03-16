@@ -1,6 +1,7 @@
 package org.benchmarker.user.util;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.benchmarker.common.error.ErrorCode;
@@ -10,6 +11,8 @@ import org.benchmarker.template.model.TestTemplate;
 import org.benchmarker.template.repository.TestTemplateRepository;
 import org.benchmarker.user.controller.dto.GroupInfo;
 import org.benchmarker.user.controller.dto.UserGroupRoleInfo;
+import org.benchmarker.user.controller.dto.UserInfo;
+import org.benchmarker.user.controller.dto.UserUpdateDto;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
@@ -72,6 +75,22 @@ public class UserServiceUtils {
             .name(userGroupRepository.findById(groupId).get().getName())
             .templates(list)
             .build();
+    }
+
+    /**
+     * Update user with {@link UserUpdateDto}
+     *
+     * @param user {@link User}
+     * @param req {@link UserUpdateDto}
+     * @return {@link User}
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public User updateUser(User user, UserUpdateDto req){
+        user.setEmail(req.getEmail());
+        user.setEmailNotification(req.getEmailNotification());
+        user.setSlackWebhookUrl(req.getSlackWebhookUrl());
+        user.setSlackNotification(req.getSlackNotification());
+        return userRepository.save(user);
     }
 
 }
