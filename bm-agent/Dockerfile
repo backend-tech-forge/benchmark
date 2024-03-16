@@ -1,5 +1,5 @@
 FROM amazoncorretto:17-alpine3.16-jdk
-ARG JAR_PATH
+ARG JAR_PATH=/bm-agent/build/libs
 
 WORKDIR /app
 

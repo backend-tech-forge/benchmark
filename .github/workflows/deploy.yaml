@@ -54,8 +54,7 @@ jobs:
         with:
           file: ./bm-controller/Dockerfile
           context: ./bm-controller
-          build-args: |
-            JAR_FILE=${{ github.workspace }}/bm-controller/build/libs
+          build-args: JAR_FILE=${{ github.workspace }}/bm-controller/build/libs
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest
           platforms: |
@@ -64,10 +63,10 @@ jobs:
 
       - name: Build and push - agent
         uses: docker/build-push-action@v5
+        env: ROOT_PROJECT=${{ github.workspace }}
         with:
           file: ./bm-agent/Dockerfile
-          build-args: |
-            JAR_FILE=${{ github.workspace }}/bm-controller/build/libs
+          build-args: JAR_FILE=$ROOT_PROJECT/bm-agent/build/libs
           context: ./bm-agent
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest
