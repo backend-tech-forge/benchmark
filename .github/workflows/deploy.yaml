@@ -49,31 +49,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push - controller
-        uses: docker/build-push-action@v5
-        with:
-          file: ./bm-controller/Dockerfile
-          context: ./bm-controller
-          build-args: JAR_FILE=${{ github.workspace }}/bm-controller/build/libs
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest
-          platforms: |
-            linux/amd64
-            linux/arm64
-
-      - name: Build and push - agent
-        uses: docker/build-push-action@v5
-        env: ROOT_PROJECT=${{ github.workspace }}
-        with:
-          file: ./bm-agent/Dockerfile
-          build-args: JAR_FILE=$ROOT_PROJECT/bm-agent/build/libs
-          context: ./bm-agent
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest
-          platforms: |
-            linux/amd64
-            linux/arm64
-      
+      - name: Build docker image and push
+        run: sh ./script/img_push_multi_arch.sh
 
       - name: Configure google cloud credentials
         id: auth

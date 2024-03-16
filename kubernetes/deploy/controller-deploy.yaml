@@ -38,6 +38,6 @@ spec:
                 secretKeyRef:
                   name: token-secret
                   key: exp
-          image: ghkdqhrbals/bm-controller:amd64
+          image: ghkdqhrbals/bm-controller:latest
           name: bm-controller
       restartPolicy: Always

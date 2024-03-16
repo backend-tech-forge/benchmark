@@ -16,6 +16,6 @@ spec:
         - env:
             - name: SERVER_PORT
               value: "8081"
-          image: ghkdqhrbals/bm-agent:amd64
+          image: ghkdqhrbals/bm-agent:latest
           name: bm-agent
       restartPolicy: Always
