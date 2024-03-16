@@ -46,6 +46,7 @@ jobs:
 
       - name: Build and push
         run: |
+          echo "${pwd}"
           docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest --push /bm-controller
           docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest --push /bm-agent
 
