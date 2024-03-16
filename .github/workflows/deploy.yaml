@@ -48,7 +48,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           file: /bm-controller/Dockerfile
-          context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest
           platforms: |
@@ -59,7 +58,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           file: /bm-agent/Dockerfile
-          context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest
           platforms: |
