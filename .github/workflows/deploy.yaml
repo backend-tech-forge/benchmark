@@ -44,11 +44,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
-        run: |
-          pwd
-          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest -f /bm-controller/Dockerfile --push .
-          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest -f /bm-agent/Dockerfile --push .
+      - name: Build and push - controller
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:bm-controller"
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest
+          platforms: |
+            linux/amd64
+            linux/arm64
+
+      - name: Build and push - agent
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:bm-agent"
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest
+          platforms: |
+            linux/amd64
+            linux/arm64
+      
 
       - name: Configure google cloud credentials
         id: auth
