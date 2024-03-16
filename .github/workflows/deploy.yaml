@@ -47,7 +47,7 @@ jobs:
       - name: Build agent and push
         uses: docker/build-push-action@v5
         with:
-          context: /bm-agent
+          context: ./bm-agent/
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ghkdqhrbals/bm-agent:latest
@@ -55,7 +55,7 @@ jobs:
       - name: Build controller and push
         uses: docker/build-push-action@v5
         with:
-          context: /bm-controller
+          context: ./bm-controller/
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ghkdqhrbals/bm-controller:latest
