@@ -1,8 +1,12 @@
-on:
-  push:
-    branches:
-      - "feature/gke-deploy"
+name: Continuous Deploy with GKE
 
+on:
+  workflow_run:
+    workflows: [ "CI with test coverage" ]
+    types:
+      - completed
+    branches:
+      - develop
 
 defaults:
   run:
