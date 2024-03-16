@@ -2,6 +2,9 @@ package org.benchmarker.common.error;
 
 import lombok.Getter;
 
+/**
+ * GlobalException is a custom exception class for handling exceptions.
+ */
 @Getter
 public class GlobalException extends RuntimeException {
 
