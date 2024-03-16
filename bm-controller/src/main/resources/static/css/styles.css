@@ -44,6 +44,16 @@ tr:hover {
   background-color: #b30000;
 }
 
+input[type="number"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
 button {
   background-color: #22a7f0;
   color: white;

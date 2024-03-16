@@ -1,5 +1,6 @@
 package org.benchmarker.user.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class UserUpdateDto {
     private Boolean slackNotification;
     private String email;
     private Boolean emailNotification;
+    @JsonIgnore
     private List<UserGroup> userGroup;
 
 }

@@ -10,7 +10,10 @@
 <div class="container">
 
 <h1>User Info</h1>
+  <button class="addUserGroupButton" th:onclick="|location.href='/user/update'|">Edit User Information</button>
 
+
+<br/>
 <div th:if="${userInfo != null}">
     <table>
       <tbody>

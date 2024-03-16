@@ -8,7 +8,9 @@ import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.template.model.TestTemplate;
 import org.benchmarker.template.repository.TestTemplateRepository;
+import org.benchmarker.user.controller.dto.GroupInfo;
 import org.benchmarker.user.repository.UserGroupRepository;
+import org.benchmarker.user.util.UserServiceUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,12 +23,15 @@ public class TestTemplateService extends AbstractTestTemplateService {
 
     private final TestTemplateRepository testTemplateRepository;
     private final UserGroupRepository userGroupRepository;
+    private final UserServiceUtils userServiceUtils;
 
     @Override
-    public Optional<TestTemplateResponseDto> createTemplate(TestTemplateRequestDto reqTestTemplate) {
+    public Optional<TestTemplateResponseDto> createTemplate(
+        TestTemplateRequestDto reqTestTemplate) {
 
         // 등록되어 있는 그룹인지만 검증
-        userGroupRepository.findById(reqTestTemplate.getUserGroupId()).orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+        userGroupRepository.findById(reqTestTemplate.getUserGroupId())
+            .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
 
         TestTemplate testTemplate = reqTestTemplate.toEntity();
         return Optional.of(testTemplateRepository.save(testTemplate).convertToResponseDto());
@@ -35,12 +40,20 @@ public class TestTemplateService extends AbstractTestTemplateService {
     @Override
     public TestTemplateResponseDto getTemplate(Integer id) {
         // Template 존재하는지 확인 후에 리턴
-        TestTemplate testTemplate = testTemplateRepository.findById(id).orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
+        TestTemplate testTemplate = testTemplateRepository.findById(id)
+            .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
         return testTemplate.convertToResponseDto();
     }
 
+    /**
+     * <strong>ADMIN ONLY</strong>
+     * <p>
+     * Get all {@link TestTemplateResponseDto} for admin
+     *
+     * @return
+     */
     @Override
-    public List<TestTemplateResponseDto> getTemplates() {
+    public List<TestTemplateResponseDto> getAllTemplatesAdmin() {
 
         List<TestTemplate> testTemplates = testTemplateRepository.findAll();
         List<TestTemplateResponseDto> response = new ArrayList<>();
@@ -51,12 +64,23 @@ public class TestTemplateService extends AbstractTestTemplateService {
         return response;
     }
 
+    public List<TestTemplateResponseDto> getTemplates(String groupId, String userId) {
+        GroupInfo groupInfo = userServiceUtils.getGroupInfo(groupId, userId);
+        return groupInfo.getTemplates();
+    }
+
+    public List<TestTemplateResponseDto> getTemplates(String groupId) {
+        return testTemplateRepository.findAllByUserGroupId(groupId)
+            .stream().map(TestTemplate::convertToResponseDto).toList();
+    }
+
     @Override
-    public Optional<TestTemplateResponseDto> updateTemplate(TestTemplateUpdateDto testTemplate) throws Exception {
+    public Optional<TestTemplateResponseDto> updateTemplate(TestTemplateUpdateDto testTemplate)
+        throws Exception {
 
         // 템플릿이 존재하는지 먼저 파악.
         TestTemplate preTestTemplate = testTemplateRepository.findById(testTemplate.getId())
-                .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
 
         preTestTemplate.update(testTemplate);
 
@@ -66,7 +90,8 @@ public class TestTemplateService extends AbstractTestTemplateService {
     @Override
     public void deleteTemplate(Integer id) {
 
-        TestTemplate preTestTemplate = testTemplateRepository.findById(id).orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
+        TestTemplate preTestTemplate = testTemplateRepository.findById(id)
+            .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
 
         testTemplateRepository.delete(preTestTemplate);
     }

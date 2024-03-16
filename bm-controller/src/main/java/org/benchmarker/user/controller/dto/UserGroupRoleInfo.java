@@ -10,6 +10,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.benchmarker.user.model.enums.GroupRole;
 
+/**
+ * {@link UserGroupRoleInfo} is a DTO class has {@link #id}, {@link #role} fields.
+ */
 @Getter
 @Setter
 @Builder
@@ -17,8 +20,15 @@ import org.benchmarker.user.model.enums.GroupRole;
 @ToString
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class UserGroupRoleInfo {
+
+    /**
+     * user id who is participating in the group
+     */
     @JsonProperty("id")
     private String id;
+    /**
+     * role of the user in the group {@link GroupRole#LEADER} or {@link GroupRole#MEMBER}
+     */
     @JsonProperty("role")
     private GroupRole role;
 }

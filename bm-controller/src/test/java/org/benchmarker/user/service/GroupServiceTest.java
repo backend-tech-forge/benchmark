@@ -7,11 +7,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.controller.dto.GroupAddDto;
 import org.benchmarker.user.controller.dto.GroupInfo;
 import org.benchmarker.user.controller.dto.GroupUpdateDto;
+import org.benchmarker.user.controller.dto.UserGroupRoleInfo;
 import org.benchmarker.user.helper.UserHelper;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.util.initialize.InitiClass;
 
 
@@ -229,6 +232,76 @@ class GroupServiceTest extends InitiClass {
     @Nested
     @DisplayName("그룹 정보 조회")
     class test03 {
+
+        @Test
+        @WithMockUser(username = "adminId", roles = {"ADMIN"})
+        @DisplayName("어드민 유저는 그룹 정보를 Pageable 로 조회할 수 있다")
+        public void test335() {
+            // Given
+            User defaultUser = UserHelper.createDefaultUser();
+            User otherUser = UserHelper.createDefaultUser("otherId");
+            userRepository.save(defaultUser);
+            userRepository.save(otherUser);
+            UserGroup userGroup = UserHelper.createDefaultUserGroup();
+            userGroupRepository.save(userGroup);
+            groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(),
+                GroupRole.LEADER);
+            groupService.addUserToGroupAdmin(userGroup.getId(), otherUser.getId(),
+                GroupRole.MEMBER);
+
+            // when
+            Pageable pageable = PageRequest.of(0, 5);
+
+            Page<GroupInfo> allGroupInfo = groupService.getAllGroupInfoAdmin(pageable);
+            Optional<GroupInfo> foundGroup = allGroupInfo.stream()
+                .filter(groupInfo -> groupInfo.getId().equals(userGroup.getId()))
+                .findFirst();
+
+            // When, Then
+            assertThat(foundGroup).isPresent();
+            assertThat(foundGroup.get().getId()).isEqualTo(userGroup.getId());
+            assertThat(foundGroup.get().getName()).isEqualTo(userGroup.getName());
+            assertThat(foundGroup.get().getUsers()).hasSize(2);
+        }
+
+        @Test
+        @WithMockUser(username = "adminId", roles = {"ADMIN"})
+        @DisplayName("어드민 유저는 모든 그룹 정보를 조회할 수 있다")
+        public void test336() {
+            // Given
+            User defaultUser = UserHelper.createDefaultUser();
+            User otherUser = UserHelper.createDefaultUser("otherId");
+            userRepository.save(defaultUser);
+            userRepository.save(otherUser);
+            UserGroup userGroup = UserHelper.createDefaultUserGroup();
+            userGroupRepository.save(userGroup);
+            groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(),
+                GroupRole.LEADER);
+            groupService.addUserToGroupAdmin(userGroup.getId(), otherUser.getId(),
+                GroupRole.MEMBER);
+
+            UserGroupRoleInfo userGroupRoleInfoUser = UserGroupRoleInfo.builder()
+                .id(defaultUser.getId())
+                .role(GroupRole.LEADER)
+                .build();
+            UserGroupRoleInfo userGroupRoleInfoOther = UserGroupRoleInfo.builder()
+                .id(otherUser.getId())
+                .role(GroupRole.MEMBER)
+                .build();
+
+            // when
+            List<GroupInfo> allGroupInfo = groupService.getAllGroupInfoAdmin();
+            Optional<GroupInfo> foundGroup = allGroupInfo.stream()
+                .filter(groupInfo -> groupInfo.getId().equals(userGroup.getId()))
+                .findFirst();
+
+            // When, Then
+            assertThat(foundGroup).isPresent();
+            assertThat(foundGroup.get().getId()).isEqualTo(userGroup.getId());
+            assertThat(foundGroup.get().getName()).isEqualTo(userGroup.getName());
+            assertThat(foundGroup.get().getUsers()).hasSize(2);
+
+        }
 
         @Test
         @DisplayName("일반 유저는 자신의 그룹 정보를 조회할 수 있다")

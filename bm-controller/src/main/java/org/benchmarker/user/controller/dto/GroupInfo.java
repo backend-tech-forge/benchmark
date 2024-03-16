@@ -10,7 +10,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
 
+/**
+ * {@link GroupInfo} is a DTO class for the GroupInfo object.
+ */
 @Getter
 @Setter
 @Builder
@@ -24,4 +28,6 @@ public class GroupInfo {
     private String name;
     @JsonProperty("users")
     private List<UserGroupRoleInfo> users; // This is a list of user ids
+    @JsonProperty("templates")
+    private List<TestTemplateResponseDto> templates;
 }
