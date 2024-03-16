@@ -5,7 +5,6 @@ DEFAULT_PLATFORM="linux/amd64,linux/arm64"
 DEFAULT_VERSION="latest"
 
 # Parse command-line arguments
-# Parse command-line arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -u|--username)
@@ -57,7 +56,7 @@ docker buildx build --platform ${BM_PLATFORM} -t ${BM_USER}/bm-controller:${BM_V
 docker buildx build --platform ${BM_PLATFORM} -t ${BM_USER}/bm-agent:${BM_VERSION} -f /bm-agent/Dockerfile --push .
 
 # Push the docker image to docker hub
-images=$(docker images --format "{{.Repository}}" | grep "^${PREFIX}")
+images=$(docker images --format "{{.Repository}}" | grep "^${BM_USER}")
 echo "Image deploy to docker hub"
 for image in $images; do
   echo "${image}"
