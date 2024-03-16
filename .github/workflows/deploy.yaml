@@ -46,9 +46,9 @@ jobs:
 
       - name: Build and push
         run: |
-          echo "${pwd}"
-          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest -f /bm-controller/Dockerfile --push
-          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest -f /bm-agent/Dockerfile --push
+          pwd
+          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest -f /bm-controller/Dockerfile --push .
+          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest -f /bm-agent/Dockerfile --push .
 
       - name: Configure google cloud credentials
         id: auth
