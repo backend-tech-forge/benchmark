@@ -47,7 +47,7 @@ jobs:
       - name: Build and push - controller
         uses: docker/build-push-action@v5
         with:
-          file: /bm-controller/Dockerfile
+          file: ./bm-controller/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest
           platforms: |
@@ -57,7 +57,7 @@ jobs:
       - name: Build and push - agent
         uses: docker/build-push-action@v5
         with:
-          file: /bm-agent/Dockerfile
+          file: ./bm-agent/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest
           platforms: |
