@@ -47,9 +47,7 @@ jobs:
       - name: Build and push - controller
         uses: docker/build-push-action@v5
         with:
-          version: latest
           file: /bm-controller
-          buildkitd-flags: --debug
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest
@@ -60,9 +58,7 @@ jobs:
       - name: Build and push - agent
         uses: docker/build-push-action@v5
         with:
-          version: latest
           file: /bm-agent
-          buildkitd-flags: --debug
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest
