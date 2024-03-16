@@ -18,6 +18,7 @@ import org.benchmarker.user.model.enums.GroupRole;
 import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
+import org.benchmarker.user.util.UserServiceUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ public class UserService extends AbstractUserService {
     private final UserGroupJoinRepository userGroupJoinRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserGroupRepository userGroupRepository;
+    private final UserServiceUtils userServiceUtils;
 
     @Override
     @Transactional
@@ -163,13 +165,7 @@ public class UserService extends AbstractUserService {
     public Optional<UserInfo> updateUser(UserUpdateDto req) {
         User user = userRepository.findById(req.getId())
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
-        ArrayList<UserGroupJoin> userGroupJoins = new ArrayList<>();
-        user.setEmail(req.getEmail());
-        user.setEmailNotification(req.getEmailNotification());
-        user.setSlackWebhookUrl(req.getSlackWebhookUrl());
-        user.setSlackNotification(req.getSlackNotification());
-        User save = userRepository.save(user);
-
+        User save = userServiceUtils.updateUser(user, req);
         UserInfo info = UserInfo.from(save);
         return Optional.of(info);
     }
