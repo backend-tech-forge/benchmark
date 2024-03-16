@@ -52,8 +52,8 @@ docker buildx inspect --bootstrap
 
 # Build and push Docker images for multiple platforms
 echo "Build the docker image with multi platform support"
-docker buildx build --platform ${BM_PLATFORM} -t ${BM_USER}/bm-controller:${BM_VERSION} -f /bm-controller/Dockerfile --push .
-docker buildx build --platform ${BM_PLATFORM} -t ${BM_USER}/bm-agent:${BM_VERSION} -f /bm-agent/Dockerfile --push .
+docker buildx build --platform ${BM_PLATFORM} -t ${BM_USER}/bm-controller:${BM_VERSION} -f ./bm-controller/Dockerfile --push .
+docker buildx build --platform ${BM_PLATFORM} -t ${BM_USER}/bm-agent:${BM_VERSION} -f ./bm-agent/Dockerfile --push .
 
 # Push the docker image to docker hub
 images=$(docker images --format "{{.Repository}}" | grep "^${BM_USER}")
