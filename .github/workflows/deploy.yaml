@@ -3,6 +3,11 @@ on:
     branches:
       - "feature/gke-deploy"
 
+
+defaults:
+  run:
+    working-directory: ./
+
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -48,6 +53,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           file: ./bm-controller/Dockerfile
+          context: ./bm-controller
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-controller:latest
           platforms: |
@@ -58,6 +64,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           file: ./bm-agent/Dockerfile
+          context: ./bm-agent
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bm-agent:latest
           platforms: |
