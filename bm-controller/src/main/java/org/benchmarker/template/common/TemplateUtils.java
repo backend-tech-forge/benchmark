@@ -1,6 +1,7 @@
 package org.benchmarker.template.common;
 
 import org.benchmarker.template.model.TestTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -46,11 +47,13 @@ public class TemplateUtils {
                     .toEntity(String.class);
             case "POST" -> webClient.post()
                     .uri(testTemplate.getUrl())
+                    .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(testTemplate.getBody())
                     .retrieve()
                     .toEntity(String.class);
             case "PATCH", "PUT" -> webClient.patch()
                     .uri(testTemplate.getUrl())
+                    .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(testTemplate.getBody())
                     .retrieve()
                     .toEntity(String.class);

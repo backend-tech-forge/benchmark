@@ -44,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @RestDocsTest
 class TestTemplateApiControllerTest {
+
     @Autowired
     private ObjectMapper objectMapper;
 
