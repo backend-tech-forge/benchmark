@@ -74,35 +74,26 @@ public class TestResultService extends AbstractTestResultService {
         Map<String, Double> mttfbPercentiles = new HashMap<>();
         Map<String, Double> tpsPercentiles = new HashMap<>();
 
-        long curAvgStartAt = saveTestResults.get(0).getStartAt();
+        long currentStartTime = saveTestResults.get(0).getStartAt();
 
         for (int i = 0; i < saveTestResults.size(); i++) {
-            totalSuccess += saveTestResults.get(i).getSuccess();
-            totalError += saveTestResults.get(i).getError();
+            TempSaveTestResultDto tempDto = saveTestResults.get(i);
+            totalSuccess += tempDto.getSuccess();
+            totalError += tempDto.getError();
 
-            int statusCode = saveTestResults.get(i).getStatusCode();
-            if (statusCode >= 200 && statusCode < 300) {
-                statusCodeCount.put("2xx", statusCodeCount.getOrDefault("2xx", 0) + 1);
-            } else if (statusCode >= 300 && statusCode < 400) {
-                statusCodeCount.put("3xx", statusCodeCount.getOrDefault("3xx", 0) + 1);
-            } else if (statusCode >= 400 && statusCode < 500) {
-                statusCodeCount.put("4xx", statusCodeCount.getOrDefault("4xx", 0) + 1);
-            } else if (statusCode >= 500 && statusCode < 600) {
-                statusCodeCount.put("5xx", statusCodeCount.getOrDefault("5xx", 0) + 1);
-            }
+            int statusCode = tempDto.getStatusCode();
+            String statusCodeCategory = getStatusCodeCategory(statusCode);
+            statusCodeCount.put(statusCodeCategory, statusCodeCount.getOrDefault(statusCodeCategory, 0) + 1);
 
-            if (i + 1 == (int) Math.ceil(0.25 * saveTestResults.size()) - 1) {
-                tpsPercentiles.put("p25", calculateTPS(curAvgStartAt, saveTestResults.get(i).getFinishAt(), totalRequest));
-                mttfbPercentiles.put("p25", calculateAvgResponseTime(curAvgStartAt, saveTestResults.get(i).getFinishAt(), totalRequest));
-            } else if (i + 1 == (int) Math.ceil(0.50 * saveTestResults.size()) - 1) {
-                tpsPercentiles.put("p50", calculateTPS(curAvgStartAt, saveTestResults.get(i).getFinishAt(), totalRequest));
-                mttfbPercentiles.put("p50", calculateAvgResponseTime(curAvgStartAt, saveTestResults.get(i).getFinishAt(), totalRequest));
-            } else if (i + 1 == (int) Math.ceil(0.75 * saveTestResults.size()) - 1) {
-                tpsPercentiles.put("p75", calculateTPS(curAvgStartAt, saveTestResults.get(i).getFinishAt(), totalRequest));
-                mttfbPercentiles.put("p75", calculateAvgResponseTime(curAvgStartAt, saveTestResults.get(i).getFinishAt(), totalRequest));
-            } else if (i + 1 == saveTestResults.size()) {
-                tpsPercentiles.put("p100", calculateTPS(curAvgStartAt, saveTestResults.get(i).getFinishAt(), totalRequest));
-                mttfbPercentiles.put("p100", calculateAvgResponseTime(curAvgStartAt, saveTestResults.get(i).getFinishAt(), totalRequest));
+            int index = i + 1;
+            if (index == (int) Math.ceil(0.25 * totalRequest)) {
+                addPercentile(tpsPercentiles, mttfbPercentiles, "p25", currentStartTime, tempDto.getFinishAt(), totalRequest);
+            } else if (index == (int) Math.ceil(0.50 * totalRequest)) {
+                addPercentile(tpsPercentiles, mttfbPercentiles, "p50", currentStartTime, tempDto.getFinishAt(), totalRequest);
+            } else if (index == (int) Math.ceil(0.75 * totalRequest)) {
+                addPercentile(tpsPercentiles, mttfbPercentiles, "p75", currentStartTime, tempDto.getFinishAt(), totalRequest);
+            } else if (index == totalRequest) {
+                addPercentile(tpsPercentiles, mttfbPercentiles, "p100", currentStartTime, tempDto.getFinishAt(), totalRequest);
             }
         }
 
@@ -110,7 +101,7 @@ public class TestResultService extends AbstractTestResultService {
         testResult.resultUpdate(totalRequest, totalSuccess, totalError, tpsPercentiles.get("p100"), mttfbPercentiles.get("p100"));
         testResultRepository.save(testResult);
 
-        TestResultResponseDto responseDto = TestResultResponseDto.builder()
+        return TestResultResponseDto.builder()
                 .testId(testResult.getId())
                 .startedAt(String.valueOf(saveTestResults.get(0).getStartAt()))
                 .finishedAt(String.valueOf(saveTestResults.get(0).getFinishAt()))
@@ -124,8 +115,6 @@ public class TestResultService extends AbstractTestResultService {
                 .mttfbPercentiles(mttfbPercentiles)
                 .tpsPercentiles(tpsPercentiles)
                 .build();
-
-        return responseDto;
     }
 
     private Mono<TempSaveTestResultDto> createAndProcessRequest(TestTemplate testTemplate, TestResult TestResult) {
@@ -148,7 +137,6 @@ public class TestResultService extends AbstractTestResultService {
             }
 
             int totalRequests = requestCounter.getTotalRequests();
-
             double tpsAvgTime = calculateTPS(startTime, endTime, totalRequests);
             double avgResponseTime = calculateAvgResponseTime(startTime, endTime, totalRequests);
 

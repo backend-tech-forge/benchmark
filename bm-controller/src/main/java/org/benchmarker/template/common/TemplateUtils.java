@@ -5,7 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.Map;
 
 public class TemplateUtils {
 
@@ -58,5 +60,26 @@ public class TemplateUtils {
                     .toEntity(String.class);
             default -> throw new IllegalArgumentException("Unsupported HTTP method: " + method);
         };
+    }
+
+    public static String getStatusCodeCategory(int statusCode) {
+        if (statusCode >= 200 && statusCode < 300) {
+            return "2xx";
+        } else if (statusCode >= 300 && statusCode < 400) {
+            return "3xx";
+        } else if (statusCode >= 400 && statusCode < 500) {
+            return "4xx";
+        } else if (statusCode >= 500 && statusCode < 600) {
+            return "5xx";
+        }
+        return "";
+    }
+
+    public static void addPercentile(Map<String, Double> tpsPercentiles, Map<String, Double> mttfbPercentiles, String key, long startTime, long finishTime, int totalRequest) {
+        double tpsPercentile = calculateTPS(startTime, finishTime, totalRequest);
+        double mttfbPercentile = calculateAvgResponseTime(startTime, finishTime, totalRequest);
+
+        tpsPercentiles.put(key, tpsPercentile);
+        mttfbPercentiles.put(key, mttfbPercentile);
     }
 }
