@@ -3,12 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <title>Home</title>
+  <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 <body>
-<h1>Welcome to the Home Page</h1>
-<a th:href="@{/login}">Login</a><br/>
-<a th:href="@{/logout}">Logout</a><br/>
-<a th:href="@{/user}">Create User</a><br/>
-<a th:href="@{/users}">User List</a><br/>
+<div th:replace="fragments/currentUserFragment :: currentUser"></div>
+<div th:replace="fragments/projectInfo :: projectInfo"></div>
+<h1>Welcome to the Benchmarker Home</h1>
+
+<div class="container">
+  <a class="link" th:href="@{/user}">Register User</a><br/>
+  <a class="link" th:href="@{/groups}">Find My Participate Groups</a><br/>
+  <a class="link" th:href="@{/group/register}">Create Group</a><br/>
+
+  <!-- ADMIN ONLY -->
+  <div class="admin-actions" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+    <h2>Admin Actions</h2>
+    <a class="link" th:href="@{/users}">Manage User</a><br/>
+    <a class="link" th:href="@{/groups}">Manage Group</a><br/>
+  </div>
+</div>
+
+<script>
+  function deleteUser() {
+    var userId = document.getElementById('userIdInput').value;
+    var url = '/api/users/' + userId;
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          console.error('Error:', data);
+          throw new Error(data.message || 'Failed to remove user from group');
+        });
+      }
+      // Reload the page after successful deletion
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // Handle error, e.g., display error message to user
+    });
+  }
+
+  function deleteGroup() {
+    var groupId = document.getElementById('groupIdInput').value;
+    var url = '/api/groups/' + groupId;
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          console.error('Error:', data);
+          throw new Error(data.message || 'Failed to remove user from group');
+        });
+      }
+      // Reload the page after successful deletion
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // Handle error, e.g., display error message to user
+    });
+  }
+</script>
+
 </body>
 </html>

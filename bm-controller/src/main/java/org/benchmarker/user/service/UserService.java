@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.controller.dto.UserInfo;
@@ -17,24 +18,26 @@ import org.benchmarker.user.model.enums.GroupRole;
 import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
+import org.benchmarker.user.util.UserServiceUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.benchmarker.common.util.NoOp.noOp;
 import static org.benchmarker.user.constant.UserConsts.USER_GROUP_DEFAULT_ID;
 import static org.benchmarker.user.constant.UserConsts.USER_GROUP_DEFAULT_NAME;
 
 @Service("userService")
 @RequiredArgsConstructor
+@Slf4j
 public class UserService extends AbstractUserService {
 
     private final UserRepository userRepository;
     private final UserGroupJoinRepository userGroupJoinRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserGroupRepository userGroupRepository;
+    private final UserServiceUtils userServiceUtils;
 
     @Override
     @Transactional
@@ -43,7 +46,7 @@ public class UserService extends AbstractUserService {
             throw new GlobalException(ErrorCode.USER_ALREADY_EXIST);
         });
         // if userGroup is empty, save user with default userGroup
-        if (req.getUserGroup().isEmpty()) {
+        if (req.getUserGroup() == null || req.getUserGroup().isEmpty()) {
             Optional<UserGroup> defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID)
                 .or(() -> Optional.of(userGroupRepository.save(UserGroup.builder()
                     .id(USER_GROUP_DEFAULT_ID)
@@ -104,6 +107,13 @@ public class UserService extends AbstractUserService {
         }
     }
 
+    /**
+     * Get user by id
+     * <p>if user not found, throw exception
+     *
+     * @param id
+     * @return {@link Optional} of {@link UserInfo}
+     */
     @Override
     @Transactional
     public Optional<UserInfo> getUser(String id) {
@@ -112,6 +122,14 @@ public class UserService extends AbstractUserService {
         return Optional.of(UserInfo.from(user));
     }
 
+    /**
+     * Get user by id if user is in the same group as current user
+     * <p>if user not found or not same group, throw exception
+     *
+     * @param currentUserId
+     * @param id
+     * @return {@link UserInfo}
+     */
     @Override
     @Transactional
     public UserInfo getUserIfSameGroup(String currentUserId, String id) {
@@ -147,32 +165,7 @@ public class UserService extends AbstractUserService {
     public Optional<UserInfo> updateUser(UserUpdateDto req) {
         User user = userRepository.findById(req.getId())
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
-        ArrayList<UserGroupJoin> userGroupJoins = new ArrayList<>();
-        req.getUserGroup().forEach(group -> {
-            UserGroup userGroup = userGroupRepository.findById(group.getId())
-                .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
-            // find UserAndGroups check if userGroupJoin already exists, do nothing
-            // if userGroupJoin does not exist, save userGroupJoin
-            Optional<UserGroupJoin> findJoins = userGroupJoinRepository.findByUserAndUserGroup(
-                user, userGroup);
-            if (findJoins.isEmpty()) {
-                UserGroupJoin saved = userGroupJoinRepository.save(UserGroupJoin.builder()
-                    .user(user)
-                    .userGroup(userGroup)
-                    .build());
-                userGroupJoins.add(saved);
-            } else {
-                userGroupJoins.add(findJoins.get());
-                noOp();
-            }
-        });
-        user.setEmail(req.getEmail());
-        user.setEmailNotification(req.getEmailNotification());
-        user.setSlackWebhookUrl(req.getSlackWebhookUrl());
-        user.setSlackNotification(req.getSlackNotification());
-        user.setUserGroupJoin(userGroupJoins);
-        User save = userRepository.save(user);
-
+        User save = userServiceUtils.updateUser(user, req);
         UserInfo info = UserInfo.from(save);
         return Optional.of(info);
     }

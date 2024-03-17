@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: agent-service
+  name: agent-service
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8081 # This is the port that the service listens on
+      targetPort: 8081 # This is the port that the container listens on
+  type: ClusterIP
+  selector:
+    app: agent-service

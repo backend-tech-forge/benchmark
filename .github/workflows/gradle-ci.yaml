@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - "develop**"
-      - "main"
 
 jobs:
   Test-Coverage-Result:
@@ -31,7 +30,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build and test project
-        run: ./gradlew build
+        run: ./gradlew clean test
 
       - name: Comment jacoco test coverage to pull request
         id: jacoco

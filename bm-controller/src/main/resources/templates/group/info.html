@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Group Information</title>
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+
+</head>
+<body>
+<div th:replace="fragments/currentUserFragment :: currentUser"></div>
+<h1>Information about Group</h1>
+
+<div class="container">
+  <h2> Joined User</h2>
+<h4>
+  <a th:href="@{'/groups/' + ${groupInfo.id}}"
+     th:text="'Group ID: ' + ${groupInfo.id} + ' Group Name: ' + ${groupInfo.name}">users and their
+    id and role</a>
+</h4>
+
+<span id="errorMsg" style="color: red;"></span>
+
+<div style="display: flex;">
+  <button th:attr="onclick='addUserToGroup(\'' + ${groupInfo.id} + '\')'">Join user</button>
+  <input type="text" id="userIdInput" placeholder="Enter User ID">
+</div>
+
+
+<div th:if="${groupInfo != null}">
+  <table>
+    <thead>
+    <tr>
+      <th>Joined user ID</th>
+      <th>Joined user ROLE</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${groupInfo.users}">
+      <td th:text="${user.id}"></td>
+      <td th:text="${user.role}"></td>
+      <td>
+        <button class="button-delete" th:unless="${user.id == currentUser.id}" th:attr="onclick='removeUserFromGroup(\'' + ${groupInfo.id} + '\', \'' + ${user.id} + '\')'">Remove User</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+<div class="container">
+  <h2>Test Templates</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>URL</th>
+      <th>Method</th>
+      <th>Request</th>
+      <th>Duration</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="template : ${groupInfo.templates}">
+      <td th:text="${template.id}"></td>
+      <td th:text="${template.url}"></td>
+      <td th:text="${template.method}"></td>
+      <td th:text="${template.maxRequest}"></td>
+      <td th:text="${template.maxDuration}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div>
+    <button id="toggleTemplateButton" onclick="toggleTemplateForm()">Add Template</button>
+  </div>
+
+  <!-- Template Form -->
+<div id="templateForm" style="display: none;">
+  <h2>Add Template</h2>
+  <form id="addTemplateForm">
+    <input type="hidden" id="userGroupId" name="userGroupId" th:value="${groupInfo.id}" />
+
+    <div>
+      <label for="url">URL:</label>
+      <input type="text" id="url" name="url">
+    </div>
+
+    <div>
+      <label for="method">Method:</label>
+      <input type="text" id="method" name="method">
+    </div>
+
+    <div>
+      <label for="body">Body:</label>
+      <input type="text" id="body" name="body">
+    </div>
+
+    <div>
+      <label for="vuser">VUser:</label>
+      <input type="number" id="vuser" name="vuser">
+    </div>
+
+    <div>
+      <label for="maxRequest">Max Request:</label>
+      <input type="number" id="maxRequest" name="maxRequest">
+    </div>
+
+    <div>
+      <label for="maxDuration">Max Duration:</label>
+      <input type="number" id="maxDuration" name="maxDuration">
+    </div>
+
+    <div>
+      <label for="cpuLimit">CPU Limit:</label>
+      <input type="number" id="cpuLimit" name="cpuLimit">
+    </div>
+
+    <button type="button" onclick="addTemplate()">Submit Template</button>
+  </form>
+</div>
+
+<script>
+  function toggleTemplateForm() {
+    var templateForm = document.getElementById('templateForm');
+    var toggleButton = document.getElementById('toggleTemplateButton');
+
+    if (templateForm.style.display === 'none') {
+      templateForm.style.display = 'block';
+      toggleButton.textContent = 'Close Template';
+      toggleButton.style.backgroundColor = 'red'; // Change button color
+    } else {
+      templateForm.style.display = 'none';
+      toggleButton.textContent = 'Add Template';
+      toggleButton.style.backgroundColor = ''; // Reset button color
+    }
+  }
+
+  function addTemplate() {
+    var formData = {
+      userGroupId: document.getElementById('userGroupId').value,
+      url: document.getElementById('url').value,
+      method: document.getElementById('method').value,
+      body: document.getElementById('body').value,
+      vuser: parseInt(document.getElementById('vuser').value),
+      maxRequest: parseInt(document.getElementById('maxRequest').value),
+      maxDuration: parseInt(document.getElementById('maxDuration').value),
+      cpuLimit: parseInt(document.getElementById('cpuLimit').value)
+    };
+
+    fetch('/api/template', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          console.error('Error:', data);
+          throw new Error(data.message || 'Failed to add template');
+        });
+      }
+      // Hide the form
+      document.getElementById('templateForm').style.display = 'none';
+      // Alert success
+      alert('Template added successfully!');
+      window.location.href = window.location.href;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('errorMsg').innerText = error.message;
+    });
+  }
+  function addUserToGroup(groupId) {
+    var userId = document.getElementById('userIdInput').value;
+    var url = '/api/groups/' + groupId + '/users/' + userId;
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          console.error('Error:', data);
+          throw new Error(data.message || 'Failed to add user from group');
+        });
+      }
+      // Redirect to current URL on success
+      window.location.href = window.location.href;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('errorMsg').innerText = error.message;
+    });
+  }
+
+  function removeUserFromGroup(groupId, userId) {
+    var url = '/api/groups/' + groupId + '/users/' + userId;
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          console.error('Error:', data);
+          throw new Error(data.message || 'Failed to remove user from group');
+        });
+      }
+      // Redirect to current URL on success
+      window.location.href = window.location.href;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('errorMsg').innerText = error.message;
+      // Handle error, e.g., display error message to user
+    });
+  }
+</script>
+</div>
+</div>
+</body>
+</html>

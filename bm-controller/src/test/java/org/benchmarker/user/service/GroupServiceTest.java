@@ -2,13 +2,18 @@ package org.benchmarker.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.user.controller.dto.GroupAddDto;
 import org.benchmarker.user.controller.dto.GroupInfo;
 import org.benchmarker.user.controller.dto.GroupUpdateDto;
+import org.benchmarker.user.controller.dto.UserGroupRoleInfo;
 import org.benchmarker.user.helper.UserHelper;
 import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
@@ -17,6 +22,10 @@ import org.benchmarker.user.model.enums.GroupRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.util.initialize.InitiClass;
 
 
@@ -44,7 +53,7 @@ class GroupServiceTest extends InitiClass {
             // then
             assertThat(groupInfo.getId()).isEqualTo("groupId");
             assertThat(groupInfo.getName()).isEqualTo("groupName");
-            assertThat(groupInfo.getUsers()).contains(defaultUser.getId());
+
 
             List<UserGroupJoin> findUserJoin = userGroupJoinRepository.findByUserId(
                 defaultUser.getId());
@@ -144,7 +153,7 @@ class GroupServiceTest extends InitiClass {
             // then
             assertThat(groupInfo.getId()).isEqualTo(userGroup.getId());
             assertThat(groupInfo.getName()).isEqualTo(userGroup.getName());
-            assertThat(groupInfo.getUsers()).contains(defaultUser.getId());
+
             assertThat(groupInfo.getUsers()).hasSize(1);
         }
 
@@ -169,7 +178,6 @@ class GroupServiceTest extends InitiClass {
             // then
             assertThat(groupInfo.getId()).isEqualTo(userGroup.getId());
             assertThat(groupInfo.getName()).isEqualTo(userGroup.getName());
-            assertThat(groupInfo.getUsers()).contains(defaultUser.getId());
             assertThat(groupInfo.getUsers()).hasSize(2);
         }
 
@@ -226,6 +234,128 @@ class GroupServiceTest extends InitiClass {
     class test03 {
 
         @Test
+        @WithMockUser(username = "adminId", roles = {"ADMIN"})
+        @DisplayName("어드민 유저는 그룹 정보를 Pageable 로 조회할 수 있다")
+        public void test335() {
+            // Given
+            User defaultUser = UserHelper.createDefaultUser();
+            User otherUser = UserHelper.createDefaultUser("otherId");
+            userRepository.save(defaultUser);
+            userRepository.save(otherUser);
+            UserGroup userGroup = UserHelper.createDefaultUserGroup();
+            userGroupRepository.save(userGroup);
+            groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(),
+                GroupRole.LEADER);
+            groupService.addUserToGroupAdmin(userGroup.getId(), otherUser.getId(),
+                GroupRole.MEMBER);
+
+            // when
+            Pageable pageable = PageRequest.of(0, 5);
+
+            Page<GroupInfo> allGroupInfo = groupService.getAllGroupInfoAdmin(pageable);
+            Optional<GroupInfo> foundGroup = allGroupInfo.stream()
+                .filter(groupInfo -> groupInfo.getId().equals(userGroup.getId()))
+                .findFirst();
+
+            // When, Then
+            assertThat(foundGroup).isPresent();
+            assertThat(foundGroup.get().getId()).isEqualTo(userGroup.getId());
+            assertThat(foundGroup.get().getName()).isEqualTo(userGroup.getName());
+            assertThat(foundGroup.get().getUsers()).hasSize(2);
+        }
+
+        @Test
+        @WithMockUser(username = "adminId", roles = {"ADMIN"})
+        @DisplayName("어드민 유저는 모든 그룹 정보를 조회할 수 있다")
+        public void test336() {
+            // Given
+            User defaultUser = UserHelper.createDefaultUser();
+            User otherUser = UserHelper.createDefaultUser("otherId");
+            userRepository.save(defaultUser);
+            userRepository.save(otherUser);
+            UserGroup userGroup = UserHelper.createDefaultUserGroup();
+            userGroupRepository.save(userGroup);
+            groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(),
+                GroupRole.LEADER);
+            groupService.addUserToGroupAdmin(userGroup.getId(), otherUser.getId(),
+                GroupRole.MEMBER);
+
+            UserGroupRoleInfo userGroupRoleInfoUser = UserGroupRoleInfo.builder()
+                .id(defaultUser.getId())
+                .role(GroupRole.LEADER)
+                .build();
+            UserGroupRoleInfo userGroupRoleInfoOther = UserGroupRoleInfo.builder()
+                .id(otherUser.getId())
+                .role(GroupRole.MEMBER)
+                .build();
+
+            // when
+            List<GroupInfo> allGroupInfo = groupService.getAllGroupInfoAdmin();
+            Optional<GroupInfo> foundGroup = allGroupInfo.stream()
+                .filter(groupInfo -> groupInfo.getId().equals(userGroup.getId()))
+                .findFirst();
+
+            // When, Then
+            assertThat(foundGroup).isPresent();
+            assertThat(foundGroup.get().getId()).isEqualTo(userGroup.getId());
+            assertThat(foundGroup.get().getName()).isEqualTo(userGroup.getName());
+            assertThat(foundGroup.get().getUsers()).hasSize(2);
+
+        }
+
+        @Test
+        @DisplayName("일반 유저는 자신의 그룹 정보를 조회할 수 있다")
+        public void test333() {
+            // Given
+            User defaultUser = UserHelper.createDefaultUser();
+            User otherUser = UserHelper.createDefaultUser("otherId");
+            userRepository.save(defaultUser);
+            userRepository.save(otherUser);
+            UserGroup userGroup = UserHelper.createDefaultUserGroup();
+            userGroupRepository.save(userGroup);
+            groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(),
+                GroupRole.LEADER);
+            groupService.addUserToGroupAdmin(userGroup.getId(), otherUser.getId(),
+                GroupRole.MEMBER);
+
+            // when
+            List<GroupInfo> allGroupInfo = groupService.getAllGroupInfo(defaultUser.getId());
+
+            // When, Then
+            assertThat(allGroupInfo).hasSize(1);
+            assertThat(allGroupInfo.get(0).getId()).isEqualTo(userGroup.getId());
+            assertThat(allGroupInfo.get(0).getName()).isEqualTo(userGroup.getName());
+            assertThat(allGroupInfo.get(0).getUsers()).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("일반 유저는 자신의 그룹 정보를 pageable 로 조회할 수 있다")
+        public void test334() {
+            // Given
+            User defaultUser = UserHelper.createDefaultUser();
+            User otherUser = UserHelper.createDefaultUser("otherId");
+            userRepository.save(defaultUser);
+            userRepository.save(otherUser);
+            UserGroup userGroup = UserHelper.createDefaultUserGroup();
+            userGroupRepository.save(userGroup);
+            groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(),
+                GroupRole.LEADER);
+            groupService.addUserToGroupAdmin(userGroup.getId(), otherUser.getId(),
+                GroupRole.MEMBER);
+
+            // when
+            Pageable pageable = PageRequest.of(0, 1);
+            Page<GroupInfo> allGroupInfo = groupService.getAllGroupInfo(defaultUser.getId(),
+                pageable);
+
+            // When, Then
+            assertThat(allGroupInfo).hasSize(1);
+            assertThat(allGroupInfo.getContent().get(0).getId()).isEqualTo(userGroup.getId());
+            assertThat(allGroupInfo.getContent().get(0).getName()).isEqualTo(userGroup.getName());
+            assertThat(allGroupInfo.getContent().get(0).getUsers()).hasSize(2);
+        }
+
+        @Test
         @DisplayName("어드민 유저는 그룹 조회 시, 그룹이 존재하지 않으면 GlobalException 을 반환한다")
         public void test18() {
             // given
@@ -250,7 +380,6 @@ class GroupServiceTest extends InitiClass {
             User defaultUser = UserHelper.createDefaultUser();
 
             UserGroup userGroup = UserHelper.createDefaultUserGroup();
-//        userGroupRepository.save(userGroup);
 
             // when
             ErrorCode errorCode = assertThrows((GlobalException.class), () -> {
@@ -394,6 +523,86 @@ class GroupServiceTest extends InitiClass {
     @Nested
     @DisplayName("그룹 삭제")
     class test05 {
+
+        @Test
+        @DisplayName("그룹 삭제 성공")
+        public void testDeleteGroupSuccess() {
+            // Given
+            String groupId = "groupId";
+            String myId = "myId";
+            User defaultUser = UserHelper.createDefaultUser();
+            UserGroup foundGroup = new UserGroup(groupId, "Group 1");
+            UserGroupJoin join = UserGroupJoin.builder()
+                .user(defaultUser)
+                .userGroup(foundGroup)
+                .role(GroupRole.LEADER)
+                .build();
+
+
+            when(userGroupRepository.findById(groupId)).thenReturn(java.util.Optional.of(foundGroup));
+            when(userGroupJoinRepository.findByUserIdAndUserGroupId(myId, groupId)).thenReturn(java.util.Optional.of(join));
+
+            // When
+            groupService.deleteGroup(groupId, myId);
+
+            // Then
+            // Verify that group and join are deleted
+            verify(userGroupJoinRepository, times(1)).deleteAllByUserGroupId(groupId);
+            verify(userGroupRepository, times(1)).delete(foundGroup);
+        }
+
+        @Test
+        @DisplayName("유저는 그룹 삭제 시, 그룹의 LEADER 가 아니라면 GlobalException 을 반환한다 - 2")
+        public void testDeleteGroupUserNotLeader() {
+            // Given
+            User defaultUser = UserHelper.createDefaultUser();
+            User otherUser = UserHelper.createDefaultUser("otherId");
+            userRepository.save(defaultUser);
+            userRepository.save(otherUser);
+            UserGroup userGroup = UserHelper.createDefaultUserGroup();
+            userGroupRepository.save(userGroup);
+            groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(),
+                GroupRole.LEADER);
+            groupService.addUserToGroupAdmin(userGroup.getId(), otherUser.getId(),
+                GroupRole.MEMBER);
+
+            // when
+            ErrorCode errorCode = assertThrows((GlobalException.class), () -> {
+                groupService.deleteGroup(userGroup.getId(), otherUser.getId());
+            }).getErrorCode();
+
+            // When, Then
+            assertThat(errorCode).isEqualTo(ErrorCode.FORBIDDEN);
+        }
+
+        @Test
+        @DisplayName("어드민 유저로 그룹 삭제 성공")
+        public void testDeleteGroupAdminSuccess() {
+            // Given
+            String groupId = "groupId";
+            UserGroup foundGroup = new UserGroup(groupId, "Group 1");
+
+            when(userGroupRepository.findById(groupId)).thenReturn(java.util.Optional.of(foundGroup));
+
+            // When
+            groupService.deleteGroupAdmin(groupId);
+
+            // Then
+            // Verify that group is deleted
+            verify(userGroupRepository, times(1)).delete(foundGroup);
+        }
+
+        @Test
+        @DisplayName("어드민 유저로 그룹 삭제 시, 그룹 미발견하면 GlobalException 반환")
+        public void testDeleteGroupAdminGroupNotFound() {
+            // Given
+            String groupId = "groupId";
+
+            when(userGroupRepository.findById(groupId)).thenReturn(java.util.Optional.empty());
+
+            // When, Then
+            assertThrows(GlobalException.class, () -> groupService.deleteGroupAdmin(groupId));
+        }
         @Test
         @DisplayName("유저는 그룹 삭제 시, 그룹이 없으면 GlobalException 을 반환한다")
         public void test12() {
