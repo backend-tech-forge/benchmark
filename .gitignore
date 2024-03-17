@@ -1,6 +1,9 @@
 # Compiled class file
 *.class
 .idea
+/data
+/backups
+*-secret.yaml
 
 # Log file
 *.log

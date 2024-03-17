@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: benchmark-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: "benchmark-gce-pd-1"
+  persistentVolumeReclaimPolicy: Retain
+  gcePersistentDisk:
+    pdName: pd-1 # GCE PD의 이름
+    fsType: ext4
