@@ -18,11 +18,11 @@ public class TempSaveTestResultDto {
 
     @NotBlank
     @JsonProperty("start_at")
-    private LocalDateTime startAt;
+    private long startAt;
 
     @NotBlank
     @JsonProperty("finish_at")
-    private LocalDateTime finishAt;
+    private long finishAt;
 
     @NotNull
     @JsonProperty("error")

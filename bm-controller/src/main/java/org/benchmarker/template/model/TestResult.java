@@ -43,4 +43,12 @@ public class TestResult extends BaseTime {
                 .mttbfbAvg(this.mttbfbAvg)
                 .build();
     }
+
+    public void resultUpdate(int totalRequest, int totalSuccess, int totalError, Double tpsAvg, Double mttbfbAvg) {
+        this.totalRequest = totalRequest;
+        this.totalSuccess = totalSuccess;
+        this.totalError = totalError;
+        this.tpsAvg = tpsAvg;
+        this.mttbfbAvg = mttbfbAvg;
+    }
 }

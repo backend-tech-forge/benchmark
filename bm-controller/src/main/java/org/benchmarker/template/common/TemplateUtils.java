@@ -59,5 +59,4 @@ public class TemplateUtils {
             default -> throw new IllegalArgumentException("Unsupported HTTP method: " + method);
         };
     }
-
 }
