@@ -1,5 +1,12 @@
 package org.benchmarker.template.common;
 
+import org.benchmarker.template.model.TestTemplate;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.util.Locale;
+
 public class TemplateUtils {
 
     public static double calculateTPS(long startTime, long endTime, int totalRequests) {
@@ -26,6 +33,31 @@ public class TemplateUtils {
 
         // 평균 응답 시간 계산 (총 경과 시간을 총 요청 수로 나눔)
         return (double) elapsedTime / totalRequests;
+    }
+
+    public static Mono<ResponseEntity<String>> createRequest(WebClient webClient, TestTemplate testTemplate) {
+        String method = testTemplate.getMethod().toUpperCase(Locale.ENGLISH);
+        return switch (method) {
+            case "GET" -> webClient.get()
+                    .uri(testTemplate.getUrl())
+                    .retrieve()
+                    .toEntity(String.class);
+            case "POST" -> webClient.post()
+                    .uri(testTemplate.getUrl())
+                    .bodyValue(testTemplate.getBody())
+                    .retrieve()
+                    .toEntity(String.class);
+            case "PATCH", "PUT" -> webClient.patch()
+                    .uri(testTemplate.getUrl())
+                    .bodyValue(testTemplate.getBody())
+                    .retrieve()
+                    .toEntity(String.class);
+            case "DELETE" -> webClient.delete()
+                    .uri(testTemplate.getUrl())
+                    .retrieve()
+                    .toEntity(String.class);
+            default -> throw new IllegalArgumentException("Unsupported HTTP method: " + method);
+        };
     }
 
 }

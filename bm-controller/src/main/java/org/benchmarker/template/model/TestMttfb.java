@@ -27,9 +27,9 @@ public class TestMttfb extends BaseTime {
     private Double mttfb;
 
     @Column(columnDefinition = "timestamp(6)")
-    protected LocalDateTime startedAt;
+    protected LocalDateTime startAt;
 
     @Column(columnDefinition = "timestamp(6)")
-    protected LocalDateTime finishedAt;
+    protected LocalDateTime finishAt;
 
 }

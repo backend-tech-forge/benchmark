@@ -29,19 +29,18 @@ public class TestResult extends BaseTime {
 
     private Integer totalSuccess;
 
-    private Double tps_avg;
+    private Double tpsAvg;
 
-    private Double mttbfb_avg;
+    private Double mttbfbAvg;
 
     public TestResultResponseDto convertToResponseDto() {
         return TestResultResponseDto.builder()
-                .id(this.id)
-                .userGroupId(this.testTemplate.getUserGroup().getId())
+                .testId(this.id)
                 .totalRequest(this.totalRequest)
                 .totalSuccess(this.totalSuccess)
                 .totalError(this.totalError)
-                .tps_avg(this.tps_avg)
-                .mttbfb_avg(this.mttbfb_avg)
+                .tpsAvg(this.tpsAvg)
+                .mttbfbAvg(this.mttbfbAvg)
                 .build();
     }
 }

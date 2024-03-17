@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.model.BaseTime;
 
+import java.time.LocalDateTime;
+
 @Slf4j
 @Getter
 @Setter
@@ -22,6 +24,12 @@ public class TestTps extends BaseTime {
     @JoinColumn(name = "test_result_id", referencedColumnName = "id", nullable = false)
     private TestResult testResult;
 
-    private Integer transaction;
+    @Column(columnDefinition = "timestamp(6)")
+    protected LocalDateTime startAt;
+
+    private Double transaction;
+
+    @Column(columnDefinition = "timestamp(6)")
+    protected LocalDateTime finishAt;
 
 }
