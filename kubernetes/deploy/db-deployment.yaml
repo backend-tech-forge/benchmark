@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: benchmark-db
+  template:
+    metadata:
+      labels:
+        app: benchmark-db
+    spec:
+      # directory creation setup
+      initContainers:
+        - name: init-data-dir
+          image: busybox
+          command: ["sh", "-c", "mkdir -p /var/lib/postgresql/production/data"]
+          volumeMounts:
+            - name: benchmark-vol
+              mountPath: /var/lib/postgresql/production/data
+      containers:
+        - args:
+            - -c
+            - wal_level=logical
+            - -c
+            - max_connections=500
+            - -p
+            - "5433"
+          env:
+            - name: POSTGRES_DB
+              value: test
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+          image: postgres:12-alpine
+          name: chat-db
+          ports:
+            - containerPort: 5433
+              hostPort: 5433
+              protocol: TCP
+          volumeMounts:
+            - name: benchmark-vol
+              mountPath: /var/lib/postgresql/production/data
+      restartPolicy: Always
+      volumes:
+        - name: benchmark-vol
+          persistentVolumeClaim:
+            claimName: benchmark-pvc
