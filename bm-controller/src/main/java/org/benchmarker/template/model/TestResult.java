@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.common.model.BaseTime;
 import org.benchmarker.template.controller.dto.TestResultResponseDto;
 
+import java.util.List;
+
 @Slf4j
 @Getter
 @Setter
@@ -32,6 +34,15 @@ public class TestResult extends BaseTime {
     private Double tpsAvg;
 
     private Double mttbfbAvg;
+
+    @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
+    private List<TestMttfb> testMttfbs;
+
+    @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
+    private List<TestTps> testTps;
+
+    @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
+    private List<TestStatus> testStatuses;
 
     public TestResultResponseDto convertToResponseDto() {
         return TestResultResponseDto.builder()
