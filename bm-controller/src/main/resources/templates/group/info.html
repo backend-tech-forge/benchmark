@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Group Information</title>
   <link rel="stylesheet" type="text/css" href="../css/styles.css">
-
+  <script src="/js/connectStomp.js"></script>
 </head>
 <body>
 <div th:replace="fragments/currentUserFragment :: currentUser"></div>
@@ -57,6 +57,7 @@
       <th>Method</th>
       <th>Request</th>
       <th>Duration</th>
+      <th>View</th>
     </tr>
     </thead>
     <tbody>
@@ -66,6 +67,10 @@
       <td th:text="${template.method}"></td>
       <td th:text="${template.maxRequest}"></td>
       <td th:text="${template.maxDuration}"></td>
+      <td>
+        <a th:href="@{'/groups/' + ${groupInfo.id} + '/templates/' + ${template.id}}"
+           th:text="'View Details'">access</a>
+      </td>
     </tr>
     </tbody>
   </table>
@@ -119,7 +124,10 @@
   </form>
 </div>
 
-<script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  var initialized = [[${initialized}]];
+  console.log(initialized);
   function toggleTemplateForm() {
     var templateForm = document.getElementById('templateForm');
     var toggleButton = document.getElementById('toggleTemplateButton');
@@ -223,6 +231,7 @@
       // Handle error, e.g., display error message to user
     });
   }
+  /*]]>*/
 </script>
 </div>
 </div>

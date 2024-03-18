@@ -53,7 +53,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation "io.jsonwebtoken:jjwt-api:0.11.1"
     testImplementation 'org.testng:testng:7.1.0'
     runtimeOnly "io.jsonwebtoken:jjwt-impl:0.11.1"
