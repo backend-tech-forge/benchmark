@@ -120,7 +120,7 @@ public class TestResultService extends AbstractTestResultService {
     private Mono<TempSaveTestResultDto> createAndProcessRequest(TestTemplate testTemplate, TestResult TestResult) {
 
         long startTime = System.currentTimeMillis();
-        Mono<ResponseEntity<String>> resultMono = createRequest(webClient, testTemplate);
+        Mono<ResponseEntity<String>> resultMono = createRequest(webClient, testTemplate).log();
 
         return resultMono.publishOn(Schedulers.boundedElastic()).flatMap(response -> {
             long endTime = System.currentTimeMillis();
@@ -158,15 +158,25 @@ public class TestResultService extends AbstractTestResultService {
         }).onErrorResume(throwable -> {
             log.error("Error occurred: " + throwable.getMessage());
 
-            requestCounter.incrementTotalRequests();
-            requestCounter.incrementTotalErrors();
-
+            long endTime = System.currentTimeMillis();
             saveErrorLog(throwable);
-            throw new GlobalException(ErrorCode.BAD_REQUEST);
-        });
+
+            TempSaveTestResultDto defaultValue = TempSaveTestResultDto.builder()
+                    .startAt(startTime)
+                    .finishAt(endTime)
+                    .success(0)
+                    .error(1)
+                    .statusCode(ErrorCode.BAD_REQUEST.getHttpStatus())
+                    .tpsAvg(0.0)
+                    .mttbfbAvg(0.0)
+                    .build();
+
+            return Mono.just(defaultValue);
+        }).log();
     }
 
     private void saveErrorLog(Throwable throwable) {
+        long endTime = System.currentTimeMillis();
         TestErrorLog testErrorLog = TestErrorLog.builder()
                 .message(throwable.getMessage())
                 .build();
