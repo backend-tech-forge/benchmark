@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: benchmark-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeName: benchmark-pv
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: "benchmark-gce-pd-1"

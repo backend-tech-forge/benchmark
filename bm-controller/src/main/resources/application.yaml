@@ -7,9 +7,9 @@ benchmark:
   version: '1.0.0'
   name: 'benchmark'
   description: 'Benchmark application'
-  contact:
-    name: 'Gyumin Hwangbo'
-    email: 'ghkdqhrbals@gmail.com'
+  contacts: Gyumin Hwangbo;ghkdqhrbals@gmail.com,JeongGi Lee;apple4rhk@naver.com
+
+
 
 # admin user
 admin:

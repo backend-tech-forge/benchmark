@@ -1,0 +1,158 @@
+/* CSS for the table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px;
+}
+.pagination {
+  display: flex;
+}
+
+.pagination button {
+  margin-right: 10px; /* Adjust the margin as needed */
+}
+
+.button-delete {
+  background-color: #de6e56;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-delete:hover {
+  background-color: #b30000;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #22a7f0;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #5fa0ce;
+}
+
+/* 링크 스타일 */
+a {
+  text-decoration: none;
+  color: #22a7f0;
+}
+
+/* 링크에 호버 스타일 */
+a:hover {
+  text-decoration: underline;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+button[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+#addUserGroupButton {
+  background-color: rgb(40, 167, 69);
+  /*color: rgb(221, 221, 221);*/
+  /*color: rgb(255, 235, 59);*/
+  /*color: rgb(33, 97, 140);*/
+  margin-bottom: 10px;
+}
+
+#addUserGroupButton:hover {
+  background-color: rgb(20, 147, 49);
+}
+
+#deleteUserGroupButton {
+  background-color: #de6e56;
+  margin-bottom: 10px;
+}
+
+#deleteUserGroupButton:hover {
+  background-color: #d9573b;
+  margin-bottom: 10px;
+}

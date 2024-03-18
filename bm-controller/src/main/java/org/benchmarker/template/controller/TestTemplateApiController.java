@@ -6,6 +6,9 @@ import org.benchmarker.template.controller.dto.TestTemplateRequestDto;
 import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.template.service.ITestTemplateService;
+import org.benchmarker.user.model.User;
+import org.benchmarker.user.model.enums.Role;
+import org.benchmarker.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +22,7 @@ import java.util.List;
 public class TestTemplateApiController {
 
     private final ITestTemplateService testTemplateService;
+    private final UserContext userContext;
 
     @PostMapping("/template")
     @PreAuthorize("hasAnyRole('USER')")
@@ -35,7 +39,17 @@ public class TestTemplateApiController {
     @GetMapping("/templates")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<List<TestTemplateResponseDto>> getTemplates() {
-        return ResponseEntity.ok(testTemplateService.getTemplates());
+        return ResponseEntity.ok(testTemplateService.getAllTemplatesAdmin());
+    }
+
+    @GetMapping("/groups/{group_id}/templates")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<List<TestTemplateResponseDto>> getTemplates(@PathVariable("group_id") String group_id) {
+        User currentUser = userContext.getCurrentUser();
+        if (currentUser.getRole().equals(Role.ROLE_ADMIN)) {
+            return ResponseEntity.ok(testTemplateService.getTemplates(group_id));
+        }
+        return ResponseEntity.ok(testTemplateService.getTemplates(group_id, currentUser.getId()));
     }
 
     @PatchMapping("/template")

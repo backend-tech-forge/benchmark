@@ -26,10 +26,10 @@ public class GlobalRestControllerAdvice {
     }
 
     @ExceptionHandler({
-            IllegalArgumentException.class,
-            IllegalStateException.class,
-            ConstraintViolationException.class,
-            MethodArgumentNotValidException.class,
+        IllegalArgumentException.class,
+        IllegalStateException.class,
+        ConstraintViolationException.class,
+        MethodArgumentNotValidException.class,
     })
     public ResponseEntity<GlobalErrorResponse> handleBadRequestException(Exception e) {
         return GlobalErrorResponse.toResponseEntity(ErrorCode.BAD_REQUEST);

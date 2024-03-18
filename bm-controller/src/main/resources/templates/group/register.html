@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Register Group</title>
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+</head>
+<body>
+<div th:replace="fragments/currentUserFragment :: currentUser"></div>
+
+<div class="container">
+  <h1>Register Group</h1>
+
+  <form th:action="@{/group/register}" th:object="${groupAddDto}" method="post">
+    <label for="groupId">Group ID:</label>
+    <input type="text" id="groupId" th:field="*{id}"/>
+
+    <label for="groupName">Group Name:</label>
+    <input type="text" id="groupName" th:field="*{name}"/>
+
+    <button type="submit">Register</button>
+  </form>
+</div>
+</body>
+</html>

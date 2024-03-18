@@ -52,17 +52,31 @@ public class GroupApiController {
 
     @DeleteMapping("/groups/{group_id}/users/{user_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<GroupInfo> deleteUserFromGroup(@PathVariable String group_id,
-        @PathVariable String user_id) {
+    public ResponseEntity<GroupInfo> deleteUserFromGroup(
+        @PathVariable(name = "group_id") String group_id,
+        @PathVariable(name = "user_id") String user_id) {
         log.info("deleteUserFromGroup");
         return ResponseEntity.ok(
-            groupService.deleteUserFromGroup(group_id, userContext.getCurrentUser().getId(),
-                user_id, userContext.getCurrentUser().getRole().isAdmin()));
+            groupService.deleteUserFromGroup(group_id,
+                userContext.getCurrentUser().getId(),
+                user_id,
+                userContext.getCurrentUser().getRole().isAdmin()));
+    }
+
+    @DeleteMapping("/groups/{group_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<String> deleteGroup(@PathVariable(name = "group_id") String group_id) {
+        if (userContext.getCurrentUser().getRole().isAdmin()) {
+            groupService.deleteGroupAdmin(group_id);
+            return ResponseEntity.ok("Group deleted successfully");
+        }
+        groupService.deleteGroup(group_id, userContext.getCurrentUser().getId());
+        return ResponseEntity.ok("Group deleted successfully");
     }
 
     @GetMapping("/groups/{group_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<GroupInfo> getGroup(@PathVariable String group_id) {
+    public ResponseEntity<GroupInfo> getGroup(@PathVariable(name = "group_id") String group_id) {
         if (userContext.getCurrentUser().getRole().isAdmin()) {
             return ResponseEntity.ok(groupService.getGroupInfoAdmin(group_id));
         }
@@ -73,7 +87,7 @@ public class GroupApiController {
 
     @PatchMapping("/groups/{group_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<GroupInfo> updateGroup(@PathVariable String group_id,
+    public ResponseEntity<GroupInfo> updateGroup(@PathVariable(name = "group_id") String group_id,
         @RequestBody GroupUpdateDto dto) {
         if (userContext.getCurrentUser().getRole().isAdmin()) {
             return ResponseEntity.ok(groupService.updateGroupAdmin(dto, group_id));

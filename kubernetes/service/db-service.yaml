@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: benchmark-db
+  name: benchmark-db
+spec:
+  ports:
+    - name: benchmark-db
+      protocol: TCP
+      port: 5433
+      targetPort: 5433
+  selector:
+    app: benchmark-db

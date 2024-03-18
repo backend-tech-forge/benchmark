@@ -187,7 +187,7 @@ class TestTemplateServiceTest {
         testTemplateRepository.saveAll(testTemplates);
 
         //when
-        List<TestTemplateResponseDto> templates = testTemplateService.getTemplates();
+        List<TestTemplateResponseDto> templates = testTemplateService.getAllTemplatesAdmin();
 
         //then
         assertThat(templates.size()).isEqualTo(5);

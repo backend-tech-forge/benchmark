@@ -2,6 +2,12 @@ package org.benchmarker.common.error;
 
 import lombok.Getter;
 
+/**
+ * ErrorCode is a custom enum class for handling error codes.
+ * <p>It has the following final fields:
+ * <p>String {@link #message}
+ * <p>int {@link #httpStatus}
+ */
 @Getter
 public enum ErrorCode {
 
@@ -38,9 +44,9 @@ public enum ErrorCode {
     /**
      * 500
      */
-    INTERNAL_SERVER_ERROR(500,"서버 내부 오류 입니다." ), ;
-
-
+    INTERNAL_SERVER_ERROR(500, "서버 내부 오류"),
+    ;
+  
     private final int httpStatus;
     private final String message;
 

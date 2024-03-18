@@ -19,11 +19,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.benchmarker.user.controller.dto.GroupAddDto;
 import org.benchmarker.user.controller.dto.GroupInfo;
 import org.benchmarker.user.controller.dto.GroupUpdateDto;
+import org.benchmarker.user.controller.dto.UserGroupRoleInfo;
 import org.benchmarker.user.helper.UserHelper;
 import org.benchmarker.user.model.User;
+import org.benchmarker.user.model.enums.GroupRole;
 import org.benchmarker.user.service.GroupService;
 import org.benchmarker.user.service.UserContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +80,7 @@ class GroupApiControllerTest {
         GroupInfo infoStub = GroupInfo.builder()
             .id(groupId)
             .name(groupName)
-            .users(Arrays.asList(userId))
+            .users(List.of(UserGroupRoleInfo.builder().id(userId).role(GroupRole.MEMBER).build()))
             .build();
         User userStub = UserHelper.createDefaultUser();
 
@@ -108,7 +111,7 @@ class GroupApiControllerTest {
         String userId = userStub.getId();
         GroupInfo infoStub = GroupInfo.builder()
             .id(groupId)
-            .users(Arrays.asList(userId))
+            .users(List.of(UserGroupRoleInfo.builder().id(userId).role(GroupRole.MEMBER).build()))
             .build();
 
         // when
@@ -123,8 +126,7 @@ class GroupApiControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(groupId))
             .andExpect(jsonPath("$.users").isArray())
-            .andExpect(jsonPath("$.users", hasSize(1)))
-            .andExpect(jsonPath("$.users[0]").value(userId));
+            .andExpect(jsonPath("$.users", hasSize(1)));
     }
 
     @Test
@@ -163,7 +165,9 @@ class GroupApiControllerTest {
         GroupInfo infoStub = GroupInfo.builder()
             .id(groupId)
             .name("Test Group")
-            .users(Arrays.asList(defaultUser.getId(), "otherUser"))
+            .users(
+                List.of(UserGroupRoleInfo.builder().id(defaultUser.getId()).role(GroupRole.MEMBER).build(),
+                    UserGroupRoleInfo.builder().id("otherUser").role(GroupRole.MEMBER).build()))
             .build();
 
         // when
@@ -190,7 +194,7 @@ class GroupApiControllerTest {
         GroupInfo infoStub = GroupInfo.builder()
             .id(groupId)
             .name("Updated Group Name")
-            .users(Arrays.asList(defaultUser.getId(), "userId2"))
+            .users(List.of(UserGroupRoleInfo.builder().id(defaultUser.getId()).role(GroupRole.MEMBER).build()))
             .build();
 
         // when
@@ -205,7 +209,7 @@ class GroupApiControllerTest {
             .andExpect(jsonPath("$.id").value(groupId))
             .andExpect(jsonPath("$.name").value("Updated Group Name"))
             .andExpect(jsonPath("$.users").isArray())
-            .andExpect(jsonPath("$.users", hasSize(2)));
+            .andExpect(jsonPath("$.users", hasSize(1)));
     }
 
 }

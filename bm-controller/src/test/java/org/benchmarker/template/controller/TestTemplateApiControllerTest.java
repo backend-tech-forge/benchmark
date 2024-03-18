@@ -1,6 +1,9 @@
 package org.benchmarker.template.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import java.util.List;
 import org.benchmarker.common.error.ErrorCode;
 import org.benchmarker.common.error.GlobalException;
 import org.benchmarker.template.controller.dto.TestTemplateRequestDto;
@@ -10,9 +13,14 @@ import org.benchmarker.template.model.TestTemplate;
 import org.benchmarker.template.repository.TestTemplateRepository;
 import org.benchmarker.template.service.TestTemplateService;
 import org.benchmarker.user.controller.constant.TestUserConsts;
+import org.benchmarker.user.helper.UserHelper;
+import org.benchmarker.user.model.User;
 import org.benchmarker.user.model.UserGroup;
+import org.benchmarker.user.model.UserGroupJoin;
+import org.benchmarker.user.repository.UserGroupJoinRepository;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
+import org.benchmarker.user.service.UserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,9 +71,18 @@ class TestTemplateApiControllerTest {
     @MockBean
     UserGroupRepository userGroupRepository;
 
+    @MockBean
+    UserContext userContext;
+
+    @MockBean
+    UserGroupJoinRepository userGroupJoinRepository;
+
     @AfterEach
     void removeAll() {
         testTemplateRepository.deleteAll();
+        userGroupJoinRepository.deleteAll();
+        userGroupRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @BeforeEach
@@ -75,6 +92,7 @@ class TestTemplateApiControllerTest {
                 .apply(documentationConfiguration(restDocumentation))
                 .build();
     }
+
 
     @Test
     @DisplayName("탬플릿 생성 호출하는 테스트")
@@ -234,6 +252,59 @@ class TestTemplateApiControllerTest {
                     assertThat(resTemplate.getMaxRequest()).isEqualTo(resTestTemplate.getMaxRequest());
                     assertThat(resTemplate.getMaxDuration()).isEqualTo(resTestTemplate.getMaxDuration());
                 });
+    }
+
+    @Test
+    @DisplayName("그룹이 가지는 템플릿 리스트 조회 테스트")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
+    public void getTemplateWithGroup() throws Exception {
+        // given
+        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        User user = UserHelper.createDefaultUser();
+        UserGroupJoin userGroupJoin = UserGroupJoin.builder().user(user).userGroup(userGroup).build();
+
+        UserGroup tempGroup = userGroupRepository.save(userGroup);
+        User tempUser = userRepository.save(user);
+        UserGroupJoin tempJoin = userGroupJoinRepository.save(userGroupJoin);
+
+        TestTemplateResponseDto resTestTemplate = TestTemplateResponseDto.builder()
+            .id(10)
+            .url("test.com")
+            .method("get")
+            .body("")
+            .userGroupId("userGroup")
+            .vuser(3)
+            .cpuLimit(3)
+            .maxRequest(3)
+            .maxDuration(3)
+            .build();
+
+        // when
+        when(testTemplateService.getTemplates(userGroup.getId(),user.getId())).thenReturn(List.of(resTestTemplate));
+        when(userContext.getCurrentUser()).thenReturn(user);
+
+        // then
+        mockMvc.perform(get("/api/groups/{group_id}/templates", userGroup.getId()))
+            .andDo(print())
+            .andDo(result -> {
+                assertThat(result.getResponse().getStatus()).isEqualTo(200);
+
+                String jsonResponse = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+                TypeFactory typeFactory = objectMapper.getTypeFactory();
+                CollectionType listType = typeFactory.constructCollectionType(List.class, TestTemplateResponseDto.class);
+                List<TestTemplateResponseDto> responseList = objectMapper.readValue(jsonResponse, listType);
+
+
+                assertThat(responseList.get(0).getUrl()).isEqualTo(resTestTemplate.getUrl());
+                assertThat(responseList.get(0).getMethod()).isEqualTo(resTestTemplate.getMethod());
+                assertThat(responseList.get(0).getBody()).isEqualTo(resTestTemplate.getBody());
+                assertThat(responseList.get(0).getUserGroupId()).isEqualTo(userGroup.getName());
+                assertThat(responseList.get(0).getVuser()).isEqualTo(resTestTemplate.getVuser());
+                assertThat(responseList.get(0).getCpuLimit()).isEqualTo(resTestTemplate.getCpuLimit());
+                assertThat(responseList.get(0).getMaxRequest()).isEqualTo(resTestTemplate.getMaxRequest());
+                assertThat(responseList.get(0).getMaxDuration()).isEqualTo(resTestTemplate.getMaxDuration());
+            });
     }
 
     @Test

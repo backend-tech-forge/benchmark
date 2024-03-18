@@ -1,0 +1,43 @@
+/* 테이블 스타일 */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+/* 링크 스타일 */
+a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+/* 링크에 호버 스타일 */
+a:hover {
+  text-decoration: underline;
+}
+input[type="number"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#addUserGroupButton {
+  background-color: rgb(40, 167, 69);
+  /*color: rgb(221, 221, 221);*/
+  /*color: rgb(255, 235, 59);*/
+  /*color: rgb(33, 97, 140);*/
+  margin-bottom: 10px;
+}

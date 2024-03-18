@@ -58,7 +58,6 @@ public class GlobalControllerAdviceTest {
         assertThat(model.getAttribute("version")).isEqualTo(globalControllerAdvice.getVersion());
         assertThat(model.getAttribute("projectName")).isEqualTo(globalControllerAdvice.getName());
         assertThat(model.getAttribute("projectDesc")).isEqualTo(globalControllerAdvice.getDescription());
-        assertThat(model.getAttribute("contributorName")).isEqualTo(globalControllerAdvice.getContactName());
-        assertThat(model.getAttribute("contributorEmail")).isEqualTo(globalControllerAdvice.getContactEmail());
+        assertThat(model.getAttribute("contributor")).isEqualTo(globalControllerAdvice.getContacts());
     }
 }

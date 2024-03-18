@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Current User</title>
+</head>
+<body>
+
+<!-- Current user status bar -->
+<div th:fragment="currentUser" class="status-bar" th:classappend="${currentUser} ? 'logged-in' : ''">
+  <link rel="stylesheet" type="text/css" href="../css/bar.css">
+  <a th:href="@{/}" class="home-link">Benchmark</a>
+  <p th:if="${currentUser}" class="user-text">
+    Logged in as:
+    <a th:href="@{'/users/' + ${currentUser.id}}" class="user-link" th:text="${currentUser.id}"></a>
+  </p>
+  <p th:unless="${currentUser}" class="not-logged-in">
+    Not logged in
+  </p>
+  <div class="links">
+    <a th:href="@{/logout}" class="logout-link" th:if="${currentUser}">Logout</a>
+    <a th:href="@{/login}" class="login-link" th:unless="${currentUser}">Login</a>
+  </div>
+</div>
+
+</body>
+</html>

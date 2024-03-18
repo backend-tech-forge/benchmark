@@ -1,0 +1,100 @@
+name: Continuous Deploy with GKE
+
+on:
+  pull_request:
+    branches:
+      - main
+
+defaults:
+  run:
+    working-directory: ./
+
+jobs:
+  Test-Coverage-Result:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Corretto openJDK 17
+        uses: actions/setup-java@v3 # check specific version in https://github.com/actions/setup-java
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Gradle caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build and test project
+        run: ./gradlew clean test
+
+      - name: Comment jacoco test coverage to pull request
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.2
+        with:
+          title: 📝 Test code-coverage reports
+          paths: ${{ github.workspace }}/bm-controller/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 60
+          min-coverage-changed-files: 60
+          pass-emoji: ✅
+  Deploy-to-GKE:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Corretto openJDK 17
+        uses: actions/setup-java@v3 # check specific version in https://github.com/actions/setup-java
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Gradle caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build and test project
+        run: ./gradlew build
+
+      - name: Build docker image and push
+        run: bash ./script/img_push_multi_arch.sh -u ${{ secrets.DOCKERHUB_USERNAME }} -t ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Configure google cloud credentials
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+
+      - name: Set up gcloud cli
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Set GKE cluster context
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+
+      - name: Deploy to GKE
+        run: |
+          kubectl apply -f ./kubernetes/volume
+          kubectl apply -f ./kubernetes/ingress
+          kubectl apply -f ./kubernetes/service
+          kubectl apply -f ./kubernetes/deploy
