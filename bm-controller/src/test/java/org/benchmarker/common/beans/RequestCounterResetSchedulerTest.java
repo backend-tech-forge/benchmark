@@ -15,31 +15,35 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class RequestCounterResetSchedulerTest {
 
-    @SpyBean
-    private RequestCounter requestCounter;
+    /**
+     * 스케줄러 사용안하게 되면서 테스트코드 삭제 예정
+     */
 
-    @Test
-    @DisplayName("5초 마다 스케줄러가 정확히 동작하는지 확인하기")
-    public void testResetRequestCounter() throws InterruptedException {
-        // given
-        ThreadPoolTaskScheduler taskSchedulerMock = mock(ThreadPoolTaskScheduler.class);
-        CountDownLatch latch = new CountDownLatch(1);
-
-        // when
-        requestCounter.reset();
-        verify(requestCounter, atLeastOnce()).reset();
-
-        doAnswer(invocation -> {
-            latch.countDown();
-            return null;
-        }).when(taskSchedulerMock).schedule(any(Runnable.class), any(CronTrigger.class));
-
-        // 테스트 대상 객체 생성
-        RequestCounterResetScheduler scheduler = new RequestCounterResetScheduler(requestCounter);
-        latch.await(10, TimeUnit.SECONDS);
-
-        // then
-        verify(requestCounter, atLeastOnce()).reset();
-    }
+//    @SpyBean
+//    private RequestCounter requestCounter;
+//
+//    @Test
+//    @DisplayName("5초 마다 스케줄러가 정확히 동작하는지 확인하기")
+//    public void testResetRequestCounter() throws InterruptedException {
+//        // given
+//        ThreadPoolTaskScheduler taskSchedulerMock = mock(ThreadPoolTaskScheduler.class);
+//        CountDownLatch latch = new CountDownLatch(1);
+//
+//        // when
+//        requestCounter.reset();
+//        verify(requestCounter, atLeastOnce()).reset();
+//
+//        doAnswer(invocation -> {
+//            latch.countDown();
+//            return null;
+//        }).when(taskSchedulerMock).schedule(any(Runnable.class), any(CronTrigger.class));
+//
+//        // 테스트 대상 객체 생성
+//        RequestCounterResetScheduler scheduler = new RequestCounterResetScheduler(requestCounter);
+//        latch.await(10, TimeUnit.SECONDS);
+//
+//        // then
+//        verify(requestCounter, atLeastOnce()).reset();
+//    }
 
 }
