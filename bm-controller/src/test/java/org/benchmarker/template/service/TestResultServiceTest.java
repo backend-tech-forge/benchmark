@@ -2,6 +2,8 @@ package org.benchmarker.template.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import okhttp3.mockwebserver.MockWebServer;
 import org.benchmarker.template.controller.dto.TestResultResponseDto;
 import org.benchmarker.template.controller.dto.TestTemplateRequestDto;
 import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
@@ -13,13 +15,18 @@ import org.benchmarker.user.model.UserGroup;
 import org.benchmarker.user.repository.UserGroupRepository;
 import org.benchmarker.user.repository.UserRepository;
 import org.benchmarker.user.service.UserContext;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.HashMap;
@@ -62,11 +69,29 @@ class TestResultServiceTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+    public static MockWebServer mockBackEnd;
+
+    @SpyBean
+    private WebClient webClient;
+
+    @BeforeAll
+    static void setUp() throws IOException {
+        mockBackEnd = new MockWebServer();
+        mockBackEnd.start();
+    }
+
+    @BeforeEach
+    public void setUpEach() {
+        webClient = WebClient.create(mockBackEnd.url("/").toString());
+    }
+
+    @AfterAll
+    static void tearDown() throws IOException {
+        mockBackEnd.shutdown();
+    }
 
     @AfterEach
     public void clear() {
-//        userRepository.deleteAll();
-//        userGroupRepository.deleteAll();
         mttfbRepository.deleteAll();
         tpsRepository.deleteAll();
         testResultRepository.deleteAll();
