@@ -10,6 +10,8 @@ import org.benchmarker.template.controller.dto.TestResultResponseDto;
 import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.template.model.*;
 import org.benchmarker.template.repository.*;
+import org.benchmarker.user.model.UserGroup;
+import org.benchmarker.user.repository.UserGroupRepository;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -40,12 +42,18 @@ public class TestResultService extends AbstractTestResultService {
 
     private final TestErrorLogRepository testErrorLogRepository;
 
+    private final UserGroupRepository userGroupRepository;
+
     private final WebClient webClient;
 
     private final RequestCounter requestCounter;
 
     @Override
-    public TestResultResponseDto measurePerformance(Integer templateId) throws InterruptedException {
+    public TestResultResponseDto measurePerformance(String group_id, Integer templateId, String action) throws InterruptedException {
+
+        // 존재하는 그룹인지 파악
+        UserGroup userGroup = userGroupRepository.findById(group_id)
+                .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
 
         // 템플릿이 존재하는지 먼저 파악.
         TestTemplate testTemplate = testTemplateRepository.findById(templateId)
@@ -172,6 +180,11 @@ public class TestResultService extends AbstractTestResultService {
                     .build();
 
             return Mono.just(defaultValue);
+        }).doOnCancel(() -> {
+            // 비동기 작업이 중단될 때 호출됨
+            log.info("Request cancelled. Stopping the processing.");
+            // 여기에 비동기 작업 중지 로직 추가
+            // 예를 들어, 해당 쓰레드의 실행을 중지하거나 작업을 취소하는 등의 작업을 수행할 수 있습니다.
         }).log();
     }
 
@@ -218,10 +231,19 @@ public class TestResultService extends AbstractTestResultService {
     }
 
     @Override
-    public List<TestResultResponseDto> getTemplates(String groupId) {
+    public List<TestResultResponseDto> getGroupTemplateResult(String groupId) {
 
+        // 존재하는 그룹인지 파악
+        UserGroup userGroup = userGroupRepository.findById(groupId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
 
+        List<TestTemplate> testTemplates = testTemplateRepository.findAllByUserGroupId(userGroup.getId());
+        List<TestResultResponseDto> results = new ArrayList<>();
+        for (int i = 0; i < testTemplates.size(); i++) {
+            TestResult tempResult = testResultRepository.findByTestTemplate(testTemplates.get(i));
+            results.add(tempResult.convertToResponseDto());
+        }
 
-        return null;
+        return results;
     }
 }

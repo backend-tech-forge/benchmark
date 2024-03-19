@@ -8,10 +8,10 @@ import java.util.Optional;
 
 public interface ITestResultService {
 
-    TestResultResponseDto measurePerformance(Integer templateId) throws InterruptedException;
+    TestResultResponseDto measurePerformance(String group_id, Integer templateId, String action) throws InterruptedException;
 
     TestTemplateResponseDto getTemplateResult(Integer templateResultId);
 
-    List<TestResultResponseDto> getTemplates(String groupId);
+    List<TestResultResponseDto> getGroupTemplateResult(String groupId);
 
 }
