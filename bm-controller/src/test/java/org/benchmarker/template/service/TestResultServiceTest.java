@@ -106,7 +106,7 @@ class TestResultServiceTest {
         Optional<TestTemplateResponseDto> template = saveGetTempData();
 
         //when
-        TestResultResponseDto testResultResponseDto = testResultService.measurePerformance(template.get().getId());
+        TestResultResponseDto testResultResponseDto = testResultService.measurePerformance("userGroup", template.get().getId(), "start");
 
         //then
         assertThat(testResultResponseDto.getMethod()).isEqualTo(template.get().getMethod());
@@ -123,7 +123,7 @@ class TestResultServiceTest {
         Optional<TestTemplateResponseDto> template = savePostTempData();
 
         //when
-        TestResultResponseDto testResultResponseDto = testResultService.measurePerformance(template.get().getId());
+        TestResultResponseDto testResultResponseDto = testResultService.measurePerformance("userGroup", template.get().getId(), "start");
 
         //then
         assertThat(testResultResponseDto.getMethod()).isEqualTo(template.get().getMethod());
