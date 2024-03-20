@@ -28,8 +28,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
-
-//    implementation project(':bm-common')
+    implementation project(':bm-common')
 }
 
 tasks.named('test') {
