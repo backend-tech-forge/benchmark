@@ -56,20 +56,21 @@ public class PerftestController {
             .uri("/api/templates/{template_id}?action={action}", templateId, action)
             .retrieve()
             .bodyToFlux(typeReference)
-            .log(); // TODO need to remove
+            .log();
 
-        eventStream.subscribe(event -> {
-                TestResult testResult = event.data();
-                messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId, testResult);
-            },
-            error -> {
-                log.error("Error receiving SSE: {}", error.getMessage());
-            },
-            () -> {
-            // success
+        eventStream
+            .doOnComplete(() -> {
+                // Flux 스트림 완료 시점에 success 실행
                 log.info("Test completed!");
                 messagingTemplate.convertAndSend("/topic/" + userId, "test completed!");
-            });
+            })
+            .subscribe(event -> {
+                    TestResult testResult = event.data();
+                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId, testResult);
+                },
+                error -> {
+                    log.error("Error receiving SSE: {}", error.getMessage());
+                });
 
         return ResponseEntity.ok().build();
     }
