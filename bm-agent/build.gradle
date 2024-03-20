@@ -1,5 +1,7 @@
 plugins {
+    id 'jacoco-report-aggregation'
     id 'java'
+    id 'jacoco'
     id 'org.springframework.boot' version '3.2.3'
     id 'io.spring.dependency-management' version '1.1.4'
 }
@@ -7,8 +9,15 @@ plugins {
 group = 'org.benchmark'
 version = '0.0.1-SNAPSHOT'
 
+def excludeJacocoTestCoverageReport = [
+]
+
 java {
     sourceCompatibility = '17'
+}
+
+jacoco {
+    toolVersion = "0.8.8"
 }
 
 configurations {
@@ -34,4 +43,42 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    jacoco
+
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+    }
+    // Set the path to the source files
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: excludeJacocoTestCoverageReport)
+    }))
+    finalizedBy 'jacocoTestCoverageVerification'
+}
+
+// task for Jacoco test coverage verification
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            // Set the path to the source files
+            classDirectories.setFrom(tasks.jacocoTestReport.classDirectories)
+            element = 'CLASS'
+            enabled = true
+
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+        }
+    }
 }
