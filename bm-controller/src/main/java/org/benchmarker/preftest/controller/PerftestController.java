@@ -27,6 +27,7 @@ public class PerftestController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final UserContext userContext;
+    private final String agentUrl = "http://localhost:8081";
 
     @GetMapping("/groups/{group_id}/templates/{template_id}")
     @PreAuthorize("hasRole('USER')")
@@ -49,7 +50,7 @@ public class PerftestController {
             new ParameterizedTypeReference<ServerSentEvent<TestResult>>() {
             };
 
-        WebClient webClient = WebClient.create("http://localhost:8081");
+        WebClient webClient = WebClient.create(agentUrl);
 
         Flux<ServerSentEvent<TestResult>> eventStream = webClient.post()
             .uri("/api/templates/{template_id}?action={action}", templateId, action)
