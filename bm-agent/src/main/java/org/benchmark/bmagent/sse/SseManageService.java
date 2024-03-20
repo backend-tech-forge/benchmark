@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmark.bmagent.pref.ResultManagerService;
 import org.benchmark.bmagent.schedule.ScheduledTaskService;
 import org.benchmark.bmagent.service.AbstractSseManageService;
 import org.benchmark.util.RandomUtils;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class SseManageService extends AbstractSseManageService {
 
     private final ScheduledTaskService scheduledTaskService;
+    private final ResultManagerService resultManagerService;
 
     @Override
     public SseEmitter start(Long id) {
@@ -28,10 +30,10 @@ public class SseManageService extends AbstractSseManageService {
             return null;
         }
         sseEmitterHashMap.put(id, emitter);
-
+        
+        // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
-            log.info("SSE send");
-            send(id, RandomUtils.generateRandomTestResult());
+            send(id, resultManagerService.getResult(id));
         }, 0, 1, TimeUnit.SECONDS);
 
         return emitter;
