@@ -16,7 +16,7 @@ public class TestResultTemplateApiController {
 
     private final ITestResultService testResultService;
 
-    @PostMapping("/api/groups/{group_id}/templates/{template_id}?action={action}")
+    @PostMapping("/groups/{group_id}/templates/{template_id}?action={action}")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<TestResultResponseDto> measurePerformance(
             @PathVariable String  group_id,
