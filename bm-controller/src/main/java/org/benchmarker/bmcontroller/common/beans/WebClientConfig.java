@@ -1,4 +1,4 @@
-package org.benchmarker.common.beans;
+package org.benchmarker.bmcontroller.common.beans;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

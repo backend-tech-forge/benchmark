@@ -1,4 +1,4 @@
-package org.benchmarker.template.controller.dto;
+package org.benchmarker.bmcontroller.template.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;

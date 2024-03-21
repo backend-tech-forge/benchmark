@@ -1,10 +1,9 @@
-package org.benchmarker.template.service;
+package org.benchmarker.bmcontroller.template.service;
 
-import org.benchmarker.template.controller.dto.TestResultResponseDto;
-import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
+import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
 
 import java.util.List;
-import java.util.Optional;
+import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 
 public interface ITestResultService {
 

@@ -1,9 +1,9 @@
-package org.benchmarker.template.model;
+package org.benchmarker.bmcontroller.template.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.benchmarker.common.model.BaseTime;
+import org.benchmarker.bmcontroller.common.model.BaseTime;
 
 @Slf4j
 @Getter

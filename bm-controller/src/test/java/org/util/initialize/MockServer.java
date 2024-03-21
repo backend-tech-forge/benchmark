@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -18,7 +16,7 @@ public class MockServer {
     /**
      * Mock server instance
      */
-    public MockWebServer mockBackEnd;
+    public static MockWebServer mockBackEnd;
     /**
      * Opened mock server url
      */
@@ -31,6 +29,7 @@ public class MockServer {
         mockBackEnd = new MockWebServer();
         mockBackEnd.start();
         backendUrl = String.format(mockBackEnd.url("/").toString());
+        System.out.println("Mock server url: " + backendUrl);
     }
 
     @AfterEach

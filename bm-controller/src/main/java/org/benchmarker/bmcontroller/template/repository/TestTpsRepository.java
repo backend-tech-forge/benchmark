@@ -1,7 +1,7 @@
-package org.benchmarker.template.repository;
+package org.benchmarker.bmcontroller.template.repository;
 
-import org.benchmarker.template.model.TestResult;
-import org.benchmarker.template.model.TestTps;
+import org.benchmarker.bmcontroller.template.model.TestTps;
+import org.benchmarker.bmcontroller.template.model.TestResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package org.benchmarker.common.beans;
+package org.benchmarker.bmcontroller.common.beans;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

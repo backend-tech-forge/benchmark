@@ -1,14 +1,12 @@
-package org.benchmarker.template.common;
+package org.benchmarker.bmcontroller.template.common;
 
-import org.benchmarker.template.model.TestTemplate;
+import java.util.Locale;
+import java.util.Map;
+import org.benchmarker.bmcontroller.template.model.TestTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.util.Locale;
-import java.util.Map;
 
 public class TemplateUtils {
 

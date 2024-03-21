@@ -1,4 +1,4 @@
-package org.benchmarker.template.service;
+package org.benchmarker.bmcontroller.template.service;
 
 public abstract class AbstractTestResultService implements ITestResultService {
 }

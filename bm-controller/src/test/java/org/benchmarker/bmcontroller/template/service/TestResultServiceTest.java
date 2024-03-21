@@ -1,26 +1,26 @@
-package org.benchmarker.template.service;
+package org.benchmarker.bmcontroller.template.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.benchmarker.common.beans.RequestCounter;
-import org.benchmarker.template.controller.dto.TestResultResponseDto;
-import org.benchmarker.template.controller.dto.TestTemplateRequestDto;
-import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
-import org.benchmarker.template.repository.TestErrorLogRepository;
-import org.benchmarker.template.repository.TestMttfbRepository;
-import org.benchmarker.template.repository.TestResultRepository;
-import org.benchmarker.template.repository.TestTemplateRepository;
-import org.benchmarker.template.repository.TestTpsRepository;
-import org.benchmarker.user.model.UserGroup;
-import org.benchmarker.user.repository.UserGroupRepository;
-import org.benchmarker.user.repository.UserRepository;
-import org.benchmarker.user.service.UserContext;
-import org.junit.jupiter.api.AfterAll;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import org.benchmarker.bmcontroller.common.beans.RequestCounter;
+import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
+import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
+import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
+import org.benchmarker.bmcontroller.template.repository.TestErrorLogRepository;
+import org.benchmarker.bmcontroller.template.repository.TestMttfbRepository;
+import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
+import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
+import org.benchmarker.bmcontroller.template.repository.TestTpsRepository;
+import org.benchmarker.bmcontroller.user.model.UserGroup;
+import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
+import org.benchmarker.bmcontroller.user.repository.UserRepository;
+import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,13 +30,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import org.util.initialize.MockServer;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

@@ -1,4 +1,4 @@
-package org.benchmarker.template.model;
+package org.benchmarker.bmcontroller.template.model;
 
 public enum HttpStatusCode {
     GET,
