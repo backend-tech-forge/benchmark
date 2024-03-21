@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmagent.schedule.SchedulerStatus;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.benchmarker.bmagent.service.ISseManageService;
+import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,10 +37,10 @@ public class AgentApiController {
      */
     @PostMapping("/templates/{template_id}")
     public SseEmitter startSSE(@PathVariable("template_id") Long templateId,
-        @RequestParam("action") String action) {
+        @RequestParam("action") String action, @RequestBody TemplateInfo templateInfo) {
 
         if (action.equals("start")) {
-            return sseManageService.start(templateId);
+            return sseManageService.start(templateId, templateInfo);
         } else {
             sseManageService.stop(templateId);
             return null;
