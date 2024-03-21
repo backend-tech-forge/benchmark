@@ -8,6 +8,8 @@ import org.benchmarker.bmagent.pref.ResultManagerService;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.service.AbstractSseManageService;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
+import org.benchmarker.bmcommon.dto.TemplateInfo;
+import org.benchmarker.bmcommon.dto.TestResult;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -32,7 +34,7 @@ public class SseManageService extends AbstractSseManageService {
      * @see ScheduledTaskService
      */
     @Override
-    public SseEmitter start(Long id) {
+    public SseEmitter start(Long id, TemplateInfo templateInfo) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
 
         // when the client disconnects, complete the SseEmitter
@@ -45,6 +47,14 @@ public class SseManageService extends AbstractSseManageService {
 
         // Save the SseEmitter to the map
         sseEmitterHashMap.put(id, emitter);
+        resultManagerService.save(id, new TestResult());
+
+        /**
+         * TODO:DEV Target Server 에 HTTP 요청 시작 메소드 작성
+         *
+         * TemplateInfo 에 기반하여 Target Server 에 HTTP 요청을 시작하는 메소드를 여기에 작성하시면 됩니다 :)
+         *
+         */
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {

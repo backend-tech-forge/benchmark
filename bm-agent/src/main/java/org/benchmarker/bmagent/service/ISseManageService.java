@@ -3,6 +3,7 @@ package org.benchmarker.bmagent.service;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.benchmarker.bmagent.consts.SseManageConsts;
+import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
@@ -15,9 +16,10 @@ public interface ISseManageService extends SseManageConsts {
      * Start a new SSE emitter for the given id
      *
      * @param id Long
+     * @param templateInfo TemplateInfo
      * @return SseEmitter
      */
-    SseEmitter start(Long id);
+    SseEmitter start(Long id, TemplateInfo templateInfo);
 
     /**
      * Stop the SSE emitter for the given id
