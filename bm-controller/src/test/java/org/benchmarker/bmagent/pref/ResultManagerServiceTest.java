@@ -2,8 +2,8 @@ package org.benchmarker.bmagent.pref;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.benchmark.dto.TestResult;
-import org.benchmark.util.RandomUtils;
+import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.util.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

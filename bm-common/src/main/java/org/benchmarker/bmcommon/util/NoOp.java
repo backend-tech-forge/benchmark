@@ -1,4 +1,4 @@
-package org.benchmark.util;
+package org.benchmarker.bmcommon.util;
 
 /**
  * NoOp

@@ -1,7 +1,7 @@
 package org.benchmarker.bmagent.sse;
 
-import org.benchmark.dto.TestResult;
-import org.benchmark.util.RandomUtils;
+import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.util.RandomUtils;
 import org.benchmarker.bmagent.pref.ResultManagerService;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.schedule.SchedulerStatus;
@@ -10,13 +10,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SseManageServiceTest {

@@ -2,7 +2,7 @@ package org.benchmarker.bmagent.pref;
 
 import java.util.concurrent.ConcurrentHashMap;
 import org.benchmarker.bmagent.service.MapManager;
-import org.benchmark.dto.TestResult;
+import org.benchmarker.bmcommon.dto.TestResult;
 import org.benchmarker.bmagent.service.ISseManageService;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * ResultManagerService for managing TestResult
  *
  * <p>
- * After agent send multiple HTTP request to target server, calculated delays and others things need
+ * After bmagent send multiple HTTP request to target server, calculated delays and others things need
  * to be added in resultHashMap
  * </p>
  *

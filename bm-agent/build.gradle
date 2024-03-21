@@ -10,6 +10,8 @@ group = 'org.benchmarker'
 version = '0.0.1-SNAPSHOT'
 
 def excludeJacocoTestCoverageReport = [
+        // bmagent
+        'org/benchmarker/bmagent/**',
 ]
 
 java {
@@ -74,12 +76,12 @@ jacocoTestCoverageVerification {
             limit {
                 counter = 'LINE'
                 value = 'COVEREDRATIO'
-                minimum = 0.00
+                minimum = 0.60
             }
             limit {
                 counter = 'METHOD'
                 value = 'COVEREDRATIO'
-                minimum = 0.00
+                minimum = 0.60
             }
         }
     }

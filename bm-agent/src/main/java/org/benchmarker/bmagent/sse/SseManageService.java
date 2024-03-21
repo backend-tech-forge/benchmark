@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmagent.pref.ResultManagerService;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.service.AbstractSseManageService;
-import org.benchmark.util.RandomUtils;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;

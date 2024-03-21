@@ -1,4 +1,4 @@
-package org.benchmark.dto;
+package org.benchmarker.bmcommon.dto;
 
 
 import java.util.Map;

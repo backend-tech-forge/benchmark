@@ -2,7 +2,7 @@ package org.benchmarker.bmcontroller.preftest.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.benchmark.dto.TestResult;
+import org.benchmarker.bmcommon.dto.TestResult;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.springframework.core.ParameterizedTypeReference;

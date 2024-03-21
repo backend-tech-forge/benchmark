@@ -1,7 +1,7 @@
-package org.benchmark.util;
+package org.benchmarker.bmcommon.util;
 
 import java.util.HashMap;
-import org.benchmark.dto.TestResult;
+import org.benchmarker.bmcommon.dto.TestResult;
 
 public class RandomUtils {
 
