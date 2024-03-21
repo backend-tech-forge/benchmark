@@ -1,7 +1,7 @@
 package org.benchmarker.bmcontroller.template.service;
 
-import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
+import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 
 import java.util.List;
@@ -14,8 +14,8 @@ public interface ITestTemplateService {
     TestTemplateResponseDto getTemplate(Integer id);
 
     List<TestTemplateResponseDto> getAllTemplatesAdmin();
-    public List<TestTemplateResponseDto> getTemplates(String groupId, String userId);
-    public List<TestTemplateResponseDto> getTemplates(String groupId);
+    List<TestTemplateResponseDto> getTemplates(String groupId, String userId);
+    List<TestTemplateResponseDto> getTemplates(String groupId);
     Optional<TestTemplateResponseDto> updateTemplate(TestTemplateUpdateDto testTemplate) throws Exception;
 
     void deleteTemplate(Integer id);
