@@ -12,13 +12,13 @@ version = rootProject.getVersion()
 
 // define exclude classes for Jacoco test coverage report
 def excludeJacocoTestCoverageReport = [
-        'org/benchmarker/home/HomeController.class',
-        'org/benchmarker/user/controller/UserController.class',
-        'org/benchmarker/BmControllerApplication.class',
-        'org/benchmarker/login/controller/LoginController.class',
-        'org/benchmarker/common/util/NoOp.class',
-        'org/benchmarker/admin/controller/AdminUserController.class',
-        'org/benchmarker/user/controller/GroupController.class',
+        'org/benchmarker/bmcontroller/home/HomeController.class',
+        'org/benchmarker/bmcontroller/user/controller/UserController.class',
+        'org/benchmarker/bmcontroller/BmControllerApplication.class',
+        'org/benchmarker/bmcontroller/login/controller/LoginController.class',
+        'org/benchmarker/bmcontroller/common/util/NoOp.class',
+        'org/benchmarker/bmcontroller/admin/controller/AdminUserController.class',
+        'org/benchmarker/bmcontroller/user/controller/GroupController.class',
 ]
 
 jacoco {
