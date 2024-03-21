@@ -1,5 +1,6 @@
 package org.benchmarker.bmagent.sse;
 
+import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcommon.dto.TestResult;
 import org.benchmarker.bmcommon.util.RandomUtils;
 import org.benchmarker.bmagent.pref.ResultManagerService;
@@ -39,7 +40,7 @@ class SseManageServiceTest {
         resultManagerService.save(id, resultStub);
 
         // when
-        SseEmitter result = sseManageService.start(id);
+        SseEmitter result = sseManageService.start(id, new TemplateInfo());
 
         // then
         assertThat(result).isNotNull();
