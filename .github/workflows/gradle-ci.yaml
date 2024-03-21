@@ -30,7 +30,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build and test project
-        run: ./gradlew clean testCodeCoverageReport
+        run: ./gradlew build
 
       - name: Comment jacoco test coverage to pull request
         id: jacoco

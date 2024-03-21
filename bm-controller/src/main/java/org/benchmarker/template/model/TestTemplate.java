@@ -8,6 +8,8 @@ import org.benchmarker.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.user.model.UserGroup;
 
+import java.util.List;
+
 @Slf4j
 @Setter
 @Getter
@@ -43,6 +45,8 @@ public class TestTemplate extends BaseTime {
     @Column(nullable = false)
     private Integer cpuLimit;
 
+    @OneToMany(mappedBy = "testTemplate", fetch = FetchType.EAGER)
+    private List<TestResult> testResults;
 
     public void update(TestTemplateUpdateDto testTemplate) {
 
