@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+  <script src="/js/connectStomp.js"></script>
+  <title>Test Results</title>
+</head>
+<body>
+
+<div id="buttons">
+  <button id="startButton" onclick="sendAction('start')">시작</button>
+  <button id="stopButton" onclick="sendAction('stop')">정지</button>
+</div>
+
+<h1>Test Results</h1>
+<div id="results">
+  <table border="1">
+    <thead>
+    <tr>
+      <th>Test ID</th>
+      <th>Started At</th>
+      <th>Finished At</th>
+      <th>URL</th>
+      <!-- Add other table headers here -->
+    </tr>
+    </thead>
+    <tbody id="resultsBody">
+    <!-- Test results will be dynamically added here -->
+    </tbody>
+  </table>
+</div>
+
+<script th:inline="javascript">
+  const userId = [[${currentUser.id}]];
+  // get userId from securty context
+  const groupId = [[${groupId}]]; // Replace with actual value
+  const templateId = [[${templateId}]]; // Replace with actual value
+  var initialized = [[${initialized}]];
+  initialize(userId,groupId,templateId);
+
+  function initialize(userId,groupId,templateId) {
+    if (!initialized) {
+      stompClient = new StompJs.Client({
+        brokerURL: 'ws://localhost:8080/gs-guide-websocket'
+      });
+
+      stompClient.onConnect = (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/'+groupId+'/'+templateId, (result) => {
+          updateResults(JSON.parse(result.body));
+        });
+        stompClient.subscribe('/topic/'+userId, (result) => {
+          console.log('Received message: /topic/userId');
+          alert('새로운 메시지가 도착했습니다: ' + result);
+        });
+      };
+
+      stompClient.onWebSocketError = (error) => {
+        console.error('Error with websocket', error);
+      };
+      initialized = true;
+    }else{
+      console.log('Already initialized');
+    }
+  }
+
+  function updateResults(result) {
+    const resultsBody = document.getElementById('resultsBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+                <td>${result.testId}</td>
+                <td>${result.startedAt}</td>
+                <td>${result.finishedAt}</td>
+                <td>${result.url}</td>
+                <!-- Add other table cells here -->
+            `;
+    resultsBody.appendChild(newRow);
+  }
+
+  function sendAction(action) {
+    // You need to replace 'groupId' and 'templateId' with actual values
+    const url = '/api/groups/' + groupId + '/templates/' + templateId + '?action=' + action;
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to perform action');
+      }
+      console.log(action + ' action performed successfully');
+    })
+    .catch(error => {
+      console.error('Error performing action:', error);
+    });
+  }
+
+  stompClient.activate();
+</script>
+</body>
+</html>

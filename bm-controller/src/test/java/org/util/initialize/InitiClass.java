@@ -1,11 +1,10 @@
 package org.util.initialize;
 
-import org.benchmarker.user.repository.UserGroupJoinRepository;
-import org.benchmarker.user.repository.UserGroupRepository;
-import org.benchmarker.user.repository.UserRepository;
-import org.benchmarker.user.service.GroupService;
-import org.benchmarker.user.service.UserService;
-import org.junit.After;
+import org.benchmarker.bmcontroller.user.repository.UserGroupJoinRepository;
+import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
+import org.benchmarker.bmcontroller.user.repository.UserRepository;
+import org.benchmarker.bmcontroller.user.service.GroupService;
+import org.benchmarker.bmcontroller.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
