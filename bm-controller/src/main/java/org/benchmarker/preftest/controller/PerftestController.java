@@ -60,9 +60,10 @@ public class PerftestController {
 
         eventStream
             .doOnComplete(() -> {
-                // Flux 스트림 완료 시점에 success 실행
-                log.info("Test completed!");
-                messagingTemplate.convertAndSend("/topic/" + userId, "test completed!");
+                if (action.equals("stop")) {
+                    log.info("Test completed! {}", action);
+                    messagingTemplate.convertAndSend("/topic/" + userId, "test started!");
+                }
             })
             .subscribe(event -> {
                     TestResult testResult = event.data();
@@ -70,7 +71,7 @@ public class PerftestController {
                 },
                 error -> {
                     log.error("Error receiving SSE: {}", error.getMessage());
-                });
+            });
 
         return ResponseEntity.ok().build();
     }
