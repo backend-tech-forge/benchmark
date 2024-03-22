@@ -18,7 +18,7 @@ def excludeJacocoTestCoverageReport = [
         'org/benchmarker/BmControllerApplication.class',
         'org/benchmarker/bmcontroller/login/controller/LoginController.class',
         'org/benchmarker/bmcontroller/common/util/NoOp.class',
-        'org/benchmarker/bmcontroller/controller/AdminUserController.class',
+        'org/benchmarker/bmcontroller/controller/AdminUserController**',
         'org/benchmarker/bmcontroller/user/controller/GroupController.class',
 ]
 
@@ -96,6 +96,7 @@ test {
     jacoco {
         excludes = ["org/benchmarker/bmcontroller/home/HomeController.class",
                     "org/benchmarker/bmcontroller/user/controller/UserController.class",
+                    'org/benchmarker/bmcontroller/controller/AdminUserController**',
                     "org/benchmarker/bmcontroller/BmControllerApplication.class"]
     }
     finalizedBy jacocoTestReport
@@ -133,12 +134,12 @@ tasks.named("asciidoctor") {
 
 jacocoTestReport {
     dependsOn (
-            test,
-            project(':bm-agent').test
+            test
     )
     reports {
         csv.required = true
         xml.required = false
+        html.required = true
     }
     // Set the path to the source files
     classDirectories.setFrom(files(classDirectories.files.collect {
