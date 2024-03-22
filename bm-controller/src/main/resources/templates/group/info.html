@@ -97,7 +97,7 @@
 
     <div>
       <label for="body">Body:</label>
-      <input type="text" id="body" name="body">
+      <textarea id="body" name="body" placeholder="Enter your JSON code here..." onkeydown="handleKeyDown(event)"></textarea>
     </div>
 
     <div>
@@ -140,6 +140,20 @@
       templateForm.style.display = 'none';
       toggleButton.textContent = 'Add Template';
       toggleButton.style.backgroundColor = ''; // Reset button color
+    }
+  }
+  function handleKeyDown(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const textarea = event.target;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      const selectedText = value.substring(start, end);
+      const indent = '  '; // You can customize the indent size here
+      const newValue = value.substring(0, start) + '\n' + indent + selectedText + '\n' + value.substring(end);
+      textarea.value = newValue;
+      textarea.setSelectionRange(start + indent.length + 1, start + indent.length + 1);
     }
   }
 
