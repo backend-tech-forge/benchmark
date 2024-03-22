@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcommon.dto.TestResult;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
+import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
+import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
@@ -26,15 +28,21 @@ import reactor.core.publisher.Flux;
 public class PerftestController {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final ITestTemplateService testTemplateService;
     private final UserContext userContext;
     private final String agentUrl = "http://localhost:8081";
 
     @GetMapping("/groups/{group_id}/templates/{template_id}")
     @PreAuthorize("hasRole('USER')")
     public String getTest(@PathVariable("group_id") String groupId,
-        @PathVariable("template_id") String templateId, Model model) {
+        @PathVariable("template_id") Integer templateId, Model model) {
+
         model.addAttribute("groupId", groupId);
         model.addAttribute("templateId", templateId);
+
+        TestTemplateResponseDto template = testTemplateService.getTemplate(templateId);
+        model.addAttribute("template", template);
+
         return "template/info"; // Thymeleaf 템플릿의 이름
     }
 
@@ -67,11 +75,12 @@ public class PerftestController {
             })
             .subscribe(event -> {
                     TestResult testResult = event.data();
-                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId, testResult);
+                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId,
+                        testResult);
                 },
                 error -> {
                     log.error("Error receiving SSE: {}", error.getMessage());
-            });
+                });
 
         return ResponseEntity.ok().build();
     }
