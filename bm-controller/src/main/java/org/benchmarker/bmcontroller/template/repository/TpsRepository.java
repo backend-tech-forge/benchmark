@@ -1,6 +1,6 @@
 package org.benchmarker.bmcontroller.template.repository;
 
-import org.benchmarker.bmcontroller.template.model.TestTps;
+import org.benchmarker.bmcontroller.template.model.Tps;
 import org.benchmarker.bmcontroller.template.model.TestResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface TestTpsRepository extends JpaRepository<TestTps, Integer> {
+public interface TpsRepository extends JpaRepository<Tps, Integer> {
 
-    List<TestTps> findByTestResult(TestResult testResult);
+    List<Tps> findByTestResult(TestResult testResult);
 }
