@@ -1,14 +1,25 @@
 package org.benchmarker.bmcontroller.template.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcontroller.common.model.BaseTime;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
-
-import java.util.List;
 
 @Slf4j
 @Setter

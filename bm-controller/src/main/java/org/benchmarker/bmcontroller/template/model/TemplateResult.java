@@ -3,6 +3,7 @@ package org.benchmarker.bmcontroller.template.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmagent.AgentStatus;
 import org.benchmarker.bmcontroller.common.model.BaseTime;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 
@@ -36,4 +37,7 @@ public class TemplateResult extends BaseTime {
     private Integer tps_avg;
 
     private Integer mttbfb_avg;
+
+    @Enumerated(EnumType.STRING)
+    private AgentStatus status;
 }
