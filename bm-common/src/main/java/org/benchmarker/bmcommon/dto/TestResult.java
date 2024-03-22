@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.benchmarker.bmagent.AgentStatus;
 
 @Getter
 @Setter
@@ -47,4 +48,6 @@ public class TestResult {
     private double tpsAverage;
     @JsonProperty("tps_percentiles")
     private Map<String, Double> TPSPercentiles;
+    @JsonProperty(value = "test_status")
+    private AgentStatus testStatus;
 }
