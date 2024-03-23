@@ -21,8 +21,10 @@ spring:
   datasource:
     url: 'jdbc:tc:postgresql:11-alpine:///testdb'
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    username: test
-    password: test
+    hikari:
+      username: 'test'
+      password: 'test'
+      maximum-pool-size: 1
   jpa:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
