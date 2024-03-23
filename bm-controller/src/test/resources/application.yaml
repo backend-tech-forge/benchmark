@@ -19,7 +19,10 @@ spring:
   profiles:
     active: test
   datasource:
-    url: 'jdbc:tc:postgresql:11-alpine:///databasename'
+    url: 'jdbc:tc:postgresql:11-alpine:///testdb'
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
   jpa:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
