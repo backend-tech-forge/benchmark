@@ -2,6 +2,7 @@ plugins {
     id "org.asciidoctor.jvm.convert" version "3.3.2"
     id 'jacoco-report-aggregation'
     id 'java'
+    id 'com.adarshr.test-logger' version '4.0.0'
 //    id 'jacoco'
     id 'org.springframework.boot' version '3.2.3'
     id 'io.spring.dependency-management' version '1.1.4'
@@ -9,6 +10,15 @@ plugins {
 
 group = 'org.benchmarker'
 version = rootProject.getVersion()
+
+ext {
+    resilience4jVersion = '2.2.0' // 사용할 버전을 여기에 기입하세요.
+}
+
+testlogger {
+    theme 'mocha' // project level
+    slowThreshold 5000
+}
 
 // define exclude classes for Jacoco test coverage report
 def excludeJacocoTestCoverageReport = [
@@ -65,8 +75,8 @@ dependencies {
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.11.1"
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation project(":bm-common")
-    implementation project(":bm-agent")
     jacocoAggregation project(":bm-agent")
+//    implementation "io.github.resilience4j:resilience4j-all:${resilience4jVersion}"
     implementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
 
 
@@ -75,9 +85,9 @@ dependencies {
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
-    testImplementation "org.testcontainers:testcontainers:1.19.3"
+    testImplementation 'org.testcontainers:testcontainers:1.19.3'
+    testImplementation 'org.testcontainers:postgresql:1.19.3'
     testImplementation "org.testcontainers:junit-jupiter:1.19.3"
-    testImplementation "org.testcontainers:postgresql:1.19.3"
 
     implementation 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
@@ -94,6 +104,26 @@ ext {
 test {
     outputs.dir snippetsDir
     useJUnitPlatform()
+
+    testlogger {
+        theme 'standard'
+        showExceptions true
+        showStackTraces true
+        showFullStackTraces false
+        showCauses true
+        slowThreshold 1000 // 1 초 이상 걸리는 테스트는 느린 테스트로 표시
+        showSummary true
+        showSimpleNames false
+        showPassed true
+        showSkipped true
+        showFailed true
+        showOnlySlow false
+        showStandardStreams false
+        showPassedStandardStreams true
+        showSkippedStandardStreams true
+        showFailedStandardStreams true
+        logLevel 'lifecycle'
+    }
 
     jacoco {
         excludes = ["org/benchmarker/bmcontroller/home/HomeController.class",
