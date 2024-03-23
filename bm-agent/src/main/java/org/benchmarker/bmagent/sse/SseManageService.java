@@ -1,7 +1,5 @@
 package org.benchmarker.bmagent.sse;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmagent.pref.ResultManagerService;
@@ -10,8 +8,18 @@ import org.benchmarker.bmagent.service.AbstractSseManageService;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcommon.dto.TestResult;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import static org.benchmarker.bmagent.common.AgentUtils.*;
 
 /**
  * SseManageService for managing SseEmitter
@@ -22,7 +30,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class SseManageService extends AbstractSseManageService {
 
     private final IScheduledTaskService scheduledTaskService;
+
     private final ResultManagerService resultManagerService;
+
+    private final WebClient webClient;
 
     /**
      * Start the SseEmitter for the given id and return the SseEmitter
@@ -47,7 +58,7 @@ public class SseManageService extends AbstractSseManageService {
 
         // Save the SseEmitter to the map
         sseEmitterHashMap.put(id, emitter);
-        resultManagerService.save(id, new TestResult());
+//        resultManagerService.save(id, new TestResult());
 
         /**
          * TODO:DEV Target Server 에 HTTP 요청 시작 메소드 작성
@@ -56,12 +67,76 @@ public class SseManageService extends AbstractSseManageService {
          *
          */
 
+        // 비동기 처리 후 각각의 결과를 담은 객체 반환
+        Mono<TestResult> saveTestResultMono = createAndProcessRequest(webClient, templateInfo);
+        TestResult resultDto = saveTestResultMono.block();
+
+        resultManagerService.save(id, resultDto);
+
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
             send(id, resultManagerService.find(id));
         }, 0, 1, TimeUnit.SECONDS);
 
         return emitter;
+    }
+
+    private Mono<TestResult> createAndProcessRequest(WebClient webClient, TemplateInfo templateInfo) {
+
+        long startTime = System.currentTimeMillis();
+        Mono<ResponseEntity<String>> resultMono = createRequest(webClient, templateInfo);
+
+        return resultMono.publishOn(Schedulers.boundedElastic()).flatMap(response -> {
+            long endTime = System.currentTimeMillis();
+
+            HttpStatusCode statusCode = response.getStatusCode();
+            boolean isSuccess = false;
+            boolean isError = false;
+
+            if (statusCode.is2xxSuccessful()) {
+                isSuccess = true;
+            } else if (statusCode.is4xxClientError() || statusCode.is5xxServerError()) {
+                isError = true;
+            }
+
+//            int totalRequests = requestCounter.getTotalRequests();
+            int request = isSuccess ? 1 : 0;
+            int error = isError ? 1 : 0;
+
+            double tpsAvgTime = calculateTPS(startTime, endTime, request);
+            double avgResponseTime = calculateAvgResponseTime(startTime, endTime, request);
+
+            TestResult tempSaveTestResultDto = TestResult.builder()
+                    .startedAt(String.valueOf(startTime))
+                    .finishedAt(String.valueOf(endTime))
+                    .totalErrors(error)
+                    .totalRequests(request)
+                    .statusCode(statusCode.value())
+                    .tpsAverage(tpsAvgTime)
+                    .mttfbAverage(avgResponseTime)
+                    .build();
+
+            return Mono.just(tempSaveTestResultDto);
+
+        }).onErrorResume(throwable -> {
+            log.error("Error occurred: " + throwable.getMessage());
+
+            long endTime = System.currentTimeMillis();
+
+            TestResult defaultValue = TestResult.builder()
+                    .startedAt(String.valueOf(startTime))
+                    .finishedAt(String.valueOf(endTime))
+                    .url(templateInfo.getUrl())
+                    .method(templateInfo.getMethod())
+                    .totalSuccess(0)
+                    .totalErrors(1)
+                    .statusCode(500)
+                    .tpsAverage(0)
+                    .mttfbAverage(0)
+                    .build();
+
+            return Mono.just(defaultValue);
+        });
     }
 
     /**
@@ -114,4 +189,5 @@ public class SseManageService extends AbstractSseManageService {
             this.stop(id); // Call method to clean up resources
         });
     }
+
 }
