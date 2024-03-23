@@ -1,12 +1,17 @@
 package org.benchmarker.bmcontroller.template.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.bmcontroller.template.model.TestTemplate;
 import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
-import org.benchmarker.bmcontroller.template.service.TestTemplateService;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -14,19 +19,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Profile("템플릿 관련 테스트")
 class TestTemplateServiceTest {
 
     @Autowired

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.benchmarker.bmcontroller.MockServer;
 import org.benchmarker.bmcontroller.common.beans.RequestCounter;
 import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
@@ -27,14 +28,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.util.initialize.MockServer;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Profile("webClinet 관련 테스트")
 class TestResultServiceTest extends MockServer {
 
     @Autowired
