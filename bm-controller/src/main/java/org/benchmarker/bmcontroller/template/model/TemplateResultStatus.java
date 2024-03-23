@@ -12,7 +12,7 @@ import org.benchmarker.bmcontroller.common.model.BaseTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestStatus extends BaseTime {
+public class TemplateResultStatus extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

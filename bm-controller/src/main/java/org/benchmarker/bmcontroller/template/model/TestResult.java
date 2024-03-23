@@ -47,13 +47,13 @@ public class TestResult extends BaseTime {
     private Double mttbfbAvg;
 
     @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
-    private List<TestMttfb> testMttfbs;
+    private List<Mttfb> mttfbs;
 
     @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
-    private List<TestTps> testTps;
+    private List<Tps> tps;
 
     @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
-    private List<TestStatus> testStatuses;
+    private List<TemplateResultStatus> templateResultStatuses;
 
     public TestResultResponseDto convertToResponseDto() {
         return TestResultResponseDto.builder()

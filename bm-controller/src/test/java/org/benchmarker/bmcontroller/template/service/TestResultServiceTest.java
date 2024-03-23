@@ -11,11 +11,11 @@ import org.benchmarker.bmcontroller.common.beans.RequestCounter;
 import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
-import org.benchmarker.bmcontroller.template.repository.TestErrorLogRepository;
-import org.benchmarker.bmcontroller.template.repository.TestMttfbRepository;
+import org.benchmarker.bmcontroller.template.repository.TemplateResultErrorLogRepository;
+import org.benchmarker.bmcontroller.template.repository.MttfbRepository;
 import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
 import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
-import org.benchmarker.bmcontroller.template.repository.TestTpsRepository;
+import org.benchmarker.bmcontroller.template.repository.TpsRepository;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.benchmarker.bmcontroller.user.repository.UserRepository;
@@ -47,10 +47,10 @@ class TestResultServiceTest extends MockServer {
     private UserGroupRepository userGroupRepository;
 
     @Autowired
-    private TestMttfbRepository mttfbRepository;
+    private MttfbRepository mttfbRepository;
 
     @Autowired
-    private TestTpsRepository tpsRepository;
+    private TpsRepository tpsRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -58,7 +58,7 @@ class TestResultServiceTest extends MockServer {
     @Autowired
     private TestTemplateService testTemplateService;
     @Autowired
-    private TestErrorLogRepository testErrorLogRepository;
+    private TemplateResultErrorLogRepository templateResultErrorLogRepository;
     @MockBean
     private UserContext userContext;
     @Autowired
@@ -70,7 +70,7 @@ class TestResultServiceTest extends MockServer {
         WebClient webClient = WebClient.builder().baseUrl(mockBackEnd.url("/").toString()).build();
 
         testResultService = new TestResultService(testTemplateRepository, testResultRepository,
-            tpsRepository, mttfbRepository, testErrorLogRepository, userGroupRepository,
+            tpsRepository, mttfbRepository, templateResultErrorLogRepository, userGroupRepository,
             webClient, new RequestCounter());
     }
 

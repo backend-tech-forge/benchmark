@@ -20,19 +20,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcontroller.common.beans.RequestCounter;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
-import org.benchmarker.bmcontroller.template.controller.dto.TempSaveTestResultDto;
+import org.benchmarker.bmcommon.dto.TempSaveTestResultDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
-import org.benchmarker.bmcontroller.template.model.TestErrorLog;
-import org.benchmarker.bmcontroller.template.model.TestMttfb;
+import org.benchmarker.bmcontroller.template.model.TemplateResultErrorLog;
+import org.benchmarker.bmcontroller.template.model.Mttfb;
 import org.benchmarker.bmcontroller.template.model.TestResult;
 import org.benchmarker.bmcontroller.template.model.TestTemplate;
-import org.benchmarker.bmcontroller.template.model.TestTps;
-import org.benchmarker.bmcontroller.template.repository.TestErrorLogRepository;
-import org.benchmarker.bmcontroller.template.repository.TestMttfbRepository;
+import org.benchmarker.bmcontroller.template.model.Tps;
+import org.benchmarker.bmcontroller.template.repository.TemplateResultErrorLogRepository;
+import org.benchmarker.bmcontroller.template.repository.MttfbRepository;
 import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
 import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
-import org.benchmarker.bmcontroller.template.repository.TestTpsRepository;
+import org.benchmarker.bmcontroller.template.repository.TpsRepository;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.springframework.http.HttpStatusCode;
@@ -52,11 +52,11 @@ public class TestResultService extends AbstractTestResultService {
 
     private final TestResultRepository testResultRepository;
 
-    private final TestTpsRepository testTpsRepository;
+    private final TpsRepository tpsRepository;
 
-    private final TestMttfbRepository testMttfbRepository;
+    private final MttfbRepository mttfbRepository;
 
-    private final TestErrorLogRepository testErrorLogRepository;
+    private final TemplateResultErrorLogRepository templateResultErrorLogRepository;
 
     private final UserGroupRepository userGroupRepository;
 
@@ -206,35 +206,35 @@ public class TestResultService extends AbstractTestResultService {
 
     private void saveErrorLog(Throwable throwable) {
         long endTime = System.currentTimeMillis();
-        TestErrorLog testErrorLog = TestErrorLog.builder()
+        TemplateResultErrorLog templateResultErrorLog = TemplateResultErrorLog.builder()
                 .message(throwable.getMessage())
                 .build();
 
-        testErrorLogRepository.save(testErrorLog);
+        templateResultErrorLogRepository.save(templateResultErrorLog);
     }
 
     private void saveMttfb(TestResult TestResult, long endTime, long startTime, double avgResponseTime) {
         long networkDelay = (long) (endTime - startTime - avgResponseTime);
         double mttfb = avgResponseTime - networkDelay;
 
-        TestMttfb testMttfb = TestMttfb.builder()
+        Mttfb testMttfb = Mttfb.builder()
                 .testResult(TestResult)
                 .mttfb(mttfb)
                 .startAt(LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime), ZoneId.systemDefault()))
                 .finishAt(LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime), ZoneId.systemDefault()))
                 .build();
-        testMttfbRepository.save(testMttfb);
+        mttfbRepository.save(testMttfb);
     }
 
     private void saveTps(TestResult TestResult, long startTime, double tpsAvgTime, long endTime) {
-        TestTps testTps = TestTps.builder()
+        Tps tps = Tps.builder()
                 .testResult(TestResult)
                 .startAt(LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime), ZoneId.systemDefault()))
                 .transaction(tpsAvgTime)
                 .finishAt(LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime), ZoneId.systemDefault()))
                 .build();
 
-        testTpsRepository.save(testTps);
+        tpsRepository.save(tps);
     }
 
     @Override

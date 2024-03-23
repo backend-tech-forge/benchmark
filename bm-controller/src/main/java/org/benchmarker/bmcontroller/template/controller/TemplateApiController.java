@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class TestTemplateApiController {
+public class TemplateApiController {
 
     private final ITestTemplateService testTemplateService;
     private final UserContext userContext;

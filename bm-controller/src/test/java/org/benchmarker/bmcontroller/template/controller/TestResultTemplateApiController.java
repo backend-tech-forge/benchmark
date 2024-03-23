@@ -29,7 +29,7 @@ import org.util.annotations.RestDocsTest;
 
 @SpringBootTest
 @RestDocsTest
-class TestResultTemplateApiControllerTest {
+class TestResultTemplateApiController {
 
     @Autowired
     private ObjectMapper objectMapper;
