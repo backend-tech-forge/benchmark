@@ -1,7 +1,7 @@
 package org.benchmarker.bmcontroller.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.template.repository.TestMttfbRepository;
+import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
+import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
+import org.benchmarker.bmcontroller.template.repository.TestTpsRepository;
 import org.benchmarker.bmcontroller.user.controller.dto.GroupAddDto;
 import org.benchmarker.bmcontroller.user.controller.dto.GroupInfo;
 import org.benchmarker.bmcontroller.user.controller.dto.GroupUpdateDto;
@@ -19,17 +23,52 @@ import org.benchmarker.bmcontroller.user.model.User;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.model.UserGroupJoin;
 import org.benchmarker.bmcontroller.user.model.enums.GroupRole;
+import org.benchmarker.bmcontroller.user.repository.UserGroupJoinRepository;
+import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
+import org.benchmarker.bmcontroller.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.util.initialize.InitiClass;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 
-class GroupServiceTest extends InitiClass {
+@Testcontainers(parallel = true)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class GroupServiceTest {
+    @SpyBean
+    private GroupService groupService;
+    @SpyBean
+    private UserGroupRepository userGroupRepository;
+    @SpyBean
+    private UserRepository userRepository;
+    @SpyBean
+    private UserGroupJoinRepository userGroupJoinRepository;
+    @SpyBean
+    private TestResultRepository testResultRepository;
+    @SpyBean
+    private TestMttfbRepository mttfbRepository;
+    @SpyBean
+    private TestTpsRepository tpsRepository;
+    @SpyBean
+    private TestTemplateRepository testTemplateRepository;
+
+    @BeforeEach
+    void removeAll() {
+        mttfbRepository.deleteAll();
+        tpsRepository.deleteAll();
+        testResultRepository.deleteAll();
+        testTemplateRepository.deleteAll();
+        userGroupJoinRepository.deleteAll();
+        userRepository.deleteAll();
+        userGroupRepository.deleteAll();
+    }
 
     @Nested
     @DisplayName("그룹 생성")
