@@ -9,7 +9,7 @@ import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.service.AbstractSseManageService;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
-import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.util.RandomUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -47,7 +47,7 @@ public class SseManageService extends AbstractSseManageService {
 
         // Save the SseEmitter to the map
         sseEmitterHashMap.put(id, emitter);
-        resultManagerService.save(id, new TestResult());
+//        resultManagerService.save(id, new TestResult());
 
         /**
          * TODO:DEV Target Server 에 HTTP 요청 시작 메소드 작성
@@ -58,7 +58,7 @@ public class SseManageService extends AbstractSseManageService {
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
-//            resultManagerService.save(id, RandomUtils.generateRandomTestResult());
+            resultManagerService.save(id, RandomUtils.generateRandomTestResult());
             send(id, resultManagerService.find(id));
         }, 0, 1, TimeUnit.SECONDS);
 
