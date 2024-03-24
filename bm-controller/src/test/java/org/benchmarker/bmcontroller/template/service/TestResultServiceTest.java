@@ -1,40 +1,33 @@
 package org.benchmarker.bmcontroller.template.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import org.benchmarker.bmcontroller.common.beans.RequestCounter;
-import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
-import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
-import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
-import org.benchmarker.bmcontroller.template.repository.TemplateResultErrorLogRepository;
-import org.benchmarker.bmcontroller.template.repository.MttfbRepository;
-import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
-import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
-import org.benchmarker.bmcontroller.template.repository.TpsRepository;
+import org.benchmarker.bmcontroller.common.error.ErrorCode;
+import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
+import org.benchmarker.bmcontroller.template.model.*;
+import org.benchmarker.bmcontroller.template.repository.*;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
-import org.benchmarker.bmcontroller.user.repository.UserRepository;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Profile;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.util.initialize.MockServer;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Profile("webClinet 관련 테스트")
+@Profile("결과 처리 관련 테스트")
 class TestResultServiceTest extends MockServer {
 
     @Autowired
@@ -44,163 +37,105 @@ class TestResultServiceTest extends MockServer {
     private TestResultRepository testResultRepository;
 
     @Autowired
-    private UserGroupRepository userGroupRepository;
-
-    @Autowired
     private MttfbRepository mttfbRepository;
 
     @Autowired
     private TpsRepository tpsRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserGroupRepository userGroupRepository;
+
+    @Autowired
+    private TemplateResultStatusRepository templateResultStatusRepository;
 
     @Autowired
     private TestTemplateService testTemplateService;
-    @Autowired
-    private TemplateResultErrorLogRepository templateResultErrorLogRepository;
+
     @MockBean
     private UserContext userContext;
+
     @Autowired
     private ObjectMapper objectMapper;
-    private ITestResultService testResultService;
 
-    @BeforeEach
-    public void setUpEach() {
-        WebClient webClient = WebClient.builder().baseUrl(mockBackEnd.url("/").toString()).build();
-
-        testResultService = new TestResultService(testTemplateRepository, testResultRepository,
-            tpsRepository, mttfbRepository, templateResultErrorLogRepository, userGroupRepository,
-            webClient, new RequestCounter());
-    }
+    @Autowired
+    private TestResultService testResultService;
 
     @AfterEach
     public void clear() {
-        mttfbRepository.deleteAll();
+        templateResultStatusRepository.deleteAll();
         tpsRepository.deleteAll();
+        mttfbRepository.deleteAll();
+
         testResultRepository.deleteAll();
         testTemplateRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("성능 측적 method 호출 시 결과 저장 후 반환 확인하는 테스트")
-    public void getMethodTemplateResultTest() throws InterruptedException {
+    @DisplayName("agent 결과 받아서 저장하는 테스트")
+    public void saveResultAndReturnTest() throws InterruptedException {
 
-        //given
-        Optional<TestTemplateResponseDto> template = saveGetTempData(
-            mockBackEnd.url("/").toString());
-        // mockBackend 에 응답할 오브젝트를 큐에 9번 반복하여 추가합니다
-        addMockResponse("test-response-1", 9);
+        // given
+        TestTemplate testTemplate = getTestTemplate();
 
-        //when
-        TestResultResponseDto testResultResponseDto = testResultService.measurePerformance(
-            "userGroup", template.get().getId(), "start");
+        SaveResultReqDto req = SaveResultReqDto.builder()
+                .testId(testTemplate.getId())
+                .startedAt(LocalDateTime.now())
+                .finishedAt(LocalDateTime.now().plusSeconds(2))
+                .url(testTemplate.getUrl())
+                .method(testTemplate.getMethod())
+                .statusCode("200")
+                .totalRequest(5)
+                .totalSuccess(3)
+                .totalError(2)
+                .totalUsers(5)
+                .mttbfbAvg(3.0)
+                .tpsAvg(0.5)
+                .build();
 
-        //then
-        assertThat(testResultResponseDto.getMethod()).isEqualTo(template.get().getMethod());
-        assertThat(testResultResponseDto.getUrl()).isEqualTo(template.get().getUrl());
-        assertThat(testResultResponseDto.getTotalUsers()).isEqualTo(template.get().getVuser());
+        // when
+        SaveResultResDto saveResultResDto = testResultService.resultSaveAndReturn(req)
+                .orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
+
+        TestResult saveResult = testResultRepository.findById(saveResultResDto.getId())
+                .orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
+
+        List<Mttfb> mttfbs = mttfbRepository.findByTestResult(saveResult);
+        List<Tps> tps = tpsRepository.findByTestResult(saveResult);
+        List<TemplateResultStatus> statuses = templateResultStatusRepository.findByTestResult(saveResult);
+
+        // then
+        assertThat(saveResult.getTestTemplate()).isEqualTo(testTemplate);
+        assertThat(saveResult.getStartedAt()).isEqualTo(req.getStartedAt());
+        assertThat(saveResult.getFinishedAt()).isEqualTo(req.getFinishedAt());
+        assertThat(saveResult.getTotalRequest()).isEqualTo(req.getTotalRequest());
+        assertThat(saveResult.getTotalSuccess()).isEqualTo(req.getTotalSuccess());
+        assertThat(saveResult.getTotalError()).isEqualTo(req.getTotalError());
+        assertThat(saveResult.getTpsAvg()).isEqualTo(req.getTpsAvg());
+        assertThat(saveResult.getMttbfbAvg()).isEqualTo(req.getMttbfbAvg());
+
+        assertThat(mttfbs.get(0).getTestResult()).isEqualTo(saveResult);
+        assertThat(tps.get(0).getTestResult()).isEqualTo(saveResult);
+        assertThat(statuses.get(0).getTestResult()).isEqualTo(saveResult);
+
     }
 
-    @Test
-    @DisplayName("성능 측적 method 호출 시 결과 저장 후 반환 확인하는 테스트")
-    public void postMethodTemplateResultTest()
-        throws InterruptedException {
-
-        //given
-        Optional<TestTemplateResponseDto> template = saveGetTempData(
-            mockBackEnd.url("/").toString());
-        // mockBackend 에 응답할 오브젝트를 큐에 9번 반복하여 추가합니다
-        addMockResponse("test-response-1", 9);
-
-        //when
-        TestResultResponseDto testResultResponseDto = testResultService.measurePerformance(
-            "userGroup", template.get().getId(), "start");
-
-        //then
-        assertThat(testResultResponseDto.getMethod()).isEqualTo(template.get().getMethod());
-        assertThat(testResultResponseDto.getUrl()).isEqualTo(template.get().getUrl());
-        assertThat(testResultResponseDto.getTotalUsers()).isEqualTo(template.get().getVuser());
-
-    }
-
-    public Optional<TestTemplateResponseDto> saveGetTempData() {
+    private TestTemplate getTestTemplate() {
 
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
-        userGroupRepository.save(userGroup);
+        UserGroup tempGroup = userGroupRepository.save(userGroup);
 
-        TestTemplateRequestDto request = TestTemplateRequestDto.builder()
-            .url("http://localhost:8080/login")
-            .method("get")
-            .body("")
-            .userGroupId("userGroup")
-            .vuser(3)
-            .cpuLimit(3)
-            .maxRequest(3)
-            .maxDuration(3)
-            .build();
+        TestTemplate request = TestTemplate.builder()
+                .url("test.com")
+                .method("get")
+                .body("")
+                .userGroup(tempGroup)
+                .vuser(3)
+                .cpuLimit(3)
+                .maxRequest(3)
+                .maxDuration(3)
+                .build();
 
-        return testTemplateService.createTemplate(request);
-    }
-
-    public Optional<TestTemplateResponseDto> saveGetTempData(String url) {
-
-        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
-        userGroupRepository.save(userGroup);
-
-        TestTemplateRequestDto request = TestTemplateRequestDto.builder()
-            .url(url)
-            .method("get")
-            .body("")
-            .userGroupId("userGroup")
-            .vuser(3)
-            .cpuLimit(3)
-            .maxRequest(3)
-            .maxDuration(3)
-            .build();
-
-        return testTemplateService.createTemplate(request);
-    }
-
-    public Optional<TestTemplateResponseDto> savePostTempData() throws JsonProcessingException {
-
-        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
-        userGroupRepository.save(userGroup);
-
-        /**
-         * "userGroupName" : "default",
-         *     "url" : "test.com",
-         *     "method" : "get",
-         *     "body" : "",
-         *     "vuser" : "3",
-         *     "maxRequest" : 4,
-         *     "maxDuration" : 5,
-         *     "cpuLimit" : 3
-         */
-        Map<String, Object> bodyMap = new HashMap<>();
-        bodyMap.put("userGroupName", "default");
-        bodyMap.put("url", "test.com");
-        bodyMap.put("method", "get");
-        bodyMap.put("body", "");
-        bodyMap.put("vuser", 3);
-        bodyMap.put("maxRequest", 3);
-        bodyMap.put("maxDuration", 3);
-        bodyMap.put("cpuLimit", 3);
-
-        String jsonBody = objectMapper.writeValueAsString(bodyMap);
-
-        TestTemplateRequestDto request = TestTemplateRequestDto.builder()
-            .url("http://localhost:8080/api/template")
-            .method("post")
-            .body(jsonBody)
-            .userGroupId("userGroup")
-            .vuser(3)
-            .cpuLimit(3)
-            .maxRequest(3)
-            .maxDuration(3)
-            .build();
-
-        return testTemplateService.createTemplate(request);
+        return testTemplateRepository.save(request);
     }
 
 }
