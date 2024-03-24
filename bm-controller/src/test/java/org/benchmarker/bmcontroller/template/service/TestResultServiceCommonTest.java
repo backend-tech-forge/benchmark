@@ -118,19 +118,19 @@ class TestResultServiceCommonTest extends MockServer {
         List<SaveResultResDto> results = saveResults(testTemplate);
 
         // when
-        ResultResDto templateResult = testResultService.getTemplateResult(testTemplate.getId());
+        CommonTestResult templateResult = testResultService.getTemplateResult(testTemplate.getId());
 
         // then
         assertThat(templateResult.getTestId()).isEqualTo(testTemplate.getId());
         assertThat(templateResult.getStartedAt()).isEqualTo(String.valueOf(results.get(0).getStartedAt()));
         assertThat(templateResult.getFinishedAt()).isEqualTo(String.valueOf(results.get(results.size() - 1).getFinishedAt()));
-        assertThat(templateResult.getTotalRequest()).isEqualTo(5);
+        assertThat(templateResult.getTotalRequests()).isEqualTo(5);
         assertThat(templateResult.getTotalSuccess()).isEqualTo(5);
-        assertThat(templateResult.getTotalError()).isEqualTo(0);
+        assertThat(templateResult.getTotalErrors()).isEqualTo(0);
 
         assertThat(templateResult.getStatusCodeCount().size()).isEqualTo(1);
-        assertThat(templateResult.getTpsPercentiles().size()).isEqualTo(4);
-        assertThat(templateResult.getMttfbPercentiles().size()).isEqualTo(4);
+        assertThat(templateResult.getTPSPercentiles().size()).isEqualTo(4);
+        assertThat(templateResult.getMTTFBPercentiles().size()).isEqualTo(4);
     }
 
     private TestTemplate getTestTemplate() {

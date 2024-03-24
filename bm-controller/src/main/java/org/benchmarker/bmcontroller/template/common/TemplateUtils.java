@@ -76,11 +76,11 @@ public class TemplateUtils {
         return "";
     }
 
-    public static void addPercentile(Map<String, Double> tpsPercentiles, Map<String, Double> mttfbPercentiles, String key, long startTime, long finishTime, int totalRequest) {
+    public static void addPercentile(Map<String, Double> tpsPercentiles, Map<String, String> mttfbPercentiles, String key, long startTime, long finishTime, int totalRequest) {
         double tpsPercentile = calculateTPS(startTime, finishTime, totalRequest);
         double mttfbPercentile = calculateAvgResponseTime(startTime, finishTime, totalRequest);
 
         tpsPercentiles.put(key, tpsPercentile);
-        mttfbPercentiles.put(key, mttfbPercentile);
+        mttfbPercentiles.put(key, String.valueOf(mttfbPercentile));
     }
 }
