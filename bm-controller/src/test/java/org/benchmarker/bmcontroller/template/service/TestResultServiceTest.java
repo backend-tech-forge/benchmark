@@ -2,6 +2,7 @@ package org.benchmarker.bmcontroller.template.service;
 
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.template.controller.dto.ResultResDto;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 import org.benchmarker.bmcontroller.template.model.*;
@@ -18,6 +19,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.util.initialize.MockServer;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,7 +62,7 @@ class TestResultServiceTest extends MockServer {
 
     @Test
     @DisplayName("agent 결과 받아서 저장하는 테스트")
-    public void saveResultAndReturnTest() throws InterruptedException {
+    public void saveResultAndReturnTest() {
 
         // given
         TestTemplate testTemplate = getTestTemplate();
@@ -71,7 +73,7 @@ class TestResultServiceTest extends MockServer {
                 .finishedAt(LocalDateTime.now().plusSeconds(2))
                 .url(testTemplate.getUrl())
                 .method(testTemplate.getMethod())
-                .statusCode("200")
+                .statusCode(200)
                 .totalRequest(5)
                 .totalSuccess(3)
                 .totalError(2)
@@ -107,6 +109,30 @@ class TestResultServiceTest extends MockServer {
 
     }
 
+    @Test
+    @DisplayName("agent 결과 받아서 client 에 보여주는 테스트")
+    public void getTemplateResult() {
+
+        // given
+        TestTemplate testTemplate = getTestTemplate();
+        List<SaveResultResDto> results = saveResults(testTemplate);
+
+        // when
+        ResultResDto templateResult = testResultService.getTemplateResult(testTemplate.getId());
+
+        // then
+        assertThat(templateResult.getTestId()).isEqualTo(testTemplate.getId());
+        assertThat(templateResult.getStartedAt()).isEqualTo(String.valueOf(results.get(0).getStartedAt()));
+        assertThat(templateResult.getFinishedAt()).isEqualTo(String.valueOf(results.get(results.size() - 1).getFinishedAt()));
+        assertThat(templateResult.getTotalRequest()).isEqualTo(5);
+        assertThat(templateResult.getTotalSuccess()).isEqualTo(5);
+        assertThat(templateResult.getTotalError()).isEqualTo(0);
+
+        assertThat(templateResult.getStatusCodeCount().size()).isEqualTo(1);
+        assertThat(templateResult.getTpsPercentiles().size()).isEqualTo(4);
+        assertThat(templateResult.getMttfbPercentiles().size()).isEqualTo(4);
+    }
+
     private TestTemplate getTestTemplate() {
 
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
@@ -124,6 +150,35 @@ class TestResultServiceTest extends MockServer {
                 .build();
 
         return testTemplateRepository.save(request);
+    }
+
+    private List<SaveResultResDto> saveResults(TestTemplate template) {
+
+        List<SaveResultResDto> testResults = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            SaveResultReqDto req = SaveResultReqDto.builder()
+                    .testId(template.getId())
+                    .startedAt(LocalDateTime.now())
+                    .finishedAt(LocalDateTime.now().plusSeconds(2))
+                    .url(template.getUrl())
+                    .method(template.getMethod())
+                    .statusCode(200)
+                    .totalRequest(i + 1)
+                    .totalSuccess(1)
+                    .totalError(0)
+                    .totalUsers(5)
+                    .mttbfbAvg(3.0 + i)
+                    .tpsAvg(0.5 + i)
+                    .build();
+
+            SaveResultResDto tempSaveResult = testResultService.resultSaveAndReturn(req)
+                    .orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
+
+            testResults.add(tempSaveResult);
+        }
+
+        return testResults;
     }
 
 }
