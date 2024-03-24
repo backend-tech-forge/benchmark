@@ -219,6 +219,8 @@ class TestTemplateServiceTest {
                 .cpuLimit(4)
                 .maxRequest(4)
                 .maxDuration(4)
+                .name("modify")
+                .description("업데이트 하면 여기 있는 내용이 업데이트 되어야 한다.")
                 .build();
 
         //when
@@ -235,6 +237,8 @@ class TestTemplateServiceTest {
         assertThat(updateTestTemplate.getCpuLimit()).isEqualTo(updateRequest.getCpuLimit());
         assertThat(updateTestTemplate.getMaxRequest()).isEqualTo(updateRequest.getMaxRequest());
         assertThat(updateTestTemplate.getMaxDuration()).isEqualTo(updateRequest.getMaxDuration());
+        assertThat(updateTestTemplate.getName()).isEqualTo(updateRequest.getName());
+        assertThat(updateTestTemplate.getDescription()).isEqualTo(updateRequest.getDescription());
     }
 
     @Test
