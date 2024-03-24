@@ -2,7 +2,7 @@ package org.benchmarker.bmcontroller.template.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ public class ResultTemplateApiController {
 
     @PostMapping("/testResult")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<SaveResultResDto> measurePerformance(@RequestBody SaveResultReqDto request) {
+    public ResponseEntity<SaveResultResDto> measurePerformance(@RequestBody CommonTestResult request) {
         return ResponseEntity.ok(testResultService.resultSaveAndReturn(request).get());
     }
 

@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcontroller.common.model.BaseTime;
-import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 import org.benchmarker.bmcontroller.template.controller.dto.ResultResDto;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,7 +73,7 @@ public class TestResult extends BaseTime {
 
     public SaveResultResDto convertToSaveResDto() {
 
-        SaveResultResDto saveResultResDto = SaveResultResDto.builder()
+        return SaveResultResDto.builder()
                 .id(this.id)
                 .testId(this.getTestTemplate().getId())
                 .startedAt(this.startedAt)
@@ -86,7 +86,5 @@ public class TestResult extends BaseTime {
                 .mttbfbAvg(this.getMttbfbAvg())
                 .tpsAvg(this.getTpsAvg())
                 .build();
-
-        return saveResultResDto;
     }
 }

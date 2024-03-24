@@ -1,9 +1,9 @@
 package org.benchmarker.bmcontroller.template.service;
 
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.template.controller.dto.ResultResDto;
-import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 import org.benchmarker.bmcontroller.template.model.*;
 import org.benchmarker.bmcontroller.template.repository.*;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Profile("결과 처리 관련 테스트")
-class TestResultServiceTest extends MockServer {
+class TestResultServiceCommonTest extends MockServer {
 
     @Autowired
     private TestTemplateRepository testTemplateRepository;
@@ -67,19 +67,19 @@ class TestResultServiceTest extends MockServer {
         // given
         TestTemplate testTemplate = getTestTemplate();
 
-        SaveResultReqDto req = SaveResultReqDto.builder()
+        CommonTestResult req = CommonTestResult.builder()
                 .testId(testTemplate.getId())
-                .startedAt(LocalDateTime.now())
-                .finishedAt(LocalDateTime.now().plusSeconds(2))
+                .startedAt(String.valueOf(LocalDateTime.now()))
+                .finishedAt(String.valueOf(LocalDateTime.now().plusSeconds(2)))
                 .url(testTemplate.getUrl())
                 .method(testTemplate.getMethod())
                 .statusCode(200)
-                .totalRequest(5)
+                .totalRequests(5)
                 .totalSuccess(3)
-                .totalError(2)
+                .totalErrors(2)
                 .totalUsers(5)
-                .mttbfbAvg(3.0)
-                .tpsAvg(0.5)
+                .mttfbAverage(3.0)
+                .tpsAverage(0.5)
                 .build();
 
         // when
@@ -97,11 +97,11 @@ class TestResultServiceTest extends MockServer {
         assertThat(saveResult.getTestTemplate()).isEqualTo(testTemplate);
         assertThat(saveResult.getStartedAt()).isEqualTo(req.getStartedAt());
         assertThat(saveResult.getFinishedAt()).isEqualTo(req.getFinishedAt());
-        assertThat(saveResult.getTotalRequest()).isEqualTo(req.getTotalRequest());
+        assertThat(saveResult.getTotalRequest()).isEqualTo(req.getTotalRequests());
         assertThat(saveResult.getTotalSuccess()).isEqualTo(req.getTotalSuccess());
-        assertThat(saveResult.getTotalError()).isEqualTo(req.getTotalError());
-        assertThat(saveResult.getTpsAvg()).isEqualTo(req.getTpsAvg());
-        assertThat(saveResult.getMttbfbAvg()).isEqualTo(req.getMttbfbAvg());
+        assertThat(saveResult.getTotalError()).isEqualTo(req.getTotalErrors());
+        assertThat(saveResult.getTpsAvg()).isEqualTo(req.getTpsAverage());
+        assertThat(saveResult.getMttbfbAvg()).isEqualTo(req.getMttfbAverage());
 
         assertThat(mttfbs.get(0).getTestResult()).isEqualTo(saveResult);
         assertThat(tps.get(0).getTestResult()).isEqualTo(saveResult);
@@ -157,19 +157,19 @@ class TestResultServiceTest extends MockServer {
         List<SaveResultResDto> testResults = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
-            SaveResultReqDto req = SaveResultReqDto.builder()
+            CommonTestResult req = CommonTestResult.builder()
                     .testId(template.getId())
-                    .startedAt(LocalDateTime.now())
-                    .finishedAt(LocalDateTime.now().plusSeconds(2))
+                    .startedAt(String.valueOf(LocalDateTime.now()))
+                    .finishedAt(String.valueOf(LocalDateTime.now().plusSeconds(2)))
                     .url(template.getUrl())
                     .method(template.getMethod())
                     .statusCode(200)
-                    .totalRequest(i + 1)
+                    .totalRequests(i + 1)
                     .totalSuccess(1)
-                    .totalError(0)
+                    .totalErrors(0)
                     .totalUsers(5)
-                    .mttbfbAvg(3.0 + i)
-                    .tpsAvg(0.5 + i)
+                    .mttfbAverage(3.0 + i)
+                    .tpsAverage(0.5 + i)
                     .build();
 
             SaveResultResDto tempSaveResult = testResultService.resultSaveAndReturn(req)

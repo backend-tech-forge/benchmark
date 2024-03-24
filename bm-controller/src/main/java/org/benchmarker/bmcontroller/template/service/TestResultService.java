@@ -2,11 +2,11 @@ package org.benchmarker.bmcontroller.template.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.template.common.TemplateUtils;
 import org.benchmarker.bmcontroller.template.controller.dto.ResultResDto;
-import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 import org.benchmarker.bmcontroller.template.model.*;
 import org.benchmarker.bmcontroller.template.repository.*;
@@ -41,7 +41,7 @@ public class TestResultService extends AbstractTestResultService {
     private final UserGroupRepository userGroupRepository;
 
     @Override
-    public Optional<SaveResultResDto> resultSaveAndReturn(SaveResultReqDto request) {
+    public Optional<SaveResultResDto> resultSaveAndReturn(CommonTestResult request) {
 
         /**
          * agent 받은 결과를 db 에 저장
@@ -50,34 +50,33 @@ public class TestResultService extends AbstractTestResultService {
         TestTemplate testTemplate = testTemplateRepository.findById(request.getTestId())
                 .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
 
-        LocalDateTime startedAt = request.getStartedAt();
-        LocalDateTime finishedAt = request.getFinishedAt();
+        LocalDateTime dateStartedAt = LocalDateTime.parse(request.getStartedAt());
+        LocalDateTime dateFinishedAt = LocalDateTime.parse(request.getFinishedAt());
 
-        long choStartAt = startedAt.toInstant(ZoneOffset.UTC).toEpochMilli();
-        long choFinishAt = finishedAt.toInstant(ZoneOffset.UTC).toEpochMilli();
+        long choStartAt = dateStartedAt.toInstant(ZoneOffset.UTC).toEpochMilli();
+        long choFinishAt = dateFinishedAt.toInstant(ZoneOffset.UTC).toEpochMilli();
 
         TestResult testResult = TestResult.builder()
                 .testTemplate(testTemplate)
-                .startedAt(request.getStartedAt())
-                .finishedAt(request.getFinishedAt())
-                .totalRequest(request.getTotalRequest())
+                .startedAt(dateStartedAt)
+                .finishedAt(dateFinishedAt)
+                .totalRequest(request.getTotalRequests())
                 .totalSuccess(request.getTotalSuccess())
-                .totalError(request.getTotalError())
-                .tpsAvg(request.getTpsAvg())
-                .mttbfbAvg(request.getMttbfbAvg())
+                .totalError(request.getTotalErrors())
+                .tpsAvg(request.getTpsAverage())
+                .mttbfbAvg(request.getMttfbAverage())
                 .build();
 
         TestResult saveTestResult = testResultRepository.save(testResult);
 
-        double tpsAvgTime = calculateTPS(choStartAt, choFinishAt, request.getTotalRequest());
-        double avgResponseTime = calculateAvgResponseTime(choStartAt, choFinishAt, request.getTotalRequest());
+        double tpsAvgTime = calculateTPS(choStartAt, choFinishAt, request.getTotalRequests());
+        double avgResponseTime = calculateAvgResponseTime(choStartAt, choFinishAt, request.getTotalRequests());
 
-        saveTps(saveTestResult, startedAt, finishedAt, tpsAvgTime);
-        saveMttfb(saveTestResult, startedAt, finishedAt, avgResponseTime);
+        saveTps(saveTestResult, dateStartedAt, dateFinishedAt, tpsAvgTime);
+        saveMttfb(saveTestResult, dateStartedAt, dateFinishedAt, avgResponseTime);
         saveTemplateResultStatus(saveTestResult, request.getStatusCode(), testTemplate.getMethod());
 
-
-        return Optional.of(testResult.convertToSaveResDto());
+        return Optional.of(saveTestResult.convertToSaveResDto());
     }
 
     private void saveMttfb(TestResult TestResult, LocalDateTime startTime, LocalDateTime finishTime, double avgResponseTime) {

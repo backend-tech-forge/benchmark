@@ -5,7 +5,7 @@ import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.schedule.SchedulerStatus;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
-import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ class SseManageServiceTest extends MockServer {
     void start_ShouldStartSseEmitterAndScheduledTask() throws InterruptedException {
         // given
         Long id = 1L;
-        TestResult resultStub = TestResult.builder()
+        CommonTestResult resultStub = CommonTestResult.builder()
                 .startedAt(String.valueOf(LocalDateTime.now()))
                 .finishedAt(String.valueOf(LocalDateTime.now()))
                 .totalErrors(0)
