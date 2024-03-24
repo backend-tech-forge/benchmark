@@ -58,7 +58,7 @@ public class SseManageService extends AbstractSseManageService {
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
-            resultManagerService.save(id, RandomUtils.generateRandomTestResult());
+//            resultManagerService.save(id, RandomUtils.generateRandomTestResult());
             send(id, resultManagerService.find(id));
         }, 0, 1, TimeUnit.SECONDS);
 
