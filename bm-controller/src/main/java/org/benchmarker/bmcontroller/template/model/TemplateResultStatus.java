@@ -23,11 +23,8 @@ public class TemplateResultStatus extends BaseTime {
     private TestResult testResult;
 
     @Enumerated(EnumType.STRING)
-    private HttpStatusCode code;
+    private HttpMethod httpMethod;
 
-    private Integer count;
-
-    @Lob
-    private String message;
+    private String resCode;
 
 }

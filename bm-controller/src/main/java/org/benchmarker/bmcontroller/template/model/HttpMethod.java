@@ -1,6 +1,6 @@
 package org.benchmarker.bmcontroller.template.model;
 
-public enum HttpStatusCode {
+public enum HttpMethod {
     GET,
     POST,
     PATCH,

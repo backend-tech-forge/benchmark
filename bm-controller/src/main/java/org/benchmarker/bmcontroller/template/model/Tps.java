@@ -37,9 +37,10 @@ public class Tps extends BaseTime {
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime startAt;
 
-    private Double transaction;
-
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime finishAt;
+
+    private Double transaction;
+
 
 }

@@ -34,7 +34,7 @@ public class Mttfb extends BaseTime {
     @JoinColumn(name = "test_result_id", referencedColumnName = "id", nullable = false)
     private TestResult testResult;
 
-    private Double mttfb;
+    private Double mttfbAvg;
 
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime startAt;
