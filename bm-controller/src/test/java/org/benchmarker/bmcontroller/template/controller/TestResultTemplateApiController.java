@@ -1,31 +1,36 @@
 package org.benchmarker.bmcontroller.template.controller;
 
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Optional;
-import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
-import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
-import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
-import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
+import org.benchmarker.bmcontroller.template.model.TestTemplate;
+import org.benchmarker.bmcontroller.template.repository.*;
 import org.benchmarker.bmcontroller.template.service.TestResultService;
-import org.benchmarker.bmcontroller.template.service.TestTemplateService;
+import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.repository.UserGroupJoinRepository;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
-import org.benchmarker.bmcontroller.user.repository.UserRepository;
-import org.benchmarker.bmcontroller.user.service.GroupService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import org.util.annotations.RestDocsTest;
+
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
 @RestDocsTest
@@ -37,22 +42,14 @@ class TestResultTemplateApiController {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private TestTemplateService testTemplateService;
-
     @MockBean
     private TestResultService testResultService;
 
     @Autowired
-    private GroupService groupService;
-
-    @Autowired
     private TestTemplateRepository testTemplateRepository;
+
     @Autowired
     private TestResultRepository testResultRepository;
-
-    @MockBean
-    private UserRepository userRepository;
 
     @Autowired
     UserGroupRepository userGroupRepository;
@@ -63,86 +60,104 @@ class TestResultTemplateApiController {
     @MockBean
     UserGroupJoinRepository userGroupJoinRepository;
 
+    @Autowired
+    private TemplateResultStatusRepository templateResultStatusRepository;
+
+    @Autowired
+    private MttfbRepository mttfbRepository;
+
+    @Autowired
+    private TpsRepository tpsRepository;
+
     @AfterEach
-    void removeAll() {
+    void clear() {
+        templateResultStatusRepository.deleteAll();
+        tpsRepository.deleteAll();
+        mttfbRepository.deleteAll();
+
         testResultRepository.deleteAll();
         testTemplateRepository.deleteAll();
-        userGroupJoinRepository.deleteAll();
-        userGroupRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
-    @BeforeEach
-    void setUp(WebApplicationContext webApplicationContext,
-               RestDocumentationContextProvider restDocumentation) {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(documentationConfiguration(restDocumentation))
+    @Test
+    @DisplayName("agent 결과 저장 생성 하는 테스트")
+    @WithMockUser(username = TestUserConsts.id, roles = "USER")
+    public void resultSaveAndReturn() throws Exception {
+
+        //given
+        TestTemplate testTemplate = getTestTemplate();
+
+        SaveResultReqDto req = SaveResultReqDto.builder()
+                .testId(testTemplate.getId())
+                .startedAt(LocalDateTime.now())
+                .finishedAt(LocalDateTime.now().plusSeconds(2))
+                .url(testTemplate.getUrl())
+                .method(testTemplate.getMethod())
+                .statusCode("200")
+                .totalRequest(5)
+                .totalSuccess(3)
+                .totalError(2)
+                .totalUsers(5)
+                .mttbfbAvg(3.0)
+                .tpsAvg(0.5)
                 .build();
+
+        SaveResultResDto res = SaveResultResDto.builder()
+                .testId(testTemplate.getId())
+                .startedAt(req.getStartedAt())
+                .finishedAt(req.getFinishedAt())
+                .url(req.getUrl())
+                .method(req.getMethod())
+                .totalRequest(req.getTotalRequest())
+                .totalSuccess(req.getTotalSuccess())
+                .totalError(req.getTotalError())
+                .tpsAvg(req.getTpsAvg())
+                .mttbfbAvg(req.getMttbfbAvg())
+                .build();
+
+        // when
+        when(testResultService.resultSaveAndReturn(any())).thenReturn(Optional.ofNullable(res));
+
+        // then
+        mockMvc.perform(post("/api/testResult")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andDo(print())
+                .andDo(result -> {
+                    assertThat(result.getResponse().getStatus()).isEqualTo(200);
+
+                    SaveResultResDto resTemplate = objectMapper.readValue(
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8),
+                            SaveResultResDto.class);
+
+                    assertThat(resTemplate.getTestId()).isEqualTo(testTemplate.getId());
+                    assertThat(resTemplate.getStartedAt()).isEqualTo(req.getStartedAt());
+                    assertThat(resTemplate.getFinishedAt()).isEqualTo(req.getFinishedAt());
+                    assertThat(resTemplate.getTotalRequest()).isEqualTo(req.getTotalRequest());
+                    assertThat(resTemplate.getTotalSuccess()).isEqualTo(req.getTotalSuccess());
+                    assertThat(resTemplate.getTotalError()).isEqualTo(req.getTotalError());
+                    assertThat(resTemplate.getTpsAvg()).isEqualTo(req.getTpsAvg());
+                    assertThat(resTemplate.getMttbfbAvg()).isEqualTo(req.getMttbfbAvg());
+                });
     }
 
-//    @Test
-//    @DisplayName("탬플릿 결과 호출하는 테스트")
-//    @WithMockUser(username = TestUserConsts.id, roles = "USER")
-//    public void createTemplateResult() throws Exception {
-//
-//        //given
-//        User defaultUser = UserHelper.createDefaultUser();
-//        TestTemplateResponseDto testTemplateResponseDto = saveGetTempData()
-//                .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
-//
-//        TestResultResponseDto request = TestResultResponseDto.builder()
-//                .url(testTemplateResponseDto.getUrl())
-//                .method(testTemplateResponseDto.getMethod())
-//                .totalSuccess(3)
-//                .totalRequest(3)
-//                .totalError(0)
-//                .build();
-//
-//        // when
-//        when(userContext.getCurrentUser()).thenReturn(defaultUser);
-//        when(testResultService.measurePerformance("userGroup", testTemplateResponseDto.getId(), "start")).thenReturn(request);
-//
-//        // then
-//        mockMvc.perform(post("/api/groups/{group_id}/templates/{template_id}?action={action}"
-//                                , "userGroup", testTemplateResponseDto.getId(), "start")
-//                        .contentType(MediaType.APPLICATION_JSON)
-////                        .content(objectMapper.writeValueAsString(request))
-//                )
-//                .andDo(print())
-//                .andDo(result -> {
-//                    assertThat(result.getResponse().getStatus()).isEqualTo(200);
-//
-//                    TestResultResponseDto resTemplate = objectMapper.readValue(
-//                            result.getResponse().getContentAsString(StandardCharsets.UTF_8),
-//                            TestResultResponseDto.class);
-//
-//                    assertThat(resTemplate.getUrl()).isEqualTo(request.getUrl());
-//                    assertThat(resTemplate.getMethod()).isEqualTo(request.getMethod());
-//                    assertThat(resTemplate.getTotalRequest()).isEqualTo(request.getTotalRequest());
-//                    assertThat(resTemplate.getTotalSuccess()).isEqualTo(request.getTotalSuccess());
-//                    assertThat(resTemplate.getTotalError()).isEqualTo(request.getTotalError());
-//
-//                });
-//    }
-
-    public Optional<TestTemplateResponseDto> saveGetTempData() {
+    private TestTemplate getTestTemplate() {
 
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        UserGroup tempGroup = userGroupRepository.save(userGroup);
 
-        UserGroup saveUserGroup = userGroupRepository.save(userGroup);
-
-        TestTemplateRequestDto request = TestTemplateRequestDto.builder()
-                .url("http://localhost:8080/login")
+        TestTemplate request = TestTemplate.builder()
+                .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupId(saveUserGroup.getId())
+                .userGroup(tempGroup)
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
                 .maxDuration(3)
                 .build();
 
-        return testTemplateService.createTemplate(request);
+        return testTemplateRepository.save(request);
     }
 
 }

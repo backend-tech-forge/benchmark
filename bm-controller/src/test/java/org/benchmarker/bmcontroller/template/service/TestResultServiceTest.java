@@ -1,6 +1,5 @@
 package org.benchmarker.bmcontroller.template.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
@@ -9,13 +8,11 @@ import org.benchmarker.bmcontroller.template.model.*;
 import org.benchmarker.bmcontroller.template.repository.*;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
-import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Profile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.util.initialize.MockServer;
@@ -47,15 +44,6 @@ class TestResultServiceTest extends MockServer {
 
     @Autowired
     private TemplateResultStatusRepository templateResultStatusRepository;
-
-    @Autowired
-    private TestTemplateService testTemplateService;
-
-    @MockBean
-    private UserContext userContext;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private TestResultService testResultService;
