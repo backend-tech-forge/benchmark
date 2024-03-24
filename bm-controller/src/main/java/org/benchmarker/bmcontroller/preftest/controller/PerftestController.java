@@ -2,10 +2,12 @@ package org.benchmarker.bmcontroller.preftest.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcommon.dto.TestResult;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -51,9 +53,13 @@ public class PerftestController {
             };
 
         WebClient webClient = WebClient.create(agentUrl);
+        // TODO : template 정보를 조회해서 전송해야합니다.
+        TemplateInfo templateInfo = new TemplateInfo();
 
         Flux<ServerSentEvent<TestResult>> eventStream = webClient.post()
             .uri("/api/templates/{template_id}?action={action}", templateId, action)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(templateInfo, TemplateInfo.class)
             .retrieve()
             .bodyToFlux(typeReference)
             .log();
