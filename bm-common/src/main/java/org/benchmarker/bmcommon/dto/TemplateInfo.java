@@ -17,7 +17,7 @@ import lombok.ToString;
 @ToString
 public class TemplateInfo {
 
-    private String id;
+    private Integer id;
     private String name;
     private String description;
     private String url;
@@ -27,11 +27,11 @@ public class TemplateInfo {
     private PrepareInfo prepare;
 
     public TemplateInfo random(){
-        this.id = "id";
-        this.name = "name";
+        this.id = 1;
+        this.name = "테스트";
         this.description = "description";
-        this.url = "url";
-        this.method = "method";
+        this.url = "http://localhost:8080/";
+        this.method = "get";
         this.headers = Map.of("key", "value");
         this.body = Map.of("key", "value");
         this.prepare = new PrepareInfo().random();
