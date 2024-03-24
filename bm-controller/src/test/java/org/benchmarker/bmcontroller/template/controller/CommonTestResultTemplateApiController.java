@@ -1,7 +1,7 @@
 package org.benchmarker.bmcontroller.template.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 import org.benchmarker.bmcontroller.template.model.TestTemplate;
 import org.benchmarker.bmcontroller.template.repository.*;
@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 @SpringBootTest
 @RestDocsTest
-class TestResultTemplateApiController {
+class CommonTestResultTemplateApiController {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -87,32 +87,32 @@ class TestResultTemplateApiController {
         //given
         TestTemplate testTemplate = getTestTemplate();
 
-        SaveResultReqDto req = SaveResultReqDto.builder()
+        CommonTestResult req = CommonTestResult.builder()
                 .testId(testTemplate.getId())
-                .startedAt(LocalDateTime.now())
-                .finishedAt(LocalDateTime.now().plusSeconds(2))
+                .startedAt(String.valueOf(LocalDateTime.now()))
+                .finishedAt(String.valueOf(LocalDateTime.now().plusSeconds(2)))
                 .url(testTemplate.getUrl())
                 .method(testTemplate.getMethod())
                 .statusCode(200)
-                .totalRequest(5)
+                .totalRequests(5)
                 .totalSuccess(3)
-                .totalError(2)
+                .totalErrors(2)
                 .totalUsers(5)
-                .mttbfbAvg(3.0)
-                .tpsAvg(0.5)
+                .mttfbAverage(3.0)
+                .tpsAverage(0.5)
                 .build();
 
         SaveResultResDto res = SaveResultResDto.builder()
                 .testId(testTemplate.getId())
-                .startedAt(req.getStartedAt())
-                .finishedAt(req.getFinishedAt())
+                .startedAt(LocalDateTime.parse(req.getStartedAt()))
+                .finishedAt(LocalDateTime.parse(req.getFinishedAt()))
                 .url(req.getUrl())
                 .method(req.getMethod())
-                .totalRequest(req.getTotalRequest())
+                .totalRequest(req.getTotalRequests())
                 .totalSuccess(req.getTotalSuccess())
-                .totalError(req.getTotalError())
-                .tpsAvg(req.getTpsAvg())
-                .mttbfbAvg(req.getMttbfbAvg())
+                .totalError(req.getTotalErrors())
+                .tpsAvg(req.getTpsAverage())
+                .mttbfbAvg(req.getMttfbAverage())
                 .build();
 
         // when
@@ -133,11 +133,11 @@ class TestResultTemplateApiController {
                     assertThat(resTemplate.getTestId()).isEqualTo(testTemplate.getId());
                     assertThat(resTemplate.getStartedAt()).isEqualTo(req.getStartedAt());
                     assertThat(resTemplate.getFinishedAt()).isEqualTo(req.getFinishedAt());
-                    assertThat(resTemplate.getTotalRequest()).isEqualTo(req.getTotalRequest());
+                    assertThat(resTemplate.getTotalRequest()).isEqualTo(req.getTotalRequests());
                     assertThat(resTemplate.getTotalSuccess()).isEqualTo(req.getTotalSuccess());
-                    assertThat(resTemplate.getTotalError()).isEqualTo(req.getTotalError());
-                    assertThat(resTemplate.getTpsAvg()).isEqualTo(req.getTpsAvg());
-                    assertThat(resTemplate.getMttbfbAvg()).isEqualTo(req.getMttbfbAvg());
+                    assertThat(resTemplate.getTotalError()).isEqualTo(req.getTotalErrors());
+                    assertThat(resTemplate.getTpsAvg()).isEqualTo(req.getTpsAverage());
+                    assertThat(resTemplate.getMttbfbAvg()).isEqualTo(req.getMttfbAverage());
                 });
     }
 
