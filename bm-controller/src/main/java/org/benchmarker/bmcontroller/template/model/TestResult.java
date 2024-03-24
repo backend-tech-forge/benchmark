@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcontroller.common.model.BaseTime;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
-import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
+import org.benchmarker.bmcontroller.template.controller.dto.ResultResDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,8 +52,8 @@ public class TestResult extends BaseTime {
     @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
     private List<TemplateResultStatus> templateResultStatuses;
 
-    public TestResultResponseDto convertToResponseDto() {
-        return TestResultResponseDto.builder()
+    public ResultResDto convertToResponseDto() {
+        return ResultResDto.builder()
                 .testId(this.id)
                 .totalRequest(this.totalRequest)
                 .totalSuccess(this.totalSuccess)

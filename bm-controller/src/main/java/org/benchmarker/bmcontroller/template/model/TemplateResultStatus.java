@@ -25,6 +25,6 @@ public class TemplateResultStatus extends BaseTime {
     @Enumerated(EnumType.STRING)
     private HttpMethod httpMethod;
 
-    private String resCode;
+    private int resCode;
 
 }

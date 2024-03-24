@@ -36,7 +36,7 @@ public class SaveResultReqDto {
 
     @NotBlank
     @JsonProperty("status_code")
-    private String statusCode;
+    private int statusCode;
 
     @NotNull
     @JsonProperty("total_request")

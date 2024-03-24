@@ -93,7 +93,7 @@ class TestResultTemplateApiController {
                 .finishedAt(LocalDateTime.now().plusSeconds(2))
                 .url(testTemplate.getUrl())
                 .method(testTemplate.getMethod())
-                .statusCode("200")
+                .statusCode(200)
                 .totalRequest(5)
                 .totalSuccess(3)
                 .totalError(2)
