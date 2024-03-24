@@ -14,8 +14,11 @@ public interface ITestTemplateService {
     TestTemplateResponseDto getTemplate(Integer id);
 
     List<TestTemplateResponseDto> getAllTemplatesAdmin();
+
     List<TestTemplateResponseDto> getTemplates(String groupId, String userId);
+
     List<TestTemplateResponseDto> getTemplates(String groupId);
+
     Optional<TestTemplateResponseDto> updateTemplate(TestTemplateUpdateDto testTemplate) throws Exception;
 
     void deleteTemplate(Integer id);
