@@ -4,20 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.template.common.TemplateUtils;
+import org.benchmarker.bmcontroller.template.controller.dto.ResultResDto;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
 import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
-import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
-import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.bmcontroller.template.model.*;
 import org.benchmarker.bmcontroller.template.repository.*;
-import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.benchmarker.bmcontroller.template.common.TemplateUtils.calculateAvgResponseTime;
@@ -102,7 +102,7 @@ public class TestResultService extends AbstractTestResultService {
         tpsRepository.save(tps);
     }
 
-    private void saveTemplateResultStatus(TestResult TestResult, String statusCode, String httpMethod) {
+    private void saveTemplateResultStatus(TestResult TestResult, int statusCode, String httpMethod) {
         TemplateResultStatus templateResultStatus = TemplateResultStatus.builder()
                 .testResult(TestResult)
                 .httpMethod(HttpMethod.valueOf(httpMethod.toUpperCase()))
@@ -113,28 +113,71 @@ public class TestResultService extends AbstractTestResultService {
     }
 
     @Override
-    public TestTemplateResponseDto getTemplateResult(Integer templateResultId) {
+    public ResultResDto getTemplateResult(Integer templateResultId) {
 
         TestTemplate testTemplate = testTemplateRepository.findById(templateResultId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
 
-        return testTemplate.convertToResponseDto();
-    }
+        List<TestResult> testResults = testResultRepository.findByTestTemplate(testTemplate);
 
-    @Override
-    public List<TestResultResponseDto> getGroupTemplateResult(String groupId) {
+        // 시간순으로 정렬
+        int totalRequest = testResults.size();
+        int totalSuccess = 0;
+        int totalError = 0;
 
-        // 존재하는 그룹인지 파악
-        UserGroup userGroup = userGroupRepository.findById(groupId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.GROUP_NOT_FOUND));
+        Map<String, Integer> statusCodeCount = new HashMap<>();
+        Map<String, Double> mttfbPercentiles = new HashMap<>();
+        Map<String, Double> tpsPercentiles = new HashMap<>();
 
-        List<TestTemplate> testTemplates = testTemplateRepository.findAllByUserGroupId(userGroup.getId());
-        List<TestResultResponseDto> results = new ArrayList<>();
-        for (int i = 0; i < testTemplates.size(); i++) {
-            TestResult tempResult = testResultRepository.findByTestTemplate(testTemplates.get(i));
-            results.add(tempResult.convertToResponseDto());
+        for (int i = 0; i < testResults.size(); i++) {
+            TestResult tempDto = testResults.get(i);
+
+            totalSuccess += tempDto.getTotalSuccess();
+            totalError += tempDto.getTotalError();
+
+            List<TemplateResultStatus> statuses = templateResultStatusRepository.findByTestResult(tempDto);
+
+            for (int j = 0; j < statuses.size(); j++) {
+                int statusCode = statuses.get(j).getResCode();
+                String statusCodeCategory = TemplateUtils.getStatusCodeCategory(statusCode);
+                statusCodeCount.put(statusCodeCategory, statusCodeCount.getOrDefault(statusCodeCategory, 0) + 1);
+            }
+
+            long choStartAt = tempDto.getStartedAt().toInstant(ZoneOffset.UTC).toEpochMilli();
+            long choFinishAt = tempDto.getFinishedAt().toInstant(ZoneOffset.UTC).toEpochMilli();
+
+            int index = i + 1;
+            if (index == (int) Math.ceil(0.25 * totalRequest)) {
+                TemplateUtils.addPercentile(tpsPercentiles, mttfbPercentiles, "p25", choStartAt, choFinishAt, totalRequest);
+            } else if (index == (int) Math.ceil(0.50 * totalRequest)) {
+                TemplateUtils.addPercentile(tpsPercentiles, mttfbPercentiles, "p50", choStartAt, choFinishAt, totalRequest);
+            } else if (index == (int) Math.ceil(0.75 * totalRequest)) {
+                TemplateUtils.addPercentile(tpsPercentiles, mttfbPercentiles, "p75", choStartAt, choFinishAt, totalRequest);
+            } else if (index == totalRequest) {
+                TemplateUtils.addPercentile(tpsPercentiles, mttfbPercentiles, "p100", choStartAt, choFinishAt, totalRequest);
+            }
         }
 
-        return results;
+        long choFirstStartAt = testResults.get(0).getStartedAt().toInstant(ZoneOffset.UTC).toEpochMilli();
+        long choEndFinishAt = testResults.get(testResults.size() - 1).getFinishedAt().toInstant(ZoneOffset.UTC).toEpochMilli();
+
+        return ResultResDto.builder()
+                .testId(testTemplate.getId())
+                .startedAt(String.valueOf(testResults.get(0).getStartedAt()))
+                .finishedAt(String.valueOf(testResults.get(testResults.size() - 1).getFinishedAt()))
+                .url(testTemplate.getUrl())
+                .body(testTemplate.getBody())
+                .method(testTemplate.getMethod())
+                .totalRequest(totalRequest)
+                .totalSuccess(totalSuccess)
+                .totalError(totalError)
+                .statusCodeCount(statusCodeCount)
+                .mttfbPercentiles(mttfbPercentiles)
+                .tpsPercentiles(tpsPercentiles)
+                .totalUsers(totalRequest)
+                .totalDuration("")
+                .tpsAvg(calculateTPS(choFirstStartAt, choEndFinishAt, totalRequest))
+                .mttbfbAvg(calculateAvgResponseTime(choFirstStartAt, choEndFinishAt, totalRequest))
+                .build();
     }
 }
