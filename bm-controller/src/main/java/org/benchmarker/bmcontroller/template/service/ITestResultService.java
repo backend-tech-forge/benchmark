@@ -10,6 +10,6 @@ public interface ITestResultService {
 
     Optional<SaveResultResDto> resultSaveAndReturn(CommonTestResult request);
 
-    ResultResDto getTemplateResult(Integer templateResultId);
+    CommonTestResult getTemplateResult(Integer templateResultId);
 
 }

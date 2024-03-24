@@ -112,7 +112,7 @@ public class TestResultService extends AbstractTestResultService {
     }
 
     @Override
-    public ResultResDto getTemplateResult(Integer templateResultId) {
+    public CommonTestResult getTemplateResult(Integer templateResultId) {
 
         TestTemplate testTemplate = testTemplateRepository.findById(templateResultId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
@@ -125,7 +125,7 @@ public class TestResultService extends AbstractTestResultService {
         int totalError = 0;
 
         Map<String, Integer> statusCodeCount = new HashMap<>();
-        Map<String, Double> mttfbPercentiles = new HashMap<>();
+        Map<String, String> mttfbPercentiles = new HashMap<>();
         Map<String, Double> tpsPercentiles = new HashMap<>();
 
         for (int i = 0; i < testResults.size(); i++) {
@@ -160,23 +160,22 @@ public class TestResultService extends AbstractTestResultService {
         long choFirstStartAt = testResults.get(0).getStartedAt().toInstant(ZoneOffset.UTC).toEpochMilli();
         long choEndFinishAt = testResults.get(testResults.size() - 1).getFinishedAt().toInstant(ZoneOffset.UTC).toEpochMilli();
 
-        return ResultResDto.builder()
+        return CommonTestResult.builder()
                 .testId(testTemplate.getId())
                 .startedAt(String.valueOf(testResults.get(0).getStartedAt()))
                 .finishedAt(String.valueOf(testResults.get(testResults.size() - 1).getFinishedAt()))
                 .url(testTemplate.getUrl())
-                .body(testTemplate.getBody())
                 .method(testTemplate.getMethod())
-                .totalRequest(totalRequest)
+                .totalRequests(totalRequest)
                 .totalSuccess(totalSuccess)
-                .totalError(totalError)
+                .totalErrors(totalError)
                 .statusCodeCount(statusCodeCount)
-                .mttfbPercentiles(mttfbPercentiles)
-                .tpsPercentiles(tpsPercentiles)
+                .MTTFBPercentiles(mttfbPercentiles)
+                .TPSPercentiles(tpsPercentiles)
                 .totalUsers(totalRequest)
                 .totalDuration("")
-                .tpsAvg(calculateTPS(choFirstStartAt, choEndFinishAt, totalRequest))
-                .mttbfbAvg(calculateAvgResponseTime(choFirstStartAt, choEndFinishAt, totalRequest))
+                .tpsAverage(calculateTPS(choFirstStartAt, choEndFinishAt, totalRequest))
+                .mttfbAverage(calculateAvgResponseTime(choFirstStartAt, choEndFinishAt, totalRequest))
                 .build();
     }
 }
