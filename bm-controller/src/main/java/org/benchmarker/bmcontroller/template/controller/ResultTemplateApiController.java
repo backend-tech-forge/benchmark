@@ -2,6 +2,8 @@ package org.benchmarker.bmcontroller.template.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
 import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +18,10 @@ public class ResultTemplateApiController {
 
     private final ITestResultService testResultService;
 
-    @PostMapping("/groups/{group_id}/templates/{template_id}?action={action}")
+    @PostMapping("/testResult")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<TestResultResponseDto> measurePerformance(
-            @PathVariable String  group_id,
-            @PathVariable Integer template_id,
-            @RequestParam(required = true) String action) throws InterruptedException {
-        return ResponseEntity.ok(testResultService.measurePerformance(group_id, template_id, action));
+    public ResponseEntity<SaveResultResDto> measurePerformance(@RequestBody SaveResultReqDto request) {
+        return ResponseEntity.ok(testResultService.resultSaveAndReturn(request).get());
     }
 
 }
