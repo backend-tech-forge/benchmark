@@ -27,4 +27,8 @@ public class TestTemplateUpdateDto {
 
     private Integer cpuLimit;
 
+    private String name;
+
+    private String description;
+
 }
