@@ -3,8 +3,12 @@ package org.benchmarker.bmcontroller.preftest.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
-import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
+import org.benchmarker.bmcontroller.common.error.ErrorCode;
+import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
+import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +32,7 @@ public class PerftestController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final UserContext userContext;
+    private final ITestResultService testResultService;
     private final String agentUrl = "http://localhost:8081";
 
     @GetMapping("/groups/{group_id}/templates/{template_id}")
@@ -47,15 +52,15 @@ public class PerftestController {
         log.info("Send action: {}", action);
         String userId = userContext.getCurrentUser().getId();
 
-        ParameterizedTypeReference<ServerSentEvent<TestResult>> typeReference =
-            new ParameterizedTypeReference<ServerSentEvent<TestResult>>() {
+        ParameterizedTypeReference<ServerSentEvent<CommonTestResult>> typeReference =
+            new ParameterizedTypeReference<ServerSentEvent<CommonTestResult>>() {
             };
 
         WebClient webClient = WebClient.create(agentUrl);
         // TODO : template 정보를 조회해서 전송해야합니다.
         TemplateInfo templateInfo = new TemplateInfo().random();
 
-        Flux<ServerSentEvent<TestResult>> eventStream = webClient.post()
+        Flux<ServerSentEvent<CommonTestResult>> eventStream = webClient.post()
             .uri("/api/templates/{templateId}?action={action}", templateId, action)
             .bodyValue(templateInfo)
             .retrieve()
@@ -70,8 +75,14 @@ public class PerftestController {
                 }
             })
             .subscribe(event -> {
-                    TestResult testResult = event.data();
-                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId, testResult);
+                    CommonTestResult commonTestResult = event.data();
+
+                    /**
+                     * 데이터 저장 로직 추가 -> 리턴되는 객체 사용해도 됩니다.
+                     */
+                    SaveResultResDto saveResultDto = testResultService.resultSaveAndReturn(commonTestResult)
+                            .orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
+                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId, commonTestResult);
                 },
                 error -> {
                     log.error("Error receiving SSE: {}", error.getMessage());
