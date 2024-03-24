@@ -12,6 +12,7 @@ version = '0.0.1-SNAPSHOT'
 def excludeJacocoTestCoverageReport = [
         // bmagent
         'org/benchmarker/bmagent/BmAgentApplication**',
+        'org/benchmarker/bmagent/sse/**',
 //        'org/benchmarker/bmagent/**',
 ]
 

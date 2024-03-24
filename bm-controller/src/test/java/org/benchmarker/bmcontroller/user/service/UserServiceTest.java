@@ -1,23 +1,48 @@
 package org.benchmarker.bmcontroller.user.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.List;
+import java.util.Optional;
+import org.benchmarker.bmcontroller.common.error.ErrorCode;
+import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
 import org.benchmarker.bmcontroller.user.controller.dto.UserInfo;
 import org.benchmarker.bmcontroller.user.controller.dto.UserRegisterDto;
 import org.benchmarker.bmcontroller.user.controller.dto.UserUpdateDto;
-import org.util.initialize.InitiClass;
-import org.benchmarker.bmcontroller.common.error.ErrorCode;
-import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
+import org.benchmarker.bmcontroller.user.repository.UserGroupJoinRepository;
+import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
+import org.benchmarker.bmcontroller.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.annotation.DirtiesContext;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Optional;
+@Testcontainers(parallel = true)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class UserServiceTest {
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+    @SpyBean
+    private UserService userService;
+    @SpyBean
+    private UserGroupRepository userGroupRepository;
+    @SpyBean
+    private UserRepository userRepository;
+    @SpyBean
+    private UserGroupJoinRepository userGroupJoinRepository;
 
-class UserServiceTest extends InitiClass {
+    @BeforeEach
+    void removeAll() {
+        userGroupJoinRepository.deleteAll();
+        userRepository.deleteAll();
+        userGroupRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("사용자를 생성하면 사용자 정보를 반환한다")
@@ -96,7 +121,8 @@ class UserServiceTest extends InitiClass {
         assertThat(u.getSlackWebhookUrl()).isEqualTo(userUpdateDto.getSlackWebhookUrl());
         assertThat(u.getSlackNotification()).isEqualTo(userUpdateDto.getSlackNotification());
         assertThat(u.getEmailNotification()).isEqualTo(userUpdateDto.getEmailNotification());
-        assertThat(u.getUserGroup().get(0).getId()).isEqualTo(userUpdateDto.getUserGroup().get(0).getId());
+        assertThat(u.getUserGroup().get(0).getId()).isEqualTo(
+            userUpdateDto.getUserGroup().get(0).getId());
         u.getUserGroup().stream().forEach(g -> {
             System.out.println(g.getId());
         });

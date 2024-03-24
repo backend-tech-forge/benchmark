@@ -1,17 +1,30 @@
 package org.benchmarker.bmcontroller.user.repository;
 
-import java.util.Optional;
-import org.benchmarker.bmcontroller.user.model.UserGroupJoin;
-import org.util.initialize.InitiClass;
-import org.benchmarker.bmcontroller.user.model.enums.Role;
-import org.benchmarker.bmcontroller.user.model.User;
-import org.benchmarker.bmcontroller.user.model.UserGroup;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UserRepositoryTest extends InitiClass {
+import java.util.Optional;
+import org.benchmarker.bmcontroller.user.model.User;
+import org.benchmarker.bmcontroller.user.model.UserGroup;
+import org.benchmarker.bmcontroller.user.model.UserGroupJoin;
+import org.benchmarker.bmcontroller.user.model.enums.Role;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.annotation.DirtiesContext;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@Testcontainers(parallel = true)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class UserRepositoryTest {
+
+    @SpyBean
+    private UserRepository userRepository;
+    @SpyBean
+    private UserGroupRepository userGroupRepository;
+    @SpyBean
+    private UserGroupJoinRepository userGroupJoinRepository;
 
     @Test
     @DisplayName("정상 사용자 생성시 사용자 정보를 반환한다")

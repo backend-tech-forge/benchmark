@@ -1,4 +1,4 @@
-package org.util.initialize;
+package org.benchmarker.bmcontroller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
