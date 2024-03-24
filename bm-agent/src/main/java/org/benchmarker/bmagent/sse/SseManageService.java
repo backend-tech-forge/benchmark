@@ -6,8 +6,8 @@ import org.benchmarker.bmagent.pref.ResultManagerService;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.service.AbstractSseManageService;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
-import org.benchmarker.bmcommon.dto.TestResult;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -71,14 +71,17 @@ public class SseManageService extends AbstractSseManageService {
          */
 
         // 비동기 처리 후 각각의 결과를 담은 객체 반환
-        Mono<TestResult> saveTestResultMono = createAndProcessRequest(webClient, templateInfo);
+        Mono<CommonTestResult> saveTestResultMono = createAndProcessRequest(webClient, templateInfo).log();
 
-        saveTestResultMono.subscribe(testResult -> {
-            log.info("Target Server Result received: " + testResult);
-            resultManagerService.save(id, testResult);
-        }, error -> {
-            log.info("Target Sever Error occurred: " + error.getMessage());
-        });
+        CommonTestResult test = saveTestResultMono.block();
+        resultManagerService.save(id, test);
+
+//        saveTestResultMono.subscribe(testResult -> {
+//            log.info("Target Server Result received: " + testResult);
+//            resultManagerService.save(id, testResult);
+//        }, error -> {
+//            log.info("Target Sever Error occurred: " + error.getMessage());
+//        });
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
@@ -88,7 +91,7 @@ public class SseManageService extends AbstractSseManageService {
         return emitter;
     }
 
-    private Mono<TestResult> createAndProcessRequest(WebClient webClient, TemplateInfo templateInfo) {
+    private Mono<CommonTestResult> createAndProcessRequest(WebClient webClient, TemplateInfo templateInfo) {
 
         long startTime = System.currentTimeMillis();
         totalRequests.incrementAndGet();
@@ -114,25 +117,33 @@ public class SseManageService extends AbstractSseManageService {
             double tpsAvgTime = calculateTPS(startTime, endTime, totalRequests.get());
             double avgResponseTime = calculateAvgResponseTime(startTime, endTime, totalRequests.get());
 
-            TestResult tempSaveTestResultDto = TestResult.builder()
+            CommonTestResult commonTestResult = CommonTestResult.builder()
+                    .testId(templateInfo.getId())
                     .startedAt(String.valueOf(startTime))
                     .finishedAt(String.valueOf(endTime))
+                    .url(templateInfo.getUrl())
+                    .method(templateInfo.getMethod())
                     .totalRequests(totalRequests.get())
                     .totalSuccess(success)
                     .totalErrors(error)
                     .statusCode(statusCode.value())
+//                    .statusCodeCount(new HashMap<>())
+                    .totalUsers(totalRequests.get())
+                    .totalDuration("-")
+//                    .MTTFBPercentiles(new HashMap<>())
                     .tpsAverage(tpsAvgTime)
+//                    .TPSPercentiles(new HashMap<>())
                     .mttfbAverage(avgResponseTime)
                     .build();
 
-            return Mono.just(tempSaveTestResultDto);
+            return Mono.just(commonTestResult);
 
         }).onErrorResume(throwable -> {
             log.error("Error occurred: " + throwable.getMessage());
 
             long endTime = System.currentTimeMillis();
 
-            TestResult defaultValue = TestResult.builder()
+            CommonTestResult defaultValue = CommonTestResult.builder()
                     .startedAt(String.valueOf(startTime))
                     .finishedAt(String.valueOf(endTime))
                     .url(templateInfo.getUrl())
@@ -141,7 +152,12 @@ public class SseManageService extends AbstractSseManageService {
                     .totalSuccess(0)
                     .totalErrors(1)
                     .statusCode(500)
+//                    .statusCodeCount(new HashMap<>())
                     .tpsAverage(0)
+//                    .MTTFBPercentiles(new HashMap<>())
+//                    .TPSPercentiles(new HashMap<>())
+                    .totalUsers(totalRequests.get())
+                    .totalDuration("-")
                     .mttfbAverage(0)
                     .build();
 
