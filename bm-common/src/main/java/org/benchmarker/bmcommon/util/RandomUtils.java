@@ -21,7 +21,7 @@ public class RandomUtils {
             }})
             .totalUsers(1)
             .totalDuration("1s")
-            .mttfbAverage("1ms")
+            .mttfbAverage(0.0)
             .MTTFBPercentiles(new HashMap<String, String>() {{
                 put("50", "1ms");
                 put("95", "1ms");

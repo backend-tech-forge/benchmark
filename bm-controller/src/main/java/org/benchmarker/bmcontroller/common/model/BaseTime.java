@@ -21,6 +21,7 @@ public class BaseTime {
 
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime createdAt;
+
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime updatedAt;
 

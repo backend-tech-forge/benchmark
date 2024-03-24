@@ -24,7 +24,7 @@ import org.benchmarker.bmcontroller.common.model.BaseTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestTps extends BaseTime {
+public class Mttfb extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,10 +34,10 @@ public class TestTps extends BaseTime {
     @JoinColumn(name = "test_result_id", referencedColumnName = "id", nullable = false)
     private TestResult testResult;
 
+    private Double mttfbAvg;
+
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime startAt;
-
-    private Double transaction;
 
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime finishAt;

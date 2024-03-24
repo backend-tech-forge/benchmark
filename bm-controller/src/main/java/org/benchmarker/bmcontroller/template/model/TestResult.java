@@ -1,23 +1,14 @@
 package org.benchmarker.bmcontroller.template.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcontroller.common.model.BaseTime;
-import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
+import org.benchmarker.bmcontroller.template.controller.dto.ResultResDto;
 
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Getter
@@ -36,6 +27,12 @@ public class TestResult extends BaseTime {
     @JoinColumn(name = "test_template_id", referencedColumnName = "id", nullable = false)
     private TestTemplate testTemplate;
 
+    @Column(columnDefinition = "timestamp(6)")
+    protected LocalDateTime startedAt;
+
+    @Column(columnDefinition = "timestamp(6)")
+    protected LocalDateTime finishedAt;
+
     private Integer totalRequest;
 
     private Integer totalError;
@@ -47,16 +44,16 @@ public class TestResult extends BaseTime {
     private Double mttbfbAvg;
 
     @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
-    private List<TestMttfb> testMttfbs;
+    private List<Mttfb> mttfbs;
 
     @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
-    private List<TestTps> testTps;
+    private List<Tps> tps;
 
     @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
-    private List<TestStatus> testStatuses;
+    private List<TemplateResultStatus> templateResultStatuses;
 
-    public TestResultResponseDto convertToResponseDto() {
-        return TestResultResponseDto.builder()
+    public ResultResDto convertToResponseDto() {
+        return ResultResDto.builder()
                 .testId(this.id)
                 .totalRequest(this.totalRequest)
                 .totalSuccess(this.totalSuccess)
@@ -72,5 +69,24 @@ public class TestResult extends BaseTime {
         this.totalError = totalError;
         this.tpsAvg = tpsAvg;
         this.mttbfbAvg = mttbfbAvg;
+    }
+
+    public SaveResultResDto convertToSaveResDto() {
+
+        SaveResultResDto saveResultResDto = SaveResultResDto.builder()
+                .id(this.id)
+                .testId(this.getTestTemplate().getId())
+                .startedAt(this.startedAt)
+                .finishedAt(this.finishedAt)
+                .url(this.getTestTemplate().getUrl())
+                .method(this.getTestTemplate().getMethod())
+                .totalRequest(this.getTotalRequest())
+                .totalSuccess(this.getTotalSuccess())
+                .totalError(this.getTotalError())
+                .mttbfbAvg(this.getMttbfbAvg())
+                .tpsAvg(this.getTpsAvg())
+                .build();
+
+        return saveResultResDto;
     }
 }

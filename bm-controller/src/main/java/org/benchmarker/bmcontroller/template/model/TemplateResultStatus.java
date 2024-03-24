@@ -12,7 +12,7 @@ import org.benchmarker.bmcontroller.common.model.BaseTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestStatus extends BaseTime {
+public class TemplateResultStatus extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +23,8 @@ public class TestStatus extends BaseTime {
     private TestResult testResult;
 
     @Enumerated(EnumType.STRING)
-    private HttpStatusCode code;
+    private HttpMethod httpMethod;
 
-    private Integer count;
-
-    @Lob
-    private String message;
+    private int resCode;
 
 }
