@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -110,7 +111,6 @@ public class SseManageService extends AbstractSseManageService {
                 isError = true;
             }
 
-//            int totalRequests = requestCounter.getTotalRequests();
             int success = isSuccess ? 1 : 0;
             int error = isError ? 1 : 0;
 
@@ -127,12 +127,12 @@ public class SseManageService extends AbstractSseManageService {
                     .totalSuccess(success)
                     .totalErrors(error)
                     .statusCode(statusCode.value())
-//                    .statusCodeCount(new HashMap<>())
+                    .statusCodeCount(new HashMap<>())
                     .totalUsers(totalRequests.get())
                     .totalDuration("-")
-//                    .MTTFBPercentiles(new HashMap<>())
+                    .MTTFBPercentiles(new HashMap<>())
                     .tpsAverage(tpsAvgTime)
-//                    .TPSPercentiles(new HashMap<>())
+                    .TPSPercentiles(new HashMap<>())
                     .mttfbAverage(avgResponseTime)
                     .build();
 
@@ -152,10 +152,10 @@ public class SseManageService extends AbstractSseManageService {
                     .totalSuccess(0)
                     .totalErrors(1)
                     .statusCode(500)
-//                    .statusCodeCount(new HashMap<>())
+                    .statusCodeCount(new HashMap<>())
                     .tpsAverage(0)
-//                    .MTTFBPercentiles(new HashMap<>())
-//                    .TPSPercentiles(new HashMap<>())
+                    .MTTFBPercentiles(new HashMap<>())
+                    .TPSPercentiles(new HashMap<>())
                     .totalUsers(totalRequests.get())
                     .totalDuration("-")
                     .mttfbAverage(0)

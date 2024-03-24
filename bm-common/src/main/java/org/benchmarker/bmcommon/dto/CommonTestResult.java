@@ -39,8 +39,8 @@ public class CommonTestResult {
     @JsonProperty("status_code")
     private int statusCode;
 
-//    @JsonProperty("status_code_count")
-//    private Map<String, Integer> statusCodeCount;
+    @JsonProperty("status_code_count")
+    private Map<String, Integer> statusCodeCount;
 
     @JsonProperty("total_users")
     private int totalUsers;
@@ -51,13 +51,13 @@ public class CommonTestResult {
     @JsonProperty("mttfb_average")
     private double mttfbAverage;
 
-//    @JsonProperty("mttfb_percentiles")
-//    private Map<String, String> MTTFBPercentiles;
+    @JsonProperty("mttfb_percentiles")
+    private Map<String, String> MTTFBPercentiles;
 
     @JsonProperty("tps_average")
     private double tpsAverage;
 
-//    @JsonProperty("tps_percentiles")
-//    private Map<String, Double> TPSPercentiles;
+    @JsonProperty("tps_percentiles")
+    private Map<String, Double> TPSPercentiles;
 
 }
