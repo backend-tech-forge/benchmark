@@ -18,6 +18,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.benchmarker.bmagent.common.AgentUtils.*;
 
@@ -34,6 +35,8 @@ public class SseManageService extends AbstractSseManageService {
     private final ResultManagerService resultManagerService;
 
     private final WebClient webClient;
+
+    private AtomicInteger totalRequests = new AtomicInteger(0);
 
     /**
      * Start the SseEmitter for the given id and return the SseEmitter
@@ -69,9 +72,13 @@ public class SseManageService extends AbstractSseManageService {
 
         // 비동기 처리 후 각각의 결과를 담은 객체 반환
         Mono<TestResult> saveTestResultMono = createAndProcessRequest(webClient, templateInfo);
-        TestResult resultDto = saveTestResultMono.block();
 
-        resultManagerService.save(id, resultDto);
+        saveTestResultMono.subscribe(testResult -> {
+            log.info("Target Server Result received: " + testResult);
+            resultManagerService.save(id, testResult);
+        }, error -> {
+            log.info("Target Sever Error occurred: " + error.getMessage());
+        });
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
@@ -84,6 +91,7 @@ public class SseManageService extends AbstractSseManageService {
     private Mono<TestResult> createAndProcessRequest(WebClient webClient, TemplateInfo templateInfo) {
 
         long startTime = System.currentTimeMillis();
+        totalRequests.incrementAndGet();
         Mono<ResponseEntity<String>> resultMono = createRequest(webClient, templateInfo);
 
         return resultMono.publishOn(Schedulers.boundedElastic()).flatMap(response -> {
@@ -100,17 +108,18 @@ public class SseManageService extends AbstractSseManageService {
             }
 
 //            int totalRequests = requestCounter.getTotalRequests();
-            int request = isSuccess ? 1 : 0;
+            int success = isSuccess ? 1 : 0;
             int error = isError ? 1 : 0;
 
-            double tpsAvgTime = calculateTPS(startTime, endTime, request);
-            double avgResponseTime = calculateAvgResponseTime(startTime, endTime, request);
+            double tpsAvgTime = calculateTPS(startTime, endTime, totalRequests.get());
+            double avgResponseTime = calculateAvgResponseTime(startTime, endTime, totalRequests.get());
 
             TestResult tempSaveTestResultDto = TestResult.builder()
                     .startedAt(String.valueOf(startTime))
                     .finishedAt(String.valueOf(endTime))
+                    .totalRequests(totalRequests.get())
+                    .totalSuccess(success)
                     .totalErrors(error)
-                    .totalRequests(request)
                     .statusCode(statusCode.value())
                     .tpsAverage(tpsAvgTime)
                     .mttfbAverage(avgResponseTime)
@@ -128,6 +137,7 @@ public class SseManageService extends AbstractSseManageService {
                     .finishedAt(String.valueOf(endTime))
                     .url(templateInfo.getUrl())
                     .method(templateInfo.getMethod())
+                    .totalRequests(totalRequests.get())
                     .totalSuccess(0)
                     .totalErrors(1)
                     .statusCode(500)
@@ -152,6 +162,7 @@ public class SseManageService extends AbstractSseManageService {
         if (emitter != null) {
             log.info("remove sse emitter");
             this.send(id, "SSE completed");
+            totalRequests.set(0);
             emitter.complete();
         }
         scheduledTaskService.shutdown(id);
