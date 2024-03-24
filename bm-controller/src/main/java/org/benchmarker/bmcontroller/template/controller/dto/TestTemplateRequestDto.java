@@ -35,6 +35,10 @@ public class TestTemplateRequestDto {
 
     @NotNull
     private Integer cpuLimit;
+
+    private String name;
+
+    private String description;
   
     public TestTemplate toEntity() {
         return TestTemplate.builder()
