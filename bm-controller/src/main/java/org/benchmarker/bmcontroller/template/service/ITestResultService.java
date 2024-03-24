@@ -1,13 +1,16 @@
 package org.benchmarker.bmcontroller.template.service;
 
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultReqDto;
+import org.benchmarker.bmcontroller.template.controller.dto.SaveResultResDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
+import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 
 import java.util.List;
-import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
+import java.util.Optional;
 
 public interface ITestResultService {
 
-    TestResultResponseDto measurePerformance(String group_id, Integer templateId, String action) throws InterruptedException;
+    Optional<SaveResultResDto> resultSaveAndReturn(SaveResultReqDto request);
 
     TestTemplateResponseDto getTemplateResult(Integer templateResultId);
 
