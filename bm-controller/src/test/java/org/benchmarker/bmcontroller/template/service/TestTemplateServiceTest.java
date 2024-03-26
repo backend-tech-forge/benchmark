@@ -3,6 +3,7 @@ package org.benchmarker.bmcontroller.template.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,7 @@ class TestTemplateServiceTest {
 
     @Test
     @DisplayName("템플릿 생성 테스트")
-    public void createTemplate() {
+    public void createTemplate() throws JsonProcessingException {
 
         //given
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
@@ -102,7 +103,7 @@ class TestTemplateServiceTest {
 
     @Test
     @DisplayName("존재하는 템플릿을 검색한다")
-    public void getTemplate() {
+    public void getTemplate() throws JsonProcessingException {
         //given
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
         UserGroup tempGroup = userGroupRepository.save(userGroup);
@@ -134,7 +135,7 @@ class TestTemplateServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 템플릿 조회시 에러가 발생한다.")
-    public void getNotFoundTemplateException() {
+    public void getNotFoundTemplateException() throws JsonProcessingException {
         //given
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
         UserGroup tempGroup = userGroupRepository.save(userGroup);
@@ -159,7 +160,7 @@ class TestTemplateServiceTest {
 
     @Test
     @DisplayName("템플릿 목록을 조회 한다.")
-    public void getTemplates() {
+    public void getTemplates() throws JsonProcessingException {
 
         //given
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
