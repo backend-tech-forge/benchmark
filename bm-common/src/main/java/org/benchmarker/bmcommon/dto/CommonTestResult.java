@@ -18,7 +18,7 @@ import org.benchmarker.bmagent.AgentStatus;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class TestResult {
+public class CommonTestResult {
 
     @JsonProperty("test_id")
     private int testId;

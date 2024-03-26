@@ -7,7 +7,7 @@ import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.schedule.SchedulerStatus;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
-import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.util.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +35,7 @@ class SseManageServiceTest {
     void start_ShouldStartSseEmitterAndScheduledTask() throws InterruptedException {
         // given
         Long id = 1L;
-        TestResult resultStub = RandomUtils.generateRandomTestResult();
+        CommonTestResult resultStub = RandomUtils.generateRandomTestResult();
         resultManagerService.save(id, resultStub);
 
         // when
@@ -54,7 +54,7 @@ class SseManageServiceTest {
     void startAndShutdown() throws InterruptedException {
         // given
         Long id = 1L;
-        TestResult resultStub = RandomUtils.generateRandomTestResult();
+        CommonTestResult resultStub = RandomUtils.generateRandomTestResult();
         resultManagerService.save(id, resultStub);
         SseEmitter result = sseManageService.start(id, new TemplateInfo());
 
@@ -71,7 +71,7 @@ class SseManageServiceTest {
     void stop_ShouldDoNothingIfEmitterAlreadyStopped() throws InterruptedException {
         // given
         Long id = 1L;
-        TestResult resultStub = RandomUtils.generateRandomTestResult();
+        CommonTestResult resultStub = RandomUtils.generateRandomTestResult();
         resultManagerService.save(id, resultStub);
         sseManageService.start(id, new TemplateInfo());
         sseManageService.stop(id);
