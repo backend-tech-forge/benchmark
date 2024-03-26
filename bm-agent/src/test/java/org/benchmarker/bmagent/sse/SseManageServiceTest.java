@@ -66,4 +66,21 @@ class SseManageServiceTest {
         sseManageService.stop(id);
     }
 
+    @Test
+    @DisplayName("stop 을 호출하기 전에 이미 종료된 emitter 를 stop 할 경우, 아무 동작도 하지 않는다")
+    void stop_ShouldDoNothingIfEmitterAlreadyStopped() throws InterruptedException {
+        // given
+        Long id = 1L;
+        TestResult resultStub = RandomUtils.generateRandomTestResult();
+        resultManagerService.save(id, resultStub);
+        sseManageService.start(id, new TemplateInfo());
+        sseManageService.stop(id);
+
+        // when
+        sseManageService.stop(id);
+
+        // then
+        assertThat(scheduledTaskService.getStatus().get(id)).isNull();
+    }
+
 }
