@@ -3,13 +3,13 @@ package org.benchmarker.bmcommon.util;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import org.benchmarker.bmagent.AgentStatus;
-import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 
 public class RandomUtils {
 
     // generate random TestResults
-    public static TestResult generateRandomTestResult() {
-        return TestResult.builder()
+    public static CommonTestResult generateRandomTestResult() {
+        return CommonTestResult.builder()
             .testId(1)
             .testStatus(AgentStatus.TESTING)
             .startedAt("2021-01-01 00:00:00")
