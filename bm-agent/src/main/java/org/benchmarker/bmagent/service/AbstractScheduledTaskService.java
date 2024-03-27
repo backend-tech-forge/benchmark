@@ -14,6 +14,7 @@ public abstract class AbstractScheduledTaskService implements IScheduledTaskServ
      * Map of scheduler id to the scheduler
      */
     protected final Map<Long, ScheduledExecutorService> schedulers = new ConcurrentHashMap<>();
+    protected final Map<Long, Map<String, ScheduledExecutorService>> schedulerChild = new ConcurrentHashMap<>();
 
     /**
      * Get the status of all the schedulers
