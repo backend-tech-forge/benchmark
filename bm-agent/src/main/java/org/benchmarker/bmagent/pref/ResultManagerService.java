@@ -1,9 +1,9 @@
 package org.benchmarker.bmagent.pref;
 
 import java.util.concurrent.ConcurrentHashMap;
+import org.benchmarker.bmagent.service.ISseManageService;
 import org.benchmarker.bmagent.service.MapManager;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
-import org.benchmarker.bmagent.service.ISseManageService;
 import org.springframework.stereotype.Component;
 
 /**
