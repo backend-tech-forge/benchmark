@@ -43,11 +43,11 @@ public class CommonTestResult {
     @JsonProperty("mttfb_average")
     private String mttfbAverage;
     @JsonProperty("mttfb_percentiles")
-    private Map<String, String> MTTFBPercentiles;
+    private Map<Double, Double> MTTFBPercentiles;
     @JsonProperty("tps_average")
     private double tpsAverage;
     @JsonProperty("tps_percentiles")
-    private Map<String, Double> TPSPercentiles;
+    private Map<Double, Double> TPSPercentiles;
     @JsonProperty(value = "test_status")
     private AgentStatus testStatus;
 }
