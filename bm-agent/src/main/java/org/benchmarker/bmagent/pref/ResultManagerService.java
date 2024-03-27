@@ -1,9 +1,9 @@
 package org.benchmarker.bmagent.pref;
 
 import java.util.concurrent.ConcurrentHashMap;
-import org.benchmarker.bmagent.service.MapManager;
-import org.benchmarker.bmcommon.dto.TestResult;
 import org.benchmarker.bmagent.service.ISseManageService;
+import org.benchmarker.bmagent.service.MapManager;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,21 +22,21 @@ import org.springframework.stereotype.Component;
  * @see ISseManageService
  */
 @Component
-public class ResultManagerService implements MapManager<Long, TestResult> {
+public class ResultManagerService implements MapManager<Long, CommonTestResult> {
 
     /**
      * ConcurrentHashMap for storing TestResult by its id
      */
-    private final ConcurrentHashMap<Long, TestResult> resultHashMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, CommonTestResult> resultHashMap = new ConcurrentHashMap<>();
 
     /**
      * Find TestResult from resultHashMap
      *
      * @param id {@link Long}
-     * @return {@link TestResult} or null
+     * @return {@link CommonTestResult} or null
      */
     @Override
-    public TestResult find(Long id) {
+    public CommonTestResult find(Long id) {
         if (resultHashMap.containsKey(id)) {
             return resultHashMap.get(id);
         }
@@ -46,10 +46,10 @@ public class ResultManagerService implements MapManager<Long, TestResult> {
     /**
      * Save TestResult to resultHashMap
      * @param id {@link Long}
-     * @param object {@link TestResult}
+     * @param object {@link CommonTestResult}
      */
     @Override
-    public void save(Long id, TestResult object) {
+    public void save(Long id, CommonTestResult object) {
         resultHashMap.put(id, object);
     }
 

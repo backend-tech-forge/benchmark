@@ -82,6 +82,11 @@
   <!-- Template Form -->
 <div id="templateForm" style="display: none;">
   <h2>Add Template</h2>
+  <button onclick="addHeaderInput()">Add Header</button>
+  <div id="headersGroup">
+    <!-- This is where dynamically generated input fields for headers will be added -->
+  </div>
+
   <form id="addTemplateForm">
     <input type="hidden" id="userGroupId" name="userGroupId" th:value="${groupInfo.id}" />
 
@@ -95,9 +100,11 @@
       <input type="text" id="method" name="method">
     </div>
 
+
     <div>
       <label for="body">Body:</label>
-      <textarea id="body" name="body" placeholder="Enter your JSON code here..." onkeydown="handleKeyDown(event)"></textarea>
+      <textarea id="body" name="body" placeholder="Enter your JSON code here..."></textarea>
+      <button type="button" onclick="reformatJSON()">Reformat JSON</button>
     </div>
 
     <div>
@@ -127,7 +134,6 @@
 <script th:inline="javascript">
   /*<![CDATA[*/
   var initialized = [[${initialized}]];
-  console.log(initialized);
   function toggleTemplateForm() {
     var templateForm = document.getElementById('templateForm');
     var toggleButton = document.getElementById('toggleTemplateButton');
@@ -142,19 +148,48 @@
       toggleButton.style.backgroundColor = ''; // Reset button color
     }
   }
-  function handleKeyDown(event) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      const textarea = event.target;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const value = textarea.value;
-      const selectedText = value.substring(start, end);
-      const indent = '  '; // You can customize the indent size here
-      const newValue = value.substring(0, start) + '\n' + indent + selectedText + '\n' + value.substring(end);
-      textarea.value = newValue;
-      textarea.setSelectionRange(start + indent.length + 1, start + indent.length + 1);
+  function reformatJSON() {
+    const textarea = document.getElementById('body');
+    const jsonString = textarea.value;
+    try {
+      const jsonObject = JSON.parse(jsonString);
+      const formattedString = JSON.stringify(jsonObject, null, 2); // 2 spaces indentation
+      document.getElementById('body').value = formattedString;
+    } catch (error) {
+      console.error('Error:', error);
     }
+  }
+
+  function addHeaderInput() {
+    var headersGroup = document.getElementById('headersGroup');
+
+    // Create a new div to contain the header input fields and delete button
+    var headerDiv = document.createElement('div');
+    headerDiv.style.display = 'flex';
+
+    // Create input fields for key and value
+    var keyInput = document.createElement('input');
+    keyInput.setAttribute('type', 'text');
+    keyInput.setAttribute('placeholder', 'Enter header key');
+
+    var valueInput = document.createElement('input');
+    valueInput.setAttribute('type', 'text');
+    valueInput.setAttribute('placeholder', 'Enter header value');
+
+    // Create delete button
+    var deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.onclick = function() {
+      headersGroup.removeChild(headerDiv);
+    };
+
+    // Append inputs and delete button to the new div
+    headerDiv.appendChild(keyInput);
+    headerDiv.appendChild(valueInput);
+    headerDiv.appendChild(deleteButton);
+
+    // Append the new div to the headersGroup
+    headersGroup.appendChild(headerDiv);
   }
 
   function addTemplate() {
@@ -166,8 +201,26 @@
       vuser: parseInt(document.getElementById('vuser').value),
       maxRequest: parseInt(document.getElementById('maxRequest').value),
       maxDuration: parseInt(document.getElementById('maxDuration').value),
-      cpuLimit: parseInt(document.getElementById('cpuLimit').value)
+      cpuLimit: parseInt(document.getElementById('cpuLimit').value),
+      headers: {}
     };
+
+    var headersGroup = document.getElementById('headersGroup').children;
+    console.log(headersGroup)
+    // 각 헤더 그룹에서 키와 값을 가져와서 FormData에 추가
+    // 각 헤더 그룹에서 키와 값을 가져와서 FormData에 추가
+    for (var i = 0; i < headersGroup.length; i++) {
+      // 현재 그룹의 헤더 입력란과 삭제 버튼을 가져옴
+      var inputs = headersGroup[i].querySelectorAll('input[type="text"]');
+      var keyInput = inputs[0];
+      var valueInput = inputs[1];
+      var key = keyInput.value.trim();
+      var value = valueInput.value.trim();
+
+      if (key && value) {
+        formData.headers[key] = value;
+      }
+    }
 
     fetch('/api/template', {
       method: 'POST',

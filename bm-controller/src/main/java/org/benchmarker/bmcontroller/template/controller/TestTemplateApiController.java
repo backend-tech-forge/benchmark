@@ -1,7 +1,11 @@
 package org.benchmarker.bmcontroller.template.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmcontroller.common.error.ErrorCode;
+import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.common.util.JsonMapper;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateUpdateDto;
@@ -23,10 +27,16 @@ public class TestTemplateApiController {
 
     private final ITestTemplateService testTemplateService;
     private final UserContext userContext;
+    private final JsonMapper jsonMapper;
 
     @PostMapping("/template")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<TestTemplateResponseDto> createTemplate(@RequestBody TestTemplateRequestDto reqTestTemplate) {
+    public ResponseEntity<TestTemplateResponseDto> createTemplate(@RequestBody TestTemplateRequestDto reqTestTemplate)
+        throws JsonProcessingException {
+        if (!jsonMapper.isValidJson(reqTestTemplate.getBody())) {
+            log.error("Invalid JSON body");
+            throw new GlobalException(ErrorCode.INVALID_JSON);
+        }
         return ResponseEntity.ok(testTemplateService.createTemplate(reqTestTemplate).get());
     }
 

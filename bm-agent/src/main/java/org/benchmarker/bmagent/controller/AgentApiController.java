@@ -37,7 +37,8 @@ public class AgentApiController {
      */
     @PostMapping("/templates/{template_id}")
     public SseEmitter manageSSE(@PathVariable("template_id") Long templateId,
-        @RequestParam("action") String action, @RequestBody(required = false) TemplateInfo templateInfo) {
+        @RequestParam("action") String action, @RequestBody TemplateInfo templateInfo) {
+        log.info(templateInfo.toString());
 
         if (action.equals("start")) {
             return sseManageService.start(templateId, templateInfo);

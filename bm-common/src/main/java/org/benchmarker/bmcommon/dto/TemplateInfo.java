@@ -1,6 +1,7 @@
 package org.benchmarker.bmcommon.dto;
 
 
+import java.time.Duration;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,19 +23,11 @@ public class TemplateInfo {
     private String description;
     private String url;
     private String method;
+    private Integer vuser;
+    private Integer maxRequest;
+    private Duration maxDuration;
     private Map<String, String> headers;
     private Map<String, Object> body;
-    private PrepareInfo prepare;
+    private String prepareScript;
 
-    public TemplateInfo random(){
-        this.id = "id";
-        this.name = "name";
-        this.description = "description";
-        this.url = "url";
-        this.method = "method";
-        this.headers = Map.of("key", "value");
-        this.body = Map.of("key", "value");
-        this.prepare = new PrepareInfo().random();
-        return this;
-    }
 }

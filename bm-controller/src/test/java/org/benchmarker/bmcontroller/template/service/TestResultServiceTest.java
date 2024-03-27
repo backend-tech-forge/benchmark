@@ -82,7 +82,7 @@ class TestResultServiceTest extends MockServer {
 
     @Test
     @DisplayName("성능 측적 method 호출 시 결과 저장 후 반환 확인하는 테스트")
-    public void getMethodTemplateResultTest() throws InterruptedException {
+    public void getMethodTemplateResultTest() throws InterruptedException, JsonProcessingException {
 
         //given
         Optional<TestTemplateResponseDto> template = saveGetTempData(
@@ -103,7 +103,7 @@ class TestResultServiceTest extends MockServer {
     @Test
     @DisplayName("성능 측적 method 호출 시 결과 저장 후 반환 확인하는 테스트")
     public void postMethodTemplateResultTest()
-        throws InterruptedException {
+        throws InterruptedException, JsonProcessingException {
 
         //given
         Optional<TestTemplateResponseDto> template = saveGetTempData(
@@ -122,7 +122,7 @@ class TestResultServiceTest extends MockServer {
 
     }
 
-    public Optional<TestTemplateResponseDto> saveGetTempData() {
+    public Optional<TestTemplateResponseDto> saveGetTempData() throws JsonProcessingException {
 
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
         userGroupRepository.save(userGroup);
@@ -141,7 +141,8 @@ class TestResultServiceTest extends MockServer {
         return testTemplateService.createTemplate(request);
     }
 
-    public Optional<TestTemplateResponseDto> saveGetTempData(String url) {
+    public Optional<TestTemplateResponseDto> saveGetTempData(String url)
+        throws JsonProcessingException {
 
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
         userGroupRepository.save(userGroup);

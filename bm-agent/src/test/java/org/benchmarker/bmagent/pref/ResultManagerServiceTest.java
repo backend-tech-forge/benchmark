@@ -2,7 +2,7 @@ package org.benchmarker.bmagent.pref;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.util.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,27 +18,27 @@ public class ResultManagerServiceTest {
     @DisplayName("TestResult 저장 및 조회 성공")
     void saveAndFind() {
         // given
-        TestResult testResult = RandomUtils.generateRandomTestResult();
-        resultManagerService.save(1L, testResult);
+        CommonTestResult commonTestResult = RandomUtils.generateRandomTestResult();
+        resultManagerService.save(1L, commonTestResult);
 
         // when
-        TestResult result = resultManagerService.find(1L);
+        CommonTestResult result = resultManagerService.find(1L);
 
         // then
-        assertThat(result).isEqualTo(testResult);
+        assertThat(result).isEqualTo(commonTestResult);
     }
 
     @Test
     @DisplayName("TestResult 저장 및 삭제 성공")
     void saveAndRemove() {
         // given
-        TestResult testResult = RandomUtils.generateRandomTestResult();
-        resultManagerService.save(1L, testResult);
+        CommonTestResult commonTestResult = RandomUtils.generateRandomTestResult();
+        resultManagerService.save(1L, commonTestResult);
 
         // when
         resultManagerService.remove(1L);
 
-        TestResult findResult = resultManagerService.find(1L);
+        CommonTestResult findResult = resultManagerService.find(1L);
 
         // then
         assertThat(findResult).isNull();

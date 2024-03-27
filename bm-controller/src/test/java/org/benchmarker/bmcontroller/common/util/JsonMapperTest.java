@@ -1,42 +1,38 @@
 package org.benchmarker.bmcontroller.common.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
-import org.benchmarker.bmcontroller.common.util.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 public class JsonMapperTest {
     private JsonMapper jsonMapper;
 
-    @Mock
     private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-        jsonMapper = new JsonMapper(objectMapper);
+        ObjectMapper objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
+        jsonMapper = new JsonMapper(this.objectMapper);
     }
 
     @Test
-    public void testJsonStringToMap() throws Exception {
+    @DisplayName("JsonMapper jsonStringToMapString Test")
+    public void test() throws Exception {
         // given
-        String json = "{ \"key\": \"value\" }";
-        Map<String, Object> expectedMap = Map.of("key", "value");
+        Map<String, String> str = jsonMapper.jsonStringToMapString(
+            "{ \"key\": \"value\" }");
+        String s = jsonMapper.mapToJsonString(Map.of("key", "value"));
 
-        // when
-        when(objectMapper.readValue(eq(json), any(TypeReference.class))).thenReturn(expectedMap);
-        Map<String, Object> resultMap = jsonMapper.jsonStringToMap(json);
-
-        // then
-        assertThat(resultMap).isEqualTo(expectedMap);
+        // when & then
+        assertThat(str).isEqualTo(Map.of("key", "value"));
+        assertThat(s).isEqualTo("{\"key\":\"value\"}");
+        assertThat(jsonMapper.isValidJson("{ \"key\": \"value\" }")).isTrue();
+        assertThat(jsonMapper.isValidJson("aa")).isFalse();
+        assertThat(jsonMapper.isValidJson("1")).isFalse();
     }
 }

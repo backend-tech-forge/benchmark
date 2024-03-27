@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.benchmarker.bmagent.schedule.SchedulerStatus;
 import org.benchmarker.bmagent.service.ISseManageService;
+import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.util.MockServer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,8 @@ public class AgentApiControllerTest extends MockServer {
         }).when(sseManageService).start(eq(1L), any());
 
         // 호출
-        agentApiController.manageSSE(1L, "start", null);
+        TemplateInfo build = TemplateInfo.builder().build();
+        agentApiController.manageSSE(1L, "start", build);
 
         // then
         // SseEmitter 로 전송된 메시지 모두 캡처
@@ -75,7 +77,8 @@ public class AgentApiControllerTest extends MockServer {
         Long templateId = 1L;
 
         // when
-        agentApiController.manageSSE(templateId, "stop", null);
+        TemplateInfo build = TemplateInfo.builder().build();
+        agentApiController.manageSSE(templateId, "stop", build);
 
         // then
         // sseManageService.stop() 메서드가 호출되었는지 검증

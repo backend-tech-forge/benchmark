@@ -57,6 +57,9 @@ public class TestTemplate extends BaseTime {
     @OneToMany(mappedBy = "testTemplate", fetch = FetchType.EAGER)
     private List<TestResult> testResults;
 
+    private String headers;
+    private String prepareScript;
+
     public void update(TestTemplateUpdateDto testTemplate) {
 
         this.userGroup.update(testTemplate.getUserGroupId());

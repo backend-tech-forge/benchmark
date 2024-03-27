@@ -1,19 +1,35 @@
 package org.benchmarker.bmcontroller.template.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.common.util.JsonMapper;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.bmcontroller.template.model.TestTemplate;
 import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
 import org.benchmarker.bmcontroller.template.service.TestTemplateService;
-import org.benchmarker.bmcontroller.user.helper.UserHelper;
 import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
+import org.benchmarker.bmcontroller.user.helper.UserHelper;
 import org.benchmarker.bmcontroller.user.model.User;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.model.UserGroupJoin;
@@ -38,19 +54,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.util.annotations.RestDocsTest;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @RestDocsTest
 class TestTemplateApiControllerTest {
@@ -66,6 +69,8 @@ class TestTemplateApiControllerTest {
 
     @MockBean
     private TestTemplateRepository testTemplateRepository;
+    @MockBean
+    private JsonMapper jsonMapper;
 
     @MockBean
     private UserRepository userRepository;
@@ -93,6 +98,7 @@ class TestTemplateApiControllerTest {
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext,
                RestDocumentationContextProvider restDocumentation) {
+        when(jsonMapper.isValidJson(any())).thenReturn(true);
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .apply(documentationConfiguration(restDocumentation))
                 .build();

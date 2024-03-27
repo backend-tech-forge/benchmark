@@ -91,4 +91,30 @@ public class UserServiceUtils {
         return userRepository.save(user);
     }
 
+    /**
+     * <strong>유저 템플릿 접근 권한 확인 메서드</strong>
+     *
+     * <p>만약 템플릿이 속해있는 그룹에 유저가 참여하고 있다면, nothing happened </p>
+     * <p>만약 유저 & 템플릿이 없거나, 참여하고 있지 않다면 GlobalException </p>
+     * @param userId
+     * @param templateId
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void verifyAccessTemplate(String userId, Integer templateId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        // is user in the group of template?
+        TestTemplate testTemplate = testTemplateRepository.findById(templateId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
+        String groupId = testTemplate.getUserGroup().getId();
+
+        // 템플릿이 속해있는 그룹에 유저가 참여하고 있지 않음
+        if (user.getUserGroupJoin().stream()
+            .noneMatch((j) -> j.getUserGroup().getId().equals(groupId))) {
+            throw new GlobalException(ErrorCode.USER_NOT_IN_GROUP);
+        }
+    }
+
+
+
 }
