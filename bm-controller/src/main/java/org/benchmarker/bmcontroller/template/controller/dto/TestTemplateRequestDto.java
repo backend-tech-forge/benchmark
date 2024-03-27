@@ -41,13 +41,11 @@ public class TestTemplateRequestDto {
     private Map<String, Object> headers;
     private String prepareScript;
 
-    public TestTemplate toEntity() throws JsonProcessingException {
-
     private String name;
 
     private String description;
   
-    public TestTemplate toEntity() {
+    public TestTemplate toEntity() throws JsonProcessingException {
         return TestTemplate.builder()
             .userGroup(UserGroup.builder().id(this.userGroupId).build())
             .url(this.url)

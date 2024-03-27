@@ -28,13 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TestTemplateServiceTest {
@@ -218,7 +211,7 @@ class TestTemplateServiceTest {
 
     @Test
     @DisplayName("템플릿을 업데이트 한다.")
-    public void updateTestTemplate() {
+    public void updateTestTemplate() throws JsonProcessingException {
         //given
         User defaultUser = UserHelper.createDefaultUser();
         userRepository.save(defaultUser);
@@ -311,7 +304,7 @@ class TestTemplateServiceTest {
 
     @Test
     @DisplayName("템플릿을 업데이트시 그룹에 존재하지 않는 유저라면 에러 발생한다.")
-    public void updateTemplateNotGroupInUserException() {
+    public void updateTemplateNotGroupInUserException() throws JsonProcessingException {
         //given
         User defaultUser = UserHelper.createDefaultUser();
         userRepository.save(defaultUser);
