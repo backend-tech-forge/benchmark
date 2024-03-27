@@ -7,12 +7,13 @@ import java.time.Duration;
 import java.util.Map;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
+import org.benchmarker.util.MockServer;
 import org.junit.jupiter.api.Test;
 
 /**
  * Schel
  */
-class HttpSenderTest {
+class HttpSenderTest extends MockServer {
     @Test
     void test() throws MalformedURLException {
 
@@ -20,16 +21,19 @@ class HttpSenderTest {
         ResultManagerService resultManagerService = new ResultManagerService();
 
         HttpSender httpSender = new HttpSender(resultManagerService, scheduledTaskService);
+        addMockResponse("ok",50);
+
 
         TemplateInfo get = TemplateInfo.builder()
-            .url("http://localhost:8080")
+            .id("1")
+            .url(mockServer.url("/").toString())
             .method("GET")
             .vuser(5)
             .body(Map.of("1", "2"))
             .headers(Map.of("3", "4"))
             .maxRequest(10)
             .maxDuration(Duration.ofSeconds(10))
-            .prepareScript("")
+            .prepareScript("a")
             .build();
 
         httpSender.sendRequests(get);
