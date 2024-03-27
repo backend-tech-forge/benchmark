@@ -22,8 +22,6 @@ testlogger {
 
 // define exclude classes for Jacoco test coverage report
 def excludeJacocoTestCoverageReport = [
-        'org/benchmarker/bmcontroller/preftest/controller/PerftestController**',
-        'org/benchmarker/bmcontroller/preftest/service/**',
         'org/benchmarker/bmcontroller/home/**',
         'org/benchmarker/bmcontroller/template/**',
         'org/benchmarker/bmcontroller/common/beans/**',
@@ -73,7 +71,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation "io.jsonwebtoken:jjwt-api:0.11.1"
     testImplementation 'org.testng:testng:7.1.0'
-    testImplementation 'io.projectreactor:reactor-test'
+
+    testImplementation 'io.projectreactor:reactor-test' // Verifier
+
     runtimeOnly "io.jsonwebtoken:jjwt-impl:0.11.1"
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.11.1"
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
