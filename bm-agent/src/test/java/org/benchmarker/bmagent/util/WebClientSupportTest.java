@@ -14,14 +14,30 @@ class WebClientSupportTest extends MockServer {
     void test1() throws MalformedURLException {
 
         addMockResponse("success",5);
+        Map<String, String> header = Map.of("header", "headervalue");
 
         RequestHeadersSpec<?> requestHeadersSpec = WebClientSupport.create("GET",
-            mockServer.url("/").toString(), "body", Map.of("header", "headervalue"));
+            mockServer.url("/").toString(), "body", header);
 
         String response = requestHeadersSpec.retrieve().bodyToMono(String.class).block();
 
         requestHeadersSpec = WebClientSupport.create("POST",
-            mockServer.url("/").toString(), "body", Map.of("header", "headervalue"));
+            mockServer.url("/").toString(), "body", header);
+
+        response = requestHeadersSpec.retrieve().bodyToMono(String.class).block();
+
+        requestHeadersSpec = WebClientSupport.create("put",
+            mockServer.url("/").toString(), "body", header);
+
+        response = requestHeadersSpec.retrieve().bodyToMono(String.class).block();
+
+        requestHeadersSpec = WebClientSupport.create("patch",
+            mockServer.url("/").toString(), "body", header);
+
+        response = requestHeadersSpec.retrieve().bodyToMono(String.class).block();
+
+        requestHeadersSpec = WebClientSupport.create("delete",
+            mockServer.url("/").toString(), "body", header);
 
         response = requestHeadersSpec.retrieve().bodyToMono(String.class).block();
 
