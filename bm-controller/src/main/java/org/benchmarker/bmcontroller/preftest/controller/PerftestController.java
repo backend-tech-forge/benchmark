@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
+import org.benchmarker.bmcontroller.preftest.service.PerftestService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -29,6 +29,7 @@ public class PerftestController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ITestTemplateService testTemplateService;
+    private final PerftestService perftestService;
     private final UserContext userContext;
     private final String agentUrl = "http://localhost:8081";
 
@@ -54,20 +55,11 @@ public class PerftestController {
         log.info("Send action: {}", action);
         String userId = userContext.getCurrentUser().getId();
 
-        ParameterizedTypeReference<ServerSentEvent<CommonTestResult>> typeReference =
-            new ParameterizedTypeReference<ServerSentEvent<CommonTestResult>>() {
-            };
-
         WebClient webClient = WebClient.create(agentUrl);
-        // TODO : template 정보를 조회해서 전송해야합니다.
         TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
 
-        Flux<ServerSentEvent<CommonTestResult>> eventStream = webClient.post()
-            .uri("/api/templates/{templateId}?action={action}", templateId, action)
-            .bodyValue(templateInfo)
-            .retrieve()
-            .bodyToFlux(typeReference)
-            .log();
+        Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
+            templateId, action, webClient, templateInfo);
 
         eventStream
             .doOnComplete(() -> {
@@ -87,4 +79,5 @@ public class PerftestController {
 
         return ResponseEntity.ok().build();
     }
+
 }

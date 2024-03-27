@@ -26,6 +26,7 @@ public class MockServer {
     @BeforeEach
     void setUp() throws IOException {
         // webClient 요청을 받을 mock 서버를 생성합니다
+        System.out.println("start mock");
         mockBackEnd = new MockWebServer();
         mockBackEnd.start();
         backendUrl = String.format(mockBackEnd.url("/").toString());
