@@ -27,16 +27,16 @@ public class RandomUtils {
             .totalUsers(1)
             .totalDuration("1s")
             .mttfbAverage("1ms")
-            .MTTFBPercentiles(new HashMap<String, String>() {{
-                put("50", randMS(1,20));
-                put("95", randMS(20,40));
-                put("99", randMS(40,60));
+            .MTTFBPercentiles(new HashMap<Double, Double>() {{
+                put(50D, randDouble(0, 100));
+                put(95D, randDouble(0, 100));
+                put(99D, randDouble(0, 100));
             }})
             .tpsAverage(randDouble(0, 100))
-            .TPSPercentiles(new HashMap<String, Double>() {{
-                put("50", randDouble(0, 100));
-                put("95", randDouble(0, 100));
-                put("99", randDouble(0, 100));
+            .TPSPercentiles(new HashMap<Double, Double>() {{
+                put(50D, randDouble(0, 100));
+                put(95D, randDouble(0, 100));
+                put(99D, randDouble(0, 100));
             }})
             .build();
     }
