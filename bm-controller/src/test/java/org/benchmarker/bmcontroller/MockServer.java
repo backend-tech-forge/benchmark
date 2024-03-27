@@ -7,6 +7,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.http.MediaType;
 
 /**
  * webClient 요청을 받을 mock 서버를 생성합니다
@@ -65,9 +66,9 @@ public class MockServer {
      * <p> 만약 Object 를 Json String 으로 변환할 수 없다면 "" 값이 응답으로 반환됩니다</p>
      *
      * @param object
-     * @param repeatCount
+     * @param repeat
      */
-    public void addMockResponse(Object object, int repeatCount) {
+    public void addMockResponse(Object object, int repeat) {
         String json = "";
         try {
             json = objectMapper.writeValueAsString(object);
@@ -78,8 +79,50 @@ public class MockServer {
         MockResponse response = new MockResponse()
             .setHeader("Content-Type", "application/json")
             .setBody(json);
-        for (int i = 0; i < repeatCount; i++) {
+        for (int i = 0; i < repeat; i++) {
             mockBackEnd.enqueue(response);
+        }
+    }
+
+    /**
+     * SSE 이벤트를 응답에 추가합니다.
+     *
+     * @param eventData
+     */
+    public void addMockResponseSSE(Object eventData) {
+        String jsonEventData = toJson(eventData);
+
+        MockResponse response = new MockResponse()
+            .addHeader("Content-Type", MediaType.TEXT_EVENT_STREAM_VALUE)
+            .setBody("data: " + jsonEventData + "\n\n");
+
+        mockBackEnd.enqueue(response);
+    }
+
+    /**
+     * SSE 이벤트를 응답에 추가합니다. 반복횟수를 지정할 수 있습니다.
+     * 
+     * @param eventData
+     * @param repeat
+     */
+    public void addMockResponseSSE(Object eventData, int repeat) {
+        String jsonEventData = toJson(eventData);
+
+        MockResponse response = new MockResponse()
+            .addHeader("Content-Type", MediaType.TEXT_EVENT_STREAM_VALUE)
+            .setBody("data: " + jsonEventData + "\n\n");
+
+        for (int i = 0; i < repeat; i++) {
+            mockBackEnd.enqueue(response);
+        }
+    }
+
+    private String toJson(Object object) {
+        try {
+            return new ObjectMapper().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 }
