@@ -1,6 +1,9 @@
 package org.benchmarker.bmcontroller.preftest.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,10 +16,13 @@ import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcommon.util.RandomUtils;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
+import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
 import org.benchmarker.bmcontroller.user.helper.UserHelper;
 import org.benchmarker.bmcontroller.user.model.User;
+import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -24,6 +30,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -56,6 +63,44 @@ public class PerftestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = TestUserConsts.id, roles = {"USER"})
+    @DisplayName("CommonTestResult SSE 결과반환 테스트")
+    public void testSend_Success() throws Exception {
+        // given
+        User defaultUser = UserHelper.createDefaultUser();
+        UserGroup defaultUserGroup = UserHelper.createDefaultUserGroup();
+
+        String userId = defaultUser.getId();
+        String groupId = defaultUserGroup.getId();
+        Integer templateId = 1;
+        String action = "start";
+        TemplateInfo templateInfo = new TemplateInfo();
+        when(userContext.getCurrentUser()).thenReturn(defaultUser);
+        when(testTemplateService.getTemplateInfo(eq(userId), eq(templateId))).thenReturn(
+            templateInfo);
+
+        // sse event stubbing
+        CommonTestResult randomResult = RandomUtils.generateRandomTestResult();
+        ServerSentEvent<CommonTestResult> resultStub = ServerSentEvent.builder(
+            randomResult).build();
+        Flux<ServerSentEvent<CommonTestResult>> eventStream = Flux.just(resultStub);
+
+        when(perftestService.executePerformanceTest(eq(templateId), eq(action), any(),
+            eq(templateInfo))).thenReturn(eventStream);
+
+        // when
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/api/groups/" + groupId + "/templates/" + templateId)
+                    .param("action", action))
+            .andExpect(status().isOk());
+
+        // then
+        // eventStream 의 subscribe 에서 메세지 send 확인
+        verify(messagingTemplate).convertAndSend(eq("/topic/" + groupId + "/" + templateId),
+            eq(randomResult));
+    }
+
+    @Test
     public void testGetTest() throws Exception {
         // when
         User defaultUser = UserHelper.createDefaultUser();
@@ -71,21 +116,7 @@ public class PerftestControllerTest {
             .andExpect(model().attributeExists("groupId", "templateId", "template"));
     }
 
-//    @Test
-//    void test21() {
-//        WebClient webClient = WebClient.create();
-//
-//        Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(2,
-//            "start", webClient,
-//            new TemplateInfo(/* mock template info */));
-//        StepVerifier.create(eventStream)
-//            .expectNextMatches(event -> {
-//                // Add your verification logic here
-//                return event.data() != null; // For example, check if data is not null
-//            })
-//            .thenCancel() // Cancel the subscription after receiving one event
-//            .verify(); // Verify that the expected events are received
-//    }
+    // HERE!!
 
     @Test
     void testExecutePerformanceTest() {
@@ -104,12 +135,13 @@ public class PerftestControllerTest {
         Flux<ServerSentEvent<CommonTestResult>> mockFlux = Flux.fromIterable(mockEvents);
 
         when(perftestService.executePerformanceTest(Mockito.anyInt(), Mockito.anyString(),
-            Mockito.any(), Mockito.any())).thenReturn(mockFlux);
+            any(), any())).thenReturn(mockFlux);
 
-        // Execute the performance test
+        // when
         Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
             2, "start", WebClient.create(), templateInfo);
 
+        // then
         // Verify that the mock event is received
         StepVerifier.create(eventStream)
             .expectNextMatches(event -> {
