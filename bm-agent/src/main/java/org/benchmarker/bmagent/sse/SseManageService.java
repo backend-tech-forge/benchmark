@@ -1,15 +1,25 @@
 package org.benchmarker.bmagent.sse;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmagent.AgentStatus;
+import org.benchmarker.bmagent.consts.PreftestConsts;
+import org.benchmarker.bmagent.pref.HttpSender;
 import org.benchmarker.bmagent.pref.ResultManagerService;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.service.AbstractSseManageService;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
-import org.benchmarker.bmcommon.util.RandomUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -23,6 +33,7 @@ public class SseManageService extends AbstractSseManageService {
 
     private final IScheduledTaskService scheduledTaskService;
     private final ResultManagerService resultManagerService;
+    private HashMap<Long, HttpSender> httpSender = new HashMap<>();
 
     /**
      * Start the SseEmitter for the given id and return the SseEmitter
@@ -49,18 +60,49 @@ public class SseManageService extends AbstractSseManageService {
         sseEmitterHashMap.put(id, emitter);
 //        resultManagerService.save(id, new TestResult());
 
-        /**
-         * TODO:DEV Target Server 에 HTTP 요청 시작 메소드 작성
-         *
-         * TemplateInfo 에 기반하여 Target Server 에 HTTP 요청을 시작하는 메소드를 여기에 작성하시면 됩니다 :)
-         *
-         */
+        httpSender.put(id, new HttpSender(resultManagerService, scheduledTaskService));
+        HttpSender htps = httpSender.get(id);
+
+        LocalDateTime now = LocalDateTime.now();
+        List<Double> percentiles = PreftestConsts.percentiles;
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
-            resultManagerService.save(id, RandomUtils.generateRandomTestResult());
+            LocalDateTime cur = LocalDateTime.now();
+            Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
+            Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
+            CommonTestResult data = CommonTestResult.builder()
+                .startedAt(now.toString())
+                .totalRequests(htps.getTotalRequests().get())
+                .totalSuccess(htps.getTotalSuccess().get())
+                .totalErrors(htps.getTotalErrors().get())
+                .statusCodeCount(htps.getStatusCodeCount())
+                .testId(Integer.parseInt(templateInfo.getId()))
+                .url(templateInfo.getUrl())
+                .method(templateInfo.getMethod())
+                .totalUsers(templateInfo.getVuser())
+                .testStatus(AgentStatus.TESTING)
+                .totalDuration(Duration.between(now, cur).toString())
+                .MTTFBPercentiles(mttfbP)
+                .TPSPercentiles(tpsP)
+                // TODO temp
+                .mttfbAverage("0")
+                .tpsAverage(0)
+                .finishedAt("-")
+                .build();
+            log.info(data.toString());
+            resultManagerService.save(id, data);
             send(id, resultManagerService.find(id));
         }, 0, 1, TimeUnit.SECONDS);
+
+        // async + non-blocking 필수
+        CompletableFuture.runAsync(() -> {
+            try {
+                htps.sendRequests(templateInfo);
+            } catch (MalformedURLException e) {
+                log.error(e.getMessage());
+            }
+        });
 
         return emitter;
     }
@@ -80,7 +122,9 @@ public class SseManageService extends AbstractSseManageService {
             this.send(id, "SSE completed");
             emitter.complete();
         }
+        httpSender.get(id).cancelRequests();
         scheduledTaskService.shutdown(id);
+        resultManagerService.remove(id);
     }
 
     @Override
