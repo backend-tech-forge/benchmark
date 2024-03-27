@@ -22,7 +22,7 @@ testlogger {
 
 // define exclude classes for Jacoco test coverage report
 def excludeJacocoTestCoverageReport = [
-        'org/benchmarker/bmcontroller/preftest/controller/PerftestController**',
+        'org/benchmarker/bmcontroller/preftest/controller/**',
         'org/benchmarker/bmcontroller/home/**',
         'org/benchmarker/bmcontroller/template/**',
         'org/benchmarker/bmcontroller/common/beans/**',

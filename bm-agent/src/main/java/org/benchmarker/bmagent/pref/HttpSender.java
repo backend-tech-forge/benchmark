@@ -68,6 +68,7 @@ public class HttpSender {
                     if (!isRunning){
                         return;
                     }
+                    // HTTP 전송 -> target server
 
                     long requestStartTime = System.currentTimeMillis();  // 요청 시작 시간 기록
                     req.exchangeToMono(resp -> {
@@ -95,7 +96,7 @@ public class HttpSender {
         scheduledTaskService.startChild(Long.valueOf(templateInfo.getId()),"recorder", () -> {
             // save current tps & reset
             tpsMap.put(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), Double.valueOf(tps.get()));
-            tps.set(0);
+            tps.set(0); // initial
         }, 0, 1, java.util.concurrent.TimeUnit.SECONDS);
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

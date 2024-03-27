@@ -81,12 +81,12 @@ public class SseManageService extends AbstractSseManageService {
                 .url(templateInfo.getUrl())
                 .method(templateInfo.getMethod())
                 .totalUsers(templateInfo.getVuser())
-                .testStatus(AgentStatus.TESTING)
                 .totalDuration(Duration.between(now, cur).toString())
                 .MTTFBPercentiles(mttfbP)
                 .TPSPercentiles(tpsP)
                 // TODO temp
                 .mttfbAverage("0")
+                .testStatus(AgentStatus.TESTING)
                 .tpsAverage(0)
                 .finishedAt("-")
                 .build();

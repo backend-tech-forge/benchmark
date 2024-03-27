@@ -63,6 +63,8 @@ public class PerftestController {
 
         eventStream
             .doOnComplete(() -> {
+                // TODO : CommonTestResult 저장 logic 구현 필요
+                // 코드 한줄
                 if (action.equals("stop")) {
                     log.info("Test completed! {}", action);
                     messagingTemplate.convertAndSend("/topic/" + userId, "test started!");

@@ -33,6 +33,6 @@ public class PerftestService {
             .bodyValue(templateInfo)
             .retrieve()
             .bodyToFlux(typeReference)
-            .log();
+            .log(); // TODO : remove
     }
 }
