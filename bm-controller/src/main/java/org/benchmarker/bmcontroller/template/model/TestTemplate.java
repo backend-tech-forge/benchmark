@@ -1,14 +1,7 @@
 package org.benchmarker.bmcontroller.template.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,6 +49,11 @@ public class TestTemplate extends BaseTime {
     @Column(nullable = false)
     private Integer cpuLimit;
 
+    private String name;
+
+    @Lob
+    private String description;
+
     @OneToMany(mappedBy = "testTemplate", fetch = FetchType.EAGER)
     private List<TestResult> testResults;
 
@@ -72,6 +70,8 @@ public class TestTemplate extends BaseTime {
         this.maxRequest = testTemplate.getMaxRequest();
         this.maxDuration = testTemplate.getMaxDuration();
         this.cpuLimit = testTemplate.getCpuLimit();
+        this.name = testTemplate.getName();
+        this.description = testTemplate.getDescription();
     }
 
     public TestTemplateResponseDto convertToResponseDto() {
@@ -86,6 +86,8 @@ public class TestTemplate extends BaseTime {
                 .maxRequest(this.maxRequest)
                 .maxDuration(this.maxDuration)
                 .cpuLimit(this.cpuLimit)
+                .name(this.name)
+                .description(this.description)
                 .build();
     }
 }

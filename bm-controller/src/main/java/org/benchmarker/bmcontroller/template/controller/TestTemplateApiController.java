@@ -65,13 +65,19 @@ public class TestTemplateApiController {
     @PatchMapping("/template")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<TestTemplateResponseDto> updateTemplate(@RequestBody TestTemplateUpdateDto resTestTemplate) throws Exception {
-        return ResponseEntity.ok(testTemplateService.updateTemplate(resTestTemplate).get());
+
+        User currentUser = userContext.getCurrentUser();
+
+        return ResponseEntity.ok(testTemplateService.updateTemplate(resTestTemplate, currentUser.getId()).get());
     }
 
     @DeleteMapping("/template/{template_id}")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<Void> deleteTemplate(@PathVariable Integer template_id) {
-        testTemplateService.deleteTemplate(template_id);
+
+        User currentUser = userContext.getCurrentUser();
+
+        testTemplateService.deleteTemplate(template_id, currentUser.getId());
         return ResponseEntity.ok().build();
     }
 
