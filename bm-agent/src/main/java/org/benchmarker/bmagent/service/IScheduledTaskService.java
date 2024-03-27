@@ -1,6 +1,7 @@
 package org.benchmarker.bmagent.service;
 
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.benchmarker.bmagent.schedule.SchedulerStatus;
 
@@ -8,8 +9,8 @@ import org.benchmarker.bmagent.schedule.SchedulerStatus;
  * This service allows you to schedule and manage tasks to be executed at specific intervals.
  *
  * <p>
- * Each task is identified by a unique ID, enabling you to easily find, start, and
- * shutdown scheduled tasks. It is crucial to ensure that <strong>IDs are unique across all scheduled
+ * Each task is identified by a unique ID, enabling you to easily find, start, and shutdown
+ * scheduled tasks. It is crucial to ensure that <strong>IDs are unique across all scheduled
  * tasks.</strong>
  *
  *
@@ -37,20 +38,12 @@ public interface IScheduledTaskService {
     void start(Long id, Runnable runnable, long delay, long period, TimeUnit timeUnit);
 
     /**
-     * Checks if any scheduler (parent or child) exists for the given ID.
-     *
-     * @param id The ID to check for the existence of any scheduler.
-     * @return true if any scheduler exists, otherwise false.
-     */
-    boolean isChildExist(Long id);
-
-    /**
-     * check if child || parent scheduler exist with given id
+     * Get all schedulers associated with the given ID
      *
      * @param id
-     * @return boolean
+     * @return Map
      */
-    boolean hasAnyScheduler(Long id);
+    Map<String, ScheduledExecutorService> getSchedulers(Long id);
 
     /**
      * Starts a child scheduler with an additional name for the given ID.
@@ -62,7 +55,8 @@ public interface IScheduledTaskService {
      * @param period        Period between successive executions.
      * @param timeUnit      TimeUnit for the delay and period.
      */
-    void startChild(Long id, String schedulerName, Runnable runnable, long delay, long period, TimeUnit timeUnit);
+    void startChild(Long id, String schedulerName, Runnable runnable, long delay, long period,
+        TimeUnit timeUnit);
 
     /**
      * Get the status of all the schedulers

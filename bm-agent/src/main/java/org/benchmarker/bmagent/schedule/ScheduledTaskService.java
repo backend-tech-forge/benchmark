@@ -1,5 +1,6 @@
 package org.benchmarker.bmagent.schedule;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,16 +44,19 @@ public class ScheduledTaskService extends AbstractScheduledTaskService {
         scheduler.scheduleAtFixedRate(runnable, delay, period, timeUnit);
     }
 
-    // deprecated
     @Override
-    public boolean isChildExist(Long id) {
-        return schedulerChild.containsKey(id);
-    }
-
-    // deprecated
-    @Override
-    public boolean hasAnyScheduler(Long id) {
-        return schedulerChild.containsKey(id) || schedulers.containsKey(id);
+    public Map<String, ScheduledExecutorService> getSchedulers(Long id) {
+        ScheduledExecutorService majorScheduler = schedulers.get(id);
+        Map<String, ScheduledExecutorService> schedulerMap = schedulerChild.get(
+            id);
+        HashMap<String, ScheduledExecutorService> newMap = new HashMap<>();
+        if (schedulerMap != null) {
+            newMap.putAll(schedulerMap);
+        }
+        if (majorScheduler != null) {
+            newMap.put("major", majorScheduler);
+        }
+        return newMap;
     }
 
     @Override
