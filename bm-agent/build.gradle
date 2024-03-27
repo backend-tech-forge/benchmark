@@ -34,6 +34,7 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
@@ -44,6 +45,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
+    if (isAppleSilicon()) {
+        runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.94.Final:osx-aarch_64")
+    }
 
     implementation project(':bm-common')
 }
@@ -89,4 +93,8 @@ jacocoTestCoverageVerification {
             }
         }
     }
+}
+
+boolean isAppleSilicon() {
+    return System.getProperty("os.name") == "Mac OS X" && System.getProperty("os.arch") == "aarch64"
 }
