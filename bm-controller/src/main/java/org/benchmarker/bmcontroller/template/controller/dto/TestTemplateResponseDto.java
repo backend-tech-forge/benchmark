@@ -12,38 +12,34 @@ import lombok.*;
 @AllArgsConstructor
 public class TestTemplateResponseDto {
 
-    @NotNull
     @JsonProperty("id")
     private Integer id;
 
-    @NotBlank
     @JsonProperty("user_group_id")
     private String userGroupId;
 
-    @NotBlank
     @JsonProperty("url")
     private String url;
 
-    @NotBlank
     @JsonProperty("method")
     private String method;
 
     @JsonProperty("body")
     private String body;
 
-    @NotNull
     @JsonProperty("vuser")
     private Integer vuser;
 
-    @NotNull
     @JsonProperty("maxRequest")
     private Integer maxRequest;
 
-    @NotNull
     @JsonProperty("maxDuration")
     private Integer maxDuration;
 
-    @NotNull
     @JsonProperty("cpuLimit")
     private Integer cpuLimit;
+
+    private String name;
+
+    private String description;
 }

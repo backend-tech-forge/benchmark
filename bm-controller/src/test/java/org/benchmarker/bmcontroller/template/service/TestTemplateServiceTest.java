@@ -13,14 +13,27 @@ import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponse
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateUpdateDto;
 import org.benchmarker.bmcontroller.template.model.TestTemplate;
 import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
+import org.benchmarker.bmcontroller.user.helper.UserHelper;
+import org.benchmarker.bmcontroller.user.model.User;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
+import org.benchmarker.bmcontroller.user.model.enums.GroupRole;
+import org.benchmarker.bmcontroller.user.repository.UserGroupJoinRepository;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
+import org.benchmarker.bmcontroller.user.repository.UserRepository;
+import org.benchmarker.bmcontroller.user.service.GroupService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,11 +46,23 @@ class TestTemplateServiceTest {
     private UserGroupRepository userGroupRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private TestTemplateService testTemplateService;
+
+    @Autowired
+    private GroupService groupService;
+
+    @Autowired
+    private UserGroupJoinRepository userGroupJoinRepository;
 
     @AfterEach
     void removeAll() {
+        userGroupJoinRepository.deleteAll();
         testTemplateRepository.deleteAll();
+        userGroupRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -193,16 +218,21 @@ class TestTemplateServiceTest {
 
     @Test
     @DisplayName("템플릿을 업데이트 한다.")
-    public void updateTestTemplate() throws Exception {
+    public void updateTestTemplate() {
         //given
-        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
-        UserGroup tempGroup = userGroupRepository.save(userGroup);
+        User defaultUser = UserHelper.createDefaultUser();
+        userRepository.save(defaultUser);
+
+        UserGroup userGroup = UserHelper.createDefaultUserGroup();
+        userGroupRepository.save(userGroup);
+
+        groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(), GroupRole.LEADER);
 
         TestTemplateRequestDto request = TestTemplateRequestDto.builder()
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupId("userGroup")
+                .userGroupId(userGroup.getId())
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -215,15 +245,17 @@ class TestTemplateServiceTest {
                 .url("update.com")
                 .method("post")
                 .body("data=sample")
-                .userGroupId("userGroup")
+                .userGroupId(userGroup.getId())
                 .vuser(4)
                 .cpuLimit(4)
                 .maxRequest(4)
                 .maxDuration(4)
+                .name("modify")
+                .description("업데이트 하면 여기 있는 내용이 업데이트 되어야 한다.")
                 .build();
 
         //when
-        TestTemplateResponseDto updateTestTemplate = testTemplateService.updateTemplate(updateRequest).get();
+        TestTemplateResponseDto updateTestTemplate = testTemplateService.updateTemplate(updateRequest, defaultUser.getId()).get();
 
         //then
         assertThat(updateTestTemplate).isNotNull();
@@ -231,24 +263,27 @@ class TestTemplateServiceTest {
         assertThat(updateTestTemplate.getUrl()).isEqualTo(updateRequest.getUrl());
         assertThat(updateTestTemplate.getMethod()).isEqualTo(updateRequest.getMethod());
         assertThat(updateTestTemplate.getBody()).isEqualTo(updateRequest.getBody());
-        assertThat(updateTestTemplate.getUserGroupId()).isEqualTo(tempGroup.getName());
+        assertThat(updateTestTemplate.getUserGroupId()).isEqualTo(userGroup.getId());
         assertThat(updateTestTemplate.getVuser()).isEqualTo(updateRequest.getVuser());
         assertThat(updateTestTemplate.getCpuLimit()).isEqualTo(updateRequest.getCpuLimit());
         assertThat(updateTestTemplate.getMaxRequest()).isEqualTo(updateRequest.getMaxRequest());
         assertThat(updateTestTemplate.getMaxDuration()).isEqualTo(updateRequest.getMaxDuration());
+        assertThat(updateTestTemplate.getName()).isEqualTo(updateRequest.getName());
+        assertThat(updateTestTemplate.getDescription()).isEqualTo(updateRequest.getDescription());
     }
 
     @Test
     @DisplayName("템플릿을 업데이트시 존재하지 않는 템플릿이라면 에러 발생한다.")
     public void updateTemplateNotFoundException() throws Exception {
         //given
-        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        UserGroup userGroup = UserHelper.createDefaultUserGroup();
+        userGroupRepository.save(userGroup);
 
         TestTemplateRequestDto request = TestTemplateRequestDto.builder()
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupId("userGroup")
+                .userGroupId(userGroup.getId())
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -270,7 +305,49 @@ class TestTemplateServiceTest {
 
         // When & Then
         assertThrows(GlobalException.class, () -> {
-            testTemplateService.updateTemplate(updateRequest);
+            testTemplateService.updateTemplate(updateRequest, "admin");
+        });
+    }
+
+    @Test
+    @DisplayName("템플릿을 업데이트시 그룹에 존재하지 않는 유저라면 에러 발생한다.")
+    public void updateTemplateNotGroupInUserException() {
+        //given
+        User defaultUser = UserHelper.createDefaultUser();
+        userRepository.save(defaultUser);
+
+        UserGroup userGroup = UserHelper.createDefaultUserGroup();
+        userGroupRepository.save(userGroup);
+
+        TestTemplateRequestDto request = TestTemplateRequestDto.builder()
+                .url("test.com")
+                .method("get")
+                .body("")
+                .userGroupId(userGroup.getId())
+                .vuser(3)
+                .cpuLimit(3)
+                .maxRequest(3)
+                .maxDuration(3)
+                .build();
+        TestTemplateResponseDto template = testTemplateService.createTemplate(request).get();
+
+        TestTemplateUpdateDto updateRequest = TestTemplateUpdateDto.builder()
+                .id(template.getId())
+                .url("update.com")
+                .method("post")
+                .body("data=sample")
+                .userGroupId(userGroup.getId() + "Test")
+                .vuser(4)
+                .cpuLimit(4)
+                .maxRequest(4)
+                .maxDuration(4)
+                .name("modify")
+                .description("업데이트 하면 여기 있는 내용이 업데이트 되어야 한다.")
+                .build();
+
+        // When & Then
+        assertThrows(GlobalException.class, () -> {
+            testTemplateService.updateTemplate(updateRequest, defaultUser.getId());
         });
     }
 
@@ -278,13 +355,19 @@ class TestTemplateServiceTest {
     @DisplayName("템플릿을 삭제 한다.")
     public void deleteTestTemplate() throws Exception {
         //given
-        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        User defaultUser = UserHelper.createDefaultUser();
+        userRepository.save(defaultUser);
+
+        UserGroup userGroup = UserHelper.createDefaultUserGroup();
+        userGroupRepository.save(userGroup);
+
+        groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(), GroupRole.LEADER);
 
         TestTemplateRequestDto request = TestTemplateRequestDto.builder()
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupId("userGroup")
+                .userGroupId(userGroup.getId())
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -293,7 +376,7 @@ class TestTemplateServiceTest {
         TestTemplateResponseDto template = testTemplateService.createTemplate(request).get();
 
         //when
-        testTemplateService.deleteTemplate(template.getId());
+        testTemplateService.deleteTemplate(template.getId(), defaultUser.getId());
 
         //then
         assertThat(testTemplateRepository.findById(template.getId())).isEmpty();
@@ -303,13 +386,14 @@ class TestTemplateServiceTest {
     @DisplayName("템플릿을 삭제시 존재하지 않는 템플릿이라면 에러 발생한다.")
     public void deleteTemplateNotFoundException() throws Exception {
         //given
-        UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
+        UserGroup userGroup = UserHelper.createDefaultUserGroup();
+        userGroupRepository.save(userGroup);
 
         TestTemplateRequestDto request = TestTemplateRequestDto.builder()
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupId("userGroup")
+                .userGroupId(userGroup.getId())
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -319,7 +403,7 @@ class TestTemplateServiceTest {
 
         // When & Then
         assertThrows(GlobalException.class, () -> {
-            testTemplateService.deleteTemplate(template.getId() + 1);
+            testTemplateService.deleteTemplate(template.getId() + 1, "admin");
         });
     }
 

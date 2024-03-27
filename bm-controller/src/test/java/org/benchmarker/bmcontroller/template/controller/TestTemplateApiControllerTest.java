@@ -33,9 +33,11 @@ import org.benchmarker.bmcontroller.user.helper.UserHelper;
 import org.benchmarker.bmcontroller.user.model.User;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.model.UserGroupJoin;
+import org.benchmarker.bmcontroller.user.model.enums.GroupRole;
 import org.benchmarker.bmcontroller.user.repository.UserGroupJoinRepository;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.benchmarker.bmcontroller.user.repository.UserRepository;
+import org.benchmarker.bmcontroller.user.service.GroupService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,6 +83,9 @@ class TestTemplateApiControllerTest {
 
     @MockBean
     UserGroupJoinRepository userGroupJoinRepository;
+
+    @MockBean
+    GroupService groupService;
 
     @AfterEach
     void removeAll() {
@@ -318,12 +323,20 @@ class TestTemplateApiControllerTest {
     @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void updateTemplate() throws Exception {
         //given
+        User defaultUser = UserHelper.createDefaultUser();
+        userRepository.save(defaultUser);
+
+        UserGroup userGroup = UserHelper.createDefaultUserGroup();
+        userGroupRepository.save(userGroup);
+
+        groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(), GroupRole.LEADER);
+
         TestTemplateUpdateDto reqTestTemplate = TestTemplateUpdateDto.builder()
                 .id(10)
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupId("userGroup")
+                .userGroupId(userGroup.getId())
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -335,7 +348,7 @@ class TestTemplateApiControllerTest {
                 .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupId("userGroup")
+                .userGroupId(userGroup.getId())
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -343,7 +356,8 @@ class TestTemplateApiControllerTest {
                 .build();
 
         // when
-        when(testTemplateService.updateTemplate(any())).thenReturn(Optional.of(resTestTemplate));
+        when(testTemplateService.updateTemplate(any(), any())).thenReturn(Optional.of(resTestTemplate));
+        when(userContext.getCurrentUser()).thenReturn(defaultUser);
 
         // then
         mockMvc.perform(patch("/api/template")
@@ -372,12 +386,20 @@ class TestTemplateApiControllerTest {
     @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void updateTemplateWithoutRequiredFieldsThrowsException() throws Exception {
         //given
+        User defaultUser = UserHelper.createDefaultUser();
+        userRepository.save(defaultUser);
+
+        UserGroup userGroup = UserHelper.createDefaultUserGroup();
+        userGroupRepository.save(userGroup);
+
+        groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(), GroupRole.LEADER);
+
         TestTemplateUpdateDto reqTestTemplate = TestTemplateUpdateDto.builder()
                 .id(10)
 //                .url("test.com")
                 .method("get")
                 .body("")
-                .userGroupId("userGroup")
+                .userGroupId(userGroup.getId())
                 .vuser(3)
                 .cpuLimit(3)
                 .maxRequest(3)
@@ -385,7 +407,8 @@ class TestTemplateApiControllerTest {
                 .build();
 
         // when
-        when(testTemplateService.updateTemplate(any())).thenThrow(new GlobalException(ErrorCode.BAD_REQUEST));
+        when(testTemplateService.updateTemplate(any(), any())).thenThrow(new GlobalException(ErrorCode.BAD_REQUEST));
+        when(userContext.getCurrentUser()).thenReturn(defaultUser);
 
         // then
         mockMvc.perform(patch("/api/template")
@@ -402,8 +425,18 @@ class TestTemplateApiControllerTest {
     @WithMockUser(username = TestUserConsts.id, roles = "USER")
     public void deleteTemplate() throws Exception {
 
+        // given
+        User defaultUser = UserHelper.createDefaultUser();
+        userRepository.save(defaultUser);
+
+        UserGroup userGroup = UserHelper.createDefaultUserGroup();
+        userGroupRepository.save(userGroup);
+
+        groupService.addUserToGroupAdmin(userGroup.getId(), defaultUser.getId(), GroupRole.LEADER);
+
         // when
-        doNothing().when(testTemplateService).deleteTemplate(any());
+        doNothing().when(testTemplateService).deleteTemplate(any(), any());
+        when(userContext.getCurrentUser()).thenReturn(defaultUser);
 
         // then
         mockMvc.perform(delete("/api/template/{template_id}", 10))
