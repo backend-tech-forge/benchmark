@@ -7,5 +7,7 @@ public interface SystemSchedulerConst {
      */
     Long systemSchedulerId = -100L;
     String systemUsageSchedulerName = "cpu-memory-usage-update";
+    Integer connectControllerTimeout = 10; // seconds
+    Integer connectionFailedLimit = 50;
 
 }
