@@ -18,6 +18,7 @@ import org.benchmarker.bmagent.pref.ResultManagerService;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.service.AbstractSseManageService;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
+import org.benchmarker.bmagent.status.AgentStatusManager;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ public class SseManageService extends AbstractSseManageService {
 
     private final IScheduledTaskService scheduledTaskService;
     private final ResultManagerService resultManagerService;
+    private final AgentStatusManager agentStatusManager;
     private HashMap<Long, HttpSender> httpSender = new HashMap<>();
 
     /**
@@ -58,7 +60,6 @@ public class SseManageService extends AbstractSseManageService {
 
         // Save the SseEmitter to the map
         sseEmitterHashMap.put(id, emitter);
-//        resultManagerService.save(id, new TestResult());
 
         httpSender.put(id, new HttpSender(resultManagerService, scheduledTaskService));
         HttpSender htps = httpSender.get(id);
@@ -71,29 +72,12 @@ public class SseManageService extends AbstractSseManageService {
             LocalDateTime cur = LocalDateTime.now();
             Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
             Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
-            CommonTestResult data = CommonTestResult.builder()
-                .startedAt(now.toString())
-                .totalRequests(htps.getTotalRequests().get())
-                .totalSuccess(htps.getTotalSuccess().get())
-                .totalErrors(htps.getTotalErrors().get())
-                .statusCodeCount(htps.getStatusCodeCount())
-                .testId(Integer.parseInt(templateInfo.getId()))
-                .url(templateInfo.getUrl())
-                .method(templateInfo.getMethod())
-                .totalUsers(templateInfo.getVuser())
-                .totalDuration(Duration.between(now, cur).toString())
-                .MTTFBPercentiles(mttfbP)
-                .TPSPercentiles(tpsP)
-                // TODO temp
-                .mttfbAverage("0")
-                .testStatus(AgentStatus.TESTING)
-                .tpsAverage(0)
-                .finishedAt("-")
-                .build();
+            CommonTestResult data = getCommonTestResult(templateInfo, htps, now, cur, tpsP, mttfbP);
             log.info(data.toString());
             resultManagerService.save(id, data);
             send(id, resultManagerService.find(id));
         }, 0, 1, TimeUnit.SECONDS);
+
 
         // async + non-blocking 필수
         CompletableFuture.runAsync(() -> {
@@ -105,6 +89,42 @@ public class SseManageService extends AbstractSseManageService {
         });
 
         return emitter;
+    }
+
+    /**
+     * Get information from {@link HttpSender}, {@link AgentStatusManager}, and convert to
+     * {@link CommonTestResult}
+     *
+     * @param templateInfo
+     * @param htps
+     * @param now
+     * @param cur
+     * @param tpsP
+     * @param mttfbP
+     * @return CommonTestResult
+     */
+    private CommonTestResult getCommonTestResult(TemplateInfo templateInfo, HttpSender htps,
+        LocalDateTime now, LocalDateTime cur, Map<Double, Double> tpsP,
+        Map<Double, Double> mttfbP) {
+        return CommonTestResult.builder()
+            .startedAt(now.toString())
+            .totalRequests(htps.getTotalRequests().get())
+            .totalSuccess(htps.getTotalSuccess().get())
+            .totalErrors(htps.getTotalErrors().get())
+            .statusCodeCount(htps.getStatusCodeCount())
+            .testId(Integer.parseInt(templateInfo.getId()))
+            .url(templateInfo.getUrl())
+            .method(templateInfo.getMethod())
+            .totalUsers(templateInfo.getVuser())
+            .totalDuration(Duration.between(now, cur).toString())
+            .MTTFBPercentiles(mttfbP)
+            .TPSPercentiles(tpsP)
+            .testStatus(agentStatusManager.getStatus().get())
+            // TODO temp
+            .mttfbAverage("0")
+            .tpsAverage(0)
+            .finishedAt("-")
+            .build();
     }
 
     /**
@@ -125,6 +145,7 @@ public class SseManageService extends AbstractSseManageService {
         httpSender.get(id).cancelRequests();
         scheduledTaskService.shutdown(id);
         resultManagerService.remove(id);
+        agentStatusManager.updateAgentStatus(AgentStatus.READY);
     }
 
     @Override
@@ -159,4 +180,5 @@ public class SseManageService extends AbstractSseManageService {
             this.stop(id); // Call method to clean up resources
         });
     }
+
 }
