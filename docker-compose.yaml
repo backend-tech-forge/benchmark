@@ -13,4 +13,49 @@ services:
       - ./backups:/home/backups
     command: -c wal_level=logical -p 5433
     restart: always
-
+  eureka:
+    build:
+      context: ./eureka
+      dockerfile: Dockerfile
+    environment:
+      - server_port=8761
+  bm-controller:
+    container_name: bm-controller
+    build:
+      context: ./bm-controller
+      dockerfile: Dockerfile
+    environment:
+      - server_port=8080
+      - spring_datasource_url=jdbc:postgresql://test-db:5433/test
+      - eureka_client_serviceUrl_defaultZone=http://eureka:8761/eureka/
+      - POSTGRES_DB=test
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - eureka
+  bm-agent-1:
+    build:
+      context: ./bm-agent
+      dockerfile: Dockerfile
+    environment:
+      - controller_url=http://bm-controller:8080/api/agent/register
+      - eureka_client_serviceUrl_defaultZone=http://eureka:8761/eureka/
+    ports:
+      - "8081:8081"
+    restart: always
+    depends_on:
+      - eureka
+      - bm-controller
+  bm-agent-2:
+    build:
+      context: ./bm-agent
+      dockerfile: Dockerfile
+    environment:
+      - controller_url=http://bm-controller:8080/api/agent/register
+      - eureka_client_serviceUrl_defaultZone=http://eureka:8761/eureka/
+    ports:
+      - "8082:8081"
+    depends_on:
+      - eureka
+      - bm-controller
