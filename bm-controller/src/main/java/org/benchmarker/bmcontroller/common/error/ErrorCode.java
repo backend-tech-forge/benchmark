@@ -15,6 +15,7 @@ public enum ErrorCode {
      * 400
      */
     BAD_REQUEST(400, "잘못된 요청입니다."),
+    INVALID_JSON(400, "잘못된 JSON 형식입니다."),
     PASSWORD_NOT_MATCH(400, "패스워드를 정확히 입력해주세요."),
     USER_NOT_SAME_GROUP(400, "그룹이 다른 사용자입니다."),
     GROUP_ALREADY_EXIST(400, "그룹이 이미 존재합니다."),
@@ -44,8 +45,7 @@ public enum ErrorCode {
     /**
      * 500
      */
-    INTERNAL_SERVER_ERROR(500, "서버 내부 오류"),
-    ;
+    INTERNAL_SERVER_ERROR(500, "서버 내부 오류"),;
   
     private final int httpStatus;
     private final String message;

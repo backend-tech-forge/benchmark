@@ -7,28 +7,44 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmagent.AgentInfo;
+import org.benchmarker.bmagent.AgentStatus;
 import org.benchmarker.bmagent.schedule.SchedulerStatus;
 import org.benchmarker.bmagent.service.ISseManageService;
+import org.benchmarker.bmagent.status.AgentStatusManager;
+import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.util.MockServer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-@ExtendWith(MockitoExtension.class)
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@Slf4j
 public class AgentApiControllerTest extends MockServer {
 
     @Mock
@@ -40,6 +56,9 @@ public class AgentApiControllerTest extends MockServer {
     @Captor
     private ArgumentCaptor<String> messageCaptor;
 
+    @Mock
+    private AgentStatusManager agentStatusManager;
+    @Autowired
     private MockMvc mockMvc;
 
     @Test
@@ -47,6 +66,8 @@ public class AgentApiControllerTest extends MockServer {
     public void testStartSSE() throws IOException {
         // given
         SseEmitter mockSseEmitter = Mockito.mock(SseEmitter.class);
+        when(agentStatusManager.getAndUpdateStatusIfReady(any())).thenReturn(Optional.of(
+            AgentStatus.READY));
 
         // when
         // sseManageService.start() 메서드의 행동을 설정하는 스텁 설정
@@ -59,7 +80,8 @@ public class AgentApiControllerTest extends MockServer {
         }).when(sseManageService).start(eq(1L), any());
 
         // 호출
-        agentApiController.manageSSE(1L, "start", null);
+        TemplateInfo build = TemplateInfo.builder().build();
+        agentApiController.manageSSE(1L, "start", build);
 
         // then
         // SseEmitter 로 전송된 메시지 모두 캡처
@@ -73,9 +95,12 @@ public class AgentApiControllerTest extends MockServer {
     public void testStopSSE() throws IOException {
         // given
         Long templateId = 1L;
+        when(agentStatusManager.getAndUpdateStatusIfReady(any())).thenReturn(Optional.of(
+            AgentStatus.READY));
 
         // when
-        agentApiController.manageSSE(templateId, "stop", null);
+        TemplateInfo build = TemplateInfo.builder().build();
+        agentApiController.manageSSE(templateId, "stop", build);
 
         // then
         // sseManageService.stop() 메서드가 호출되었는지 검증
@@ -84,7 +109,7 @@ public class AgentApiControllerTest extends MockServer {
 
     @Test
     @DisplayName("스케줄러 상태 체크 테스트")
-    public void testCheckSchedulerStatus() throws Exception {
+    public void testCheckSchedulerStats() throws Exception {
         // given
         WebClient webClient = WebClient.create(mockServer.url("/api/status").toString());
         Map<Long, SchedulerStatus> schedulerStatusMap = new HashMap<>();
@@ -104,5 +129,23 @@ public class AgentApiControllerTest extends MockServer {
         // then
         assertThat(response.get(1L)).isEqualTo(SchedulerStatus.RUNNING);
         assertThat(response.get(2L)).isEqualTo(SchedulerStatus.SHUTDOWN);
+    }
+
+    @Test
+    @DisplayName("AgentInfo 반환 테스트")
+    public void testGetStatus() throws Exception {
+
+        mockMvc.perform(get("/api/status")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andDo((resp)->{
+                ObjectMapper objectMapper = new ObjectMapper();
+                AgentInfo agentInfo = objectMapper.registerModule(new JavaTimeModule()).readValue(
+                    resp.getResponse().getContentAsString(), AgentInfo.class);
+                assertThat(agentInfo.getStatus()).isEqualTo(AgentStatus.READY);
+                assertThat(agentInfo.getCpuUsage()).isNotNull();
+                assertThat(agentInfo.getMemoryUsage()).isNotNull();
+                assertThat(agentInfo.getStartedAt()).isNotNull();
+            })
+            .andExpect(status().isOk());
     }
 }

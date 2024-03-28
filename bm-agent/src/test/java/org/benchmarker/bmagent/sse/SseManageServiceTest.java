@@ -6,8 +6,9 @@ import org.benchmarker.bmagent.pref.ResultManagerService;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.schedule.SchedulerStatus;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
+import org.benchmarker.bmagent.status.AgentStatusManager;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
-import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.util.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,16 +19,23 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @ExtendWith(MockitoExtension.class)
 class SseManageServiceTest {
+
     private IScheduledTaskService scheduledTaskService;
     private ResultManagerService resultManagerService;
 
     private SseManageService sseManageService;
+    private AgentStatusManager agentStatusManager;
 
     @BeforeEach
     void setUp() {
         scheduledTaskService = new ScheduledTaskService();
         resultManagerService = new ResultManagerService();
-        sseManageService = new SseManageService(scheduledTaskService, resultManagerService);
+        agentStatusManager = new AgentStatusManager();
+        sseManageService = new SseManageService(
+            scheduledTaskService,
+            resultManagerService,
+            agentStatusManager
+        );
     }
 
     @Test
@@ -35,7 +43,7 @@ class SseManageServiceTest {
     void start_ShouldStartSseEmitterAndScheduledTask() throws InterruptedException {
         // given
         Long id = 1L;
-        TestResult resultStub = RandomUtils.generateRandomTestResult();
+        CommonTestResult resultStub = RandomUtils.generateRandomTestResult();
         resultManagerService.save(id, resultStub);
 
         // when
@@ -54,7 +62,7 @@ class SseManageServiceTest {
     void startAndShutdown() throws InterruptedException {
         // given
         Long id = 1L;
-        TestResult resultStub = RandomUtils.generateRandomTestResult();
+        CommonTestResult resultStub = RandomUtils.generateRandomTestResult();
         resultManagerService.save(id, resultStub);
         SseEmitter result = sseManageService.start(id, new TemplateInfo());
 
@@ -71,7 +79,7 @@ class SseManageServiceTest {
     void stop_ShouldDoNothingIfEmitterAlreadyStopped() throws InterruptedException {
         // given
         Long id = 1L;
-        TestResult resultStub = RandomUtils.generateRandomTestResult();
+        CommonTestResult resultStub = RandomUtils.generateRandomTestResult();
         resultManagerService.save(id, resultStub);
         sseManageService.start(id, new TemplateInfo());
         sseManageService.stop(id);

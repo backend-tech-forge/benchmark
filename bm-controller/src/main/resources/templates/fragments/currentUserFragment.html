@@ -8,7 +8,7 @@
 
 <!-- Current user status bar -->
 <div th:fragment="currentUser" class="status-bar" th:classappend="${currentUser} ? 'logged-in' : ''">
-  <link rel="stylesheet" type="text/css" href="../css/bar.css">
+  <link rel="stylesheet" type="text/css" href="/css/bar.css">
   <a th:href="@{/}" class="home-link">Benchmark</a>
   <p th:if="${currentUser}" class="user-text">
     Logged in as:

@@ -18,7 +18,7 @@ import org.benchmarker.bmagent.AgentStatus;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class TestResult {
+public class CommonTestResult {
 
     @JsonProperty("test_id")
     private int testId;
@@ -43,11 +43,11 @@ public class TestResult {
     @JsonProperty("mttfb_average")
     private String mttfbAverage;
     @JsonProperty("mttfb_percentiles")
-    private Map<String, String> MTTFBPercentiles;
+    private Map<Double, Double> MTTFBPercentiles;
     @JsonProperty("tps_average")
     private double tpsAverage;
     @JsonProperty("tps_percentiles")
-    private Map<String, Double> TPSPercentiles;
+    private Map<Double, Double> TPSPercentiles;
     @JsonProperty(value = "test_status")
     private AgentStatus testStatus;
 }

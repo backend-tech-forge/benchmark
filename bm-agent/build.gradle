@@ -13,6 +13,7 @@ def excludeJacocoTestCoverageReport = [
         // bmagent
         'org/benchmarker/bmagent/BmAgentApplication**',
         'org/benchmarker/bmagent/sse/**',
+        'org/benchmarker/bmagent/consts/SystemSchedulerConst',
 //        'org/benchmarker/bmagent/**',
 ]
 
@@ -34,16 +35,21 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
+    implementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     // add webflux
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
+    if (isAppleSilicon()) {
+        runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.94.Final:osx-aarch_64")
+    }
 
     implementation project(':bm-common')
 }
@@ -89,4 +95,8 @@ jacocoTestCoverageVerification {
             }
         }
     }
+}
+
+boolean isAppleSilicon() {
+    return System.getProperty("os.name") == "Mac OS X" && System.getProperty("os.arch") == "aarch64"
 }

@@ -2,6 +2,7 @@ package org.benchmarker.bmcontroller.template.controller;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateRequestDto;
@@ -80,52 +81,7 @@ class TestResultTemplateApiControllerTest {
                 .build();
     }
 
-//    @Test
-//    @DisplayName("탬플릿 결과 호출하는 테스트")
-//    @WithMockUser(username = TestUserConsts.id, roles = "USER")
-//    public void createTemplateResult() throws Exception {
-//
-//        //given
-//        User defaultUser = UserHelper.createDefaultUser();
-//        TestTemplateResponseDto testTemplateResponseDto = saveGetTempData()
-//                .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
-//
-//        TestResultResponseDto request = TestResultResponseDto.builder()
-//                .url(testTemplateResponseDto.getUrl())
-//                .method(testTemplateResponseDto.getMethod())
-//                .totalSuccess(3)
-//                .totalRequest(3)
-//                .totalError(0)
-//                .build();
-//
-//        // when
-//        when(userContext.getCurrentUser()).thenReturn(defaultUser);
-//        when(testResultService.measurePerformance("userGroup", testTemplateResponseDto.getId(), "start")).thenReturn(request);
-//
-//        // then
-//        mockMvc.perform(post("/api/groups/{group_id}/templates/{template_id}?action={action}"
-//                                , "userGroup", testTemplateResponseDto.getId(), "start")
-//                        .contentType(MediaType.APPLICATION_JSON)
-////                        .content(objectMapper.writeValueAsString(request))
-//                )
-//                .andDo(print())
-//                .andDo(result -> {
-//                    assertThat(result.getResponse().getStatus()).isEqualTo(200);
-//
-//                    TestResultResponseDto resTemplate = objectMapper.readValue(
-//                            result.getResponse().getContentAsString(StandardCharsets.UTF_8),
-//                            TestResultResponseDto.class);
-//
-//                    assertThat(resTemplate.getUrl()).isEqualTo(request.getUrl());
-//                    assertThat(resTemplate.getMethod()).isEqualTo(request.getMethod());
-//                    assertThat(resTemplate.getTotalRequest()).isEqualTo(request.getTotalRequest());
-//                    assertThat(resTemplate.getTotalSuccess()).isEqualTo(request.getTotalSuccess());
-//                    assertThat(resTemplate.getTotalError()).isEqualTo(request.getTotalError());
-//
-//                });
-//    }
-
-    public Optional<TestTemplateResponseDto> saveGetTempData() {
+    public Optional<TestTemplateResponseDto> saveGetTempData() throws JsonProcessingException {
 
         UserGroup userGroup = UserGroup.builder().id("userGroup").name("userGroup").build();
 

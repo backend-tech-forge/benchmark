@@ -2,13 +2,12 @@ package org.benchmarker.bmcontroller.preftest.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
-import org.benchmarker.bmcommon.dto.TestResult;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
-import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
+import org.benchmarker.bmcontroller.preftest.service.PerftestService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -30,19 +29,20 @@ public class PerftestController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ITestTemplateService testTemplateService;
+    private final PerftestService perftestService;
     private final UserContext userContext;
     private final String agentUrl = "http://localhost:8081";
 
     @GetMapping("/groups/{group_id}/templates/{template_id}")
     @PreAuthorize("hasRole('USER')")
     public String getTest(@PathVariable("group_id") String groupId,
-        @PathVariable("template_id") Integer templateId, Model model) {
+        @PathVariable("template_id") Integer templateId, Model model) throws Exception {
+        String userId = userContext.getCurrentUser().getId();
 
         model.addAttribute("groupId", groupId);
         model.addAttribute("templateId", templateId);
-
-        TestTemplateResponseDto template = testTemplateService.getTemplate(templateId);
-        model.addAttribute("template", template);
+        TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
+        model.addAttribute("template", templateInfo);
 
         return "template/info"; // Thymeleaf 템플릿의 이름
     }
@@ -50,37 +50,30 @@ public class PerftestController {
     @PostMapping("/api/groups/{group_id}/templates/{template_id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity send(@PathVariable("group_id") String groupId,
-        @PathVariable("template_id") String templateId,
-        @RequestParam(value = "action") String action) {
+        @PathVariable("template_id") Integer templateId,
+        @RequestParam(value = "action") String action) throws Exception {
         log.info("Send action: {}", action);
         String userId = userContext.getCurrentUser().getId();
 
-        ParameterizedTypeReference<ServerSentEvent<TestResult>> typeReference =
-            new ParameterizedTypeReference<ServerSentEvent<TestResult>>() {
-            };
-
         WebClient webClient = WebClient.create(agentUrl);
-        // TODO : template 정보를 조회해서 전송해야합니다.
-        TemplateInfo templateInfo = new TemplateInfo().random();
+        TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
 
-        Flux<ServerSentEvent<TestResult>> eventStream = webClient.post()
-            .uri("/api/templates/{templateId}?action={action}", templateId, action)
-            .bodyValue(templateInfo)
-            .retrieve()
-            .bodyToFlux(typeReference)
-            .log();
+        Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
+            templateId, action, webClient, templateInfo);
 
         eventStream
             .doOnComplete(() -> {
+                // TODO : CommonTestResult 저장 logic 구현 필요
+                // 코드 한줄
                 if (action.equals("stop")) {
                     log.info("Test completed! {}", action);
                     messagingTemplate.convertAndSend("/topic/" + userId, "test started!");
                 }
             })
             .subscribe(event -> {
-                    TestResult testResult = event.data();
+                    CommonTestResult commonTestResult = event.data();
                     messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId,
-                        testResult);
+                        commonTestResult);
                 },
                 error -> {
                     log.error("Error receiving SSE: {}", error.getMessage());
@@ -88,4 +81,5 @@ public class PerftestController {
 
         return ResponseEntity.ok().build();
     }
+
 }

@@ -182,9 +182,8 @@
   const templateId = [[${templateId}]]; // Replace with actual value
   var initialized = [[${initialized}]];
 
-  const jsonString = [[${template.body}]];
-  var jsonObject = JSON.parse(jsonString)
-  var prettyJsonString = JSON.stringify(jsonObject, null, 2); // 4 spaces for indentation
+  const jsonString = [[${template.body}]]
+  var prettyJsonString = JSON.stringify(jsonString, null, 2); // 4 spaces for indentation
   document.getElementById('jsonOutput').innerText = prettyJsonString;
 
   initialize(userId,groupId,templateId);

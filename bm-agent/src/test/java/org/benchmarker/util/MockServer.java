@@ -29,7 +29,6 @@ public class MockServer {
         mockServer = new MockWebServer();
         mockServer.start();
         backendUrl = String.format(mockServer.url("/").toString());
-        System.out.println("Mock server url: " + backendUrl);
     }
 
     @AfterEach

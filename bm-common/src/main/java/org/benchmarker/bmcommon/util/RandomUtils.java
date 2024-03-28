@@ -3,13 +3,13 @@ package org.benchmarker.bmcommon.util;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import org.benchmarker.bmagent.AgentStatus;
-import org.benchmarker.bmcommon.dto.TestResult;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 
 public class RandomUtils {
 
     // generate random TestResults
-    public static TestResult generateRandomTestResult() {
-        return TestResult.builder()
+    public static CommonTestResult generateRandomTestResult() {
+        return CommonTestResult.builder()
             .testId(1)
             .testStatus(AgentStatus.TESTING)
             .startedAt("2021-01-01 00:00:00")
@@ -27,16 +27,16 @@ public class RandomUtils {
             .totalUsers(1)
             .totalDuration("1s")
             .mttfbAverage("1ms")
-            .MTTFBPercentiles(new HashMap<String, String>() {{
-                put("50", randMS(1,20));
-                put("95", randMS(20,40));
-                put("99", randMS(40,60));
+            .MTTFBPercentiles(new HashMap<Double, Double>() {{
+                put(50D, randDouble(0, 100));
+                put(95D, randDouble(0, 100));
+                put(99D, randDouble(0, 100));
             }})
             .tpsAverage(randDouble(0, 100))
-            .TPSPercentiles(new HashMap<String, Double>() {{
-                put("50", randDouble(0, 100));
-                put("95", randDouble(0, 100));
-                put("99", randDouble(0, 100));
+            .TPSPercentiles(new HashMap<Double, Double>() {{
+                put(50D, randDouble(0, 100));
+                put(95D, randDouble(0, 100));
+                put(99D, randDouble(0, 100));
             }})
             .build();
     }
