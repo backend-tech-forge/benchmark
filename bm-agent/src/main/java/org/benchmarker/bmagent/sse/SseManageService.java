@@ -169,14 +169,17 @@ public class SseManageService extends AbstractSseManageService {
     private void alwaysDoStop(Long id, SseEmitter emitter) {
         emitter.onCompletion(() -> {
             log.info("SSE Completed");
+            agentStatusManager.updateAgentStatus(AgentStatus.READY);
             this.stop(id);
         });
         emitter.onTimeout(() -> {
             log.warn("SSE Timeout");
+            agentStatusManager.updateAgentStatus(AgentStatus.READY);
             this.stop(id);
         });
         emitter.onError((ex) -> {
             log.info("SSE connection error for template ID: {}", id);
+            agentStatusManager.updateAgentStatus(AgentStatus.READY);
             this.stop(id); // Call method to clean up resources
         });
     }
