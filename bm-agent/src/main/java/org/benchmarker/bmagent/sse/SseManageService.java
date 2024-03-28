@@ -61,7 +61,7 @@ public class SseManageService extends AbstractSseManageService {
         // Save the SseEmitter to the map
         sseEmitterHashMap.put(id, emitter);
 
-        httpSender.put(id, new HttpSender(resultManagerService, scheduledTaskService));
+        httpSender.put(id, new HttpSender(resultManagerService, scheduledTaskService, agentStatusManager));
         HttpSender htps = httpSender.get(id);
 
         LocalDateTime now = LocalDateTime.now();
