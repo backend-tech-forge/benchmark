@@ -1,7 +1,7 @@
 package org.benchmarker.bmagent.initializer;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.benchmarker.bmagent.consts.SystemSchedulerConst;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.status.AgentStatusManager;
@@ -16,6 +16,7 @@ class InitializerTest {
     private ScheduledTaskService scheduledTaskService;
     @Autowired
     private AgentStatusManager agentStatusManager;
+
     @Test
     @DisplayName("System scheduler running check")
     void test1() throws Exception {

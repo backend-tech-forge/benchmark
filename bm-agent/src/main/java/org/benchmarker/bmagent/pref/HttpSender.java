@@ -17,9 +17,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
 import org.benchmarker.bmagent.AgentStatus;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.benchmarker.bmagent.status.AgentStatusManager;
+
 import org.benchmarker.bmagent.util.WebClientSupport;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
@@ -36,6 +38,7 @@ public class HttpSender {
 
     private final ResultManagerService resultManagerService;
     private final IScheduledTaskService scheduledTaskService;
+
     private final AgentStatusManager agentStatusManager;
 
 

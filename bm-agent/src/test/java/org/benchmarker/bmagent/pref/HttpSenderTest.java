@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.Map;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
 import org.benchmarker.bmagent.status.AgentStatusManager;
+
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.util.MockServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,11 +50,13 @@ class HttpSenderTest extends MockServer {
             .build();
 
         // then
+
         assertThrows((MalformedURLException.class), () -> {
             // when
             httpSender.sendRequests(get);
             httpSender.cancelRequests();
         });
+
 
     }
 
@@ -61,6 +64,7 @@ class HttpSenderTest extends MockServer {
     @DisplayName("performance testing")
     void test() throws MalformedURLException {
         // given
+
         HttpSender httpSender = new HttpSender(resultManagerService, scheduledTaskService,
             agentStatusManager);
         addMockResponse("ok", 50); // mock 50 response

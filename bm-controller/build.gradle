@@ -43,6 +43,7 @@ def excludeJacocoTestCoverageReport = [
         'org/benchmarker/bmcontroller/agent/**',
         'org/benchmarker/bmagent/status/**',
 
+
 ]
 
 jacoco {

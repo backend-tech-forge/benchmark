@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
 import org.benchmarker.bmagent.AgentInfo;
 import org.benchmarker.bmagent.AgentStatus;
 import org.benchmarker.bmagent.consts.HeaderConst;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
+
 
 /**
  * Agent instance status and information manager
@@ -51,6 +53,7 @@ public class AgentStatusManager {
 
     // Mutex lock object
     private Object lock = new Object();
+
 
     private AgentInfo getInfo() throws UnknownHostException {
         log.info(getServerProperties().toString());
@@ -101,6 +104,7 @@ public class AgentStatusManager {
             return false;
         }
     }
+
 
     /**
      * Check the current status is READY state
