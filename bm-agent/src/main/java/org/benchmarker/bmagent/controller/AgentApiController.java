@@ -46,6 +46,7 @@ public class AgentApiController {
     public SseEmitter manageSSE(@PathVariable("template_id") Long templateId,
         @RequestParam("action") String action, @RequestBody TemplateInfo templateInfo) {
         log.info(templateInfo.toString());
+
         if (action.equals("start")) {
             agentStatusManager.getAndUpdateStatusIfReady(
                 AgentStatus.TESTING).orElseThrow(() -> new RuntimeException("agent is not ready"));

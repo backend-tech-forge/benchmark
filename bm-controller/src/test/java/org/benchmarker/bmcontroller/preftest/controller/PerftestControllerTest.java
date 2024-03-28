@@ -123,7 +123,6 @@ public class PerftestControllerTest {
             .andExpect(model().attributeExists("groupId", "templateId", "template"));
     }
 
-    // HERE!!
 
     @Test
     void testExecutePerformanceTest() {

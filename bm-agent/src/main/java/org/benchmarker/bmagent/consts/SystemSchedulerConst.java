@@ -10,4 +10,5 @@ public interface SystemSchedulerConst {
     Integer connectControllerTimeout = 10; // seconds
     Integer connectionFailedLimit = 50;
 
+
 }
