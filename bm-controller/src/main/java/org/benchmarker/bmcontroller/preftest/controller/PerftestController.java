@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
+import org.benchmarker.bmcontroller.agent.AgentServerManager;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
+import org.benchmarker.bmcontroller.common.error.ErrorCode;
+import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
@@ -31,6 +34,7 @@ public class PerftestController {
     private final ITestTemplateService testTemplateService;
     private final PerftestService perftestService;
     private final UserContext userContext;
+    private final AgentServerManager agentServerManager;
     private final String agentUrl = "http://localhost:8081";
 
     @GetMapping("/groups/{group_id}/templates/{template_id}")
@@ -54,8 +58,21 @@ public class PerftestController {
         @RequestParam(value = "action") String action) throws Exception {
         log.info("Send action: {}", action);
         String userId = userContext.getCurrentUser().getId();
+        String serverUrl = "";
+        if (action.equals("stop")){
 
-        WebClient webClient = WebClient.create(agentUrl);
+            serverUrl = agentServerManager.getAgentMapped().get(Long.valueOf(templateId));
+            agentServerManager.removeTemplateRunnerAgent(Long.valueOf(templateId));
+            log.info("stop to " + serverUrl);
+        }else{
+
+            serverUrl = agentServerManager.getReadyAgent().orElseThrow(() ->
+                new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR)).getServerUrl();
+            agentServerManager.addTemplateRunnerAgent(Long.valueOf(templateId), serverUrl);
+            log.info("send to " + serverUrl);
+        }
+        WebClient webClient = WebClient.create(serverUrl);
+
         TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
 
         Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
