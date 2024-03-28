@@ -1,0 +1,18 @@
+
+
+server:
+  port: 8081
+controller:
+  url: http://localhost:8080/api/agent/register
+
+token:
+  secret: '21edc783bca7b12425ccd76e9bb135d868b478286e1ea49965c9ae7138345fb3a5dc90cebae25c76d246529664bd223c81842fa37387b0d444986d30828288bb'
+  expiration_time: 86400000 # 1 day
+  refresh_expiration_time: 604800000 # 7 days
+
+spring:
+  profiles:
+    active: test
+  cloud:
+    discovery:
+      enabled: false
