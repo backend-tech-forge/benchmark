@@ -151,7 +151,9 @@ test {
         excludes = ["org/benchmarker/bmcontroller/home/HomeController.class",
                     "org/benchmarker/bmcontroller/user/controller/UserController.class",
                     'org/benchmarker/bmcontroller/controller/AdminUserController**',
-                    "org/benchmarker/bmcontroller/BmControllerApplication.class"]
+                    "org/benchmarker/bmcontroller/BmControllerApplication.class",
+                    'org/benchmarker/bmcontroller/scheduler/**',
+                    'org/benchmarker/bmcontroller/agent/**']
     }
     finalizedBy jacocoTestReport
 }

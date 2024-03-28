@@ -52,7 +52,9 @@ class HttpSenderTest extends MockServer {
         assertThrows((MalformedURLException.class), () -> {
             // when
             httpSender.sendRequests(get);
+            httpSender.cancelRequests();
         });
+
     }
 
     @Test
@@ -77,7 +79,7 @@ class HttpSenderTest extends MockServer {
 
         // when
         httpSender.sendRequests(get);
-        scheduledTaskService.shutdown(0L);
+        scheduledTaskService.shutdown(1L);
 
         // then
         assertThat(httpSender.getTpsMap()).isNotNull();

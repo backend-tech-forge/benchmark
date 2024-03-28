@@ -99,7 +99,7 @@ public class HttpSender {
                 long startTime = System.currentTimeMillis(); // 시작 시간 기록
                 long endTime = startTime + duration.toMillis();
 
-                for (int j = 0; j < 1000; j++) {
+                for (int j = 0; j < templateInfo.getMaxRequest(); j++) {
                     // 만약 running 이 아니거나 시간이 끝났다면,
                     if (!isRunning || System.currentTimeMillis() > endTime) {
                         agentStatusManager.updateAgentStatus(AgentStatus.READY);
