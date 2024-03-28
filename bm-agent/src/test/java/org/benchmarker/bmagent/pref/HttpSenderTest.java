@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.time.Duration;
 import java.util.Map;
 import org.benchmarker.bmagent.schedule.ScheduledTaskService;
+import org.benchmarker.bmagent.status.AgentStatusManager;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.util.MockServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,9 +21,10 @@ class HttpSenderTest extends MockServer {
 
     private ScheduledTaskService scheduledTaskService = new ScheduledTaskService();
     private ResultManagerService resultManagerService = new ResultManagerService();
+    private AgentStatusManager agentStatusManager = new AgentStatusManager();
 
     @BeforeEach
-    void setup(){
+    void setup() {
         ScheduledTaskService scheduledTaskService = new ScheduledTaskService();
         ResultManagerService resultManagerService = new ResultManagerService();
     }
@@ -31,7 +33,8 @@ class HttpSenderTest extends MockServer {
     @DisplayName("url 포멧 에러 시 에러 반환")
     void test2() throws MalformedURLException {
         // given
-        HttpSender httpSender = new HttpSender(resultManagerService, scheduledTaskService);
+        HttpSender httpSender = new HttpSender(resultManagerService, scheduledTaskService,
+            agentStatusManager);
 
         TemplateInfo get = TemplateInfo.builder()
             .id("1")
@@ -46,7 +49,7 @@ class HttpSenderTest extends MockServer {
             .build();
 
         // then
-        assertThrows((MalformedURLException.class),()->{
+        assertThrows((MalformedURLException.class), () -> {
             // when
             httpSender.sendRequests(get);
         });
@@ -56,8 +59,9 @@ class HttpSenderTest extends MockServer {
     @DisplayName("performance testing")
     void test() throws MalformedURLException {
         // given
-        HttpSender httpSender = new HttpSender(resultManagerService, scheduledTaskService);
-        addMockResponse("ok",50); // mock 50 response
+        HttpSender httpSender = new HttpSender(resultManagerService, scheduledTaskService,
+            agentStatusManager);
+        addMockResponse("ok", 50); // mock 50 response
 
         TemplateInfo get = TemplateInfo.builder()
             .id("1")

@@ -19,21 +19,26 @@ class InitializerTest {
     private ScheduledTaskService scheduledTaskService;
     @Autowired
     private AgentStatusManager agentStatusManager;
-
     @Test
     @DisplayName("System scheduler running check")
     void test1() throws Exception {
+        Initializer initializer = new Initializer(scheduledTaskService,agentStatusManager);
+        initializer.run();
+
         Map<String, ScheduledExecutorService> schedulers = scheduledTaskService.getSchedulers(
             SystemSchedulerConst.systemSchedulerId);
-        assertThat(schedulers).isNotEmpty();
         assertThat(schedulers).isNotNull();
         assertThat(schedulers.keySet().size()).isEqualTo(1);
         assertThat(schedulers.keySet().toArray()[0]).isEqualTo(SystemSchedulerConst.systemUsageSchedulerName);
-        sleep(2000); // wait 2 seconds and scheduler will calculate cpu&memory usage in a seconds
+        sleep(4000); // wait 2 seconds and scheduler will calculate cpu&memory usage in a seconds
         assertThat(agentStatusManager.getCpuUsage()).isNotNull();
         assertThat(agentStatusManager.getMemoryUsage()).isNotNull();
         System.out.println("cpu usage test : " + agentStatusManager.getCpuUsage());
         System.out.println("memory usage test : " + agentStatusManager.getMemoryUsage());
 
+        assertThat(SystemSchedulerConst.connectControllerTimeout).isEqualTo(10);
+        assertThat(SystemSchedulerConst.systemSchedulerId).isEqualTo(-100L);
+        assertThat(SystemSchedulerConst.systemUsageSchedulerName).isEqualTo("cpu-memory-usage-update");
+        assertThat(SystemSchedulerConst.connectionFailedLimit).isEqualTo(50);
     }
 }

@@ -11,9 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import org.benchmarker.bmagent.AgentInfo;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcommon.util.RandomUtils;
+import org.benchmarker.bmcontroller.agent.AgentServerManager;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
@@ -54,6 +57,9 @@ public class PerftestControllerTest {
     @Mock
     private UserContext userContext;
 
+    @Mock
+    private AgentServerManager agentServerManager;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -87,6 +93,7 @@ public class PerftestControllerTest {
 
         when(perftestService.executePerformanceTest(eq(templateId), eq(action), any(),
             eq(templateInfo))).thenReturn(eventStream);
+        when(agentServerManager.getReadyAgent()).thenReturn(Optional.of(new AgentInfo()));
 
         // when
         mockMvc.perform(
