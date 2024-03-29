@@ -21,7 +21,6 @@ public class BMUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        log.info("loadByUsername : {}", userId);
         User user = userRepository.findById(userId)
             .orElseThrow(
                 () -> new UsernameNotFoundException("User not found with userId: " + userId));

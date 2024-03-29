@@ -17,14 +17,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
 import org.benchmarker.bmagent.AgentStatus;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.benchmarker.bmagent.status.AgentStatusManager;
-
 import org.benchmarker.bmagent.util.WebClientSupport;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Mono;
 
 /**
@@ -73,7 +72,7 @@ public class HttpSender {
      *
      * @param templateInfo {@link TemplateInfo}
      */
-    public void sendRequests(TemplateInfo templateInfo) throws MalformedURLException {
+    public void sendRequests(SseEmitter sseEmitter, TemplateInfo templateInfo) throws MalformedURLException {
 
         URL url = new URL(templateInfo.getUrl());
         RequestHeadersSpec<?> req = WebClientSupport.create(templateInfo.getMethod(),
@@ -106,7 +105,7 @@ public class HttpSender {
                     // 만약 running 이 아니거나 시간이 끝났다면,
                     if (!isRunning || System.currentTimeMillis() > endTime) {
                         agentStatusManager.updateAgentStatus(AgentStatus.READY);
-                        return;
+                        break;
                     }
                     long requestStartTime = System.currentTimeMillis();  // 요청 시작 시간 기록
                     req.exchangeToMono(resp -> {

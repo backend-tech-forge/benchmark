@@ -31,6 +31,8 @@ testlogger {
 def excludeJacocoTestCoverageReport = [
         'org/benchmarker/bmcontroller/home/**',
         'org/benchmarker/bmcontroller/template/**',
+        'org/benchmarker/bmcontroller/prerun/**',
+        'org/benchmarker/bmcontroller/preftest/**',
         'org/benchmarker/bmcontroller/common/beans/**',
         'org/benchmarker/bmcontroller/user/controller/UserController.class',
         'org/benchmarker/BmControllerApplication.class',

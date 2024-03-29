@@ -91,7 +91,7 @@ public class PerftestControllerTest {
             randomResult).build();
         Flux<ServerSentEvent<CommonTestResult>> eventStream = Flux.just(resultStub);
 
-        when(perftestService.executePerformanceTest(eq(templateId), eq(action), any(),
+        when(perftestService.executePerformanceTest(eq(templateId), eq(groupId), eq(action), any(),
             eq(templateInfo))).thenReturn(eventStream);
         when(agentServerManager.getReadyAgent()).thenReturn(Optional.of(new AgentInfo()));
 
@@ -140,12 +140,12 @@ public class PerftestControllerTest {
 
         Flux<ServerSentEvent<CommonTestResult>> mockFlux = Flux.fromIterable(mockEvents);
 
-        when(perftestService.executePerformanceTest(Mockito.anyInt(), Mockito.anyString(),
+        when(perftestService.executePerformanceTest(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(),
             any(), any())).thenReturn(mockFlux);
 
         // when
-        Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
-            2, "start", WebClient.create(), templateInfo);
+        Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(1,
+            "2", "start", WebClient.create(), templateInfo);
 
         // then
         // Verify that the mock event is received

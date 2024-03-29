@@ -77,11 +77,11 @@ public class AgentApiControllerTest extends MockServer {
             mockSseEmitter.send("Data 2");
             mockSseEmitter.complete();
             return null;
-        }).when(sseManageService).start(eq(1L), any());
+        }).when(sseManageService).start(eq(1L),any(), any());
 
         // 호출
         TemplateInfo build = TemplateInfo.builder().build();
-        agentApiController.manageSSE(1L, "start", build);
+        agentApiController.manageSSE(1L, "groupId","start", build);
 
         // then
         // SseEmitter 로 전송된 메시지 모두 캡처
@@ -100,7 +100,7 @@ public class AgentApiControllerTest extends MockServer {
 
         // when
         TemplateInfo build = TemplateInfo.builder().build();
-        agentApiController.manageSSE(templateId, "stop", build);
+        agentApiController.manageSSE(templateId, "groupId","stop", build);
 
         // then
         // sseManageService.stop() 메서드가 호출되었는지 검증

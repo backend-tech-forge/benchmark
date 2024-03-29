@@ -52,6 +52,7 @@ public class DataLoader implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final ScheduledTaskService scheduledTaskService;
     private final AgentServerManager agentServerManager;
+
     @Value("${admin.id}")
     private String adminId;
     @Value("${admin.password}")
@@ -89,7 +90,6 @@ public class DataLoader implements CommandLineRunner {
 
         // remove & add agent in every seconds
         scheduledTaskService.start(-100L, () -> {
-            log.info(agentServerManager.getAgentsUrl().values().toString());
             // agent health check
             Iterator<Entry<String, AgentInfo>> iterator = agentServerManager.getAgentsUrl()
                 .entrySet().iterator();
@@ -135,7 +135,7 @@ public class DataLoader implements CommandLineRunner {
             }
             messagingTemplate.convertAndSend("/topic/server",
                 agentServerManager.getAgentsUrl().values());
-        }, 0, 2, TimeUnit.SECONDS);
+        }, 0, 500, TimeUnit.MILLISECONDS);
 
 
     }

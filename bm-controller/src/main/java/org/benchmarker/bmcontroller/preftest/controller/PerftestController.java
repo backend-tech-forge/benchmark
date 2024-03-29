@@ -8,7 +8,6 @@ import org.benchmarker.bmcontroller.agent.AgentServerManager;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
-
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
@@ -76,11 +75,14 @@ public class PerftestController {
 
         TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
 
+
         Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
-            templateId, action, webClient, templateInfo);
+            templateId, groupId, action, webClient, templateInfo);
+        perftestService.saveRunning(groupId, templateId);
 
         eventStream
             .doOnComplete(() -> {
+                perftestService.removeRunning(groupId,templateId);
                 // TODO : CommonTestResult 저장 logic 구현 필요
                 // 코드 한줄
                 if (action.equals("stop")) {

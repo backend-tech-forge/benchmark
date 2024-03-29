@@ -122,8 +122,6 @@
   const groupId = '[[${groupId}]]';
   const templateId = [[${templateId}]];
   const jsonString = '[[${template.body}]]';
-  console.log("templateInfo script")
-  console.log(stompClient2);
   var prettyJsonString = JSON.stringify(jsonString, null, 2); // 4 spaces for indentation
   document.getElementById('jsonOutput').innerText = prettyJsonString;
 

@@ -14,6 +14,7 @@ import org.benchmarker.util.MockServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
  * Schel
@@ -53,7 +54,7 @@ class HttpSenderTest extends MockServer {
 
         assertThrows((MalformedURLException.class), () -> {
             // when
-            httpSender.sendRequests(get);
+            httpSender.sendRequests(new SseEmitter(),get);
             httpSender.cancelRequests();
         });
 
@@ -82,7 +83,7 @@ class HttpSenderTest extends MockServer {
             .build();
 
         // when
-        httpSender.sendRequests(get);
+        httpSender.sendRequests(new SseEmitter(),get);
         scheduledTaskService.shutdown(1L);
 
         // then

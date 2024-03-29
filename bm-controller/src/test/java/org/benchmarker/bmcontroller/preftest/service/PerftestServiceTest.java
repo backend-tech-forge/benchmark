@@ -28,7 +28,7 @@ class PerftestServiceTest extends MockServer {
             .build();
 
         Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(1,
-            "start", webClient, templateInfo);
+            "groupId","start", webClient, templateInfo);
 
         StepVerifier.create(eventStream)
             .expectNextMatches(event -> {

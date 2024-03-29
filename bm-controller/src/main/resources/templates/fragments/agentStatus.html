@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="/css/bar.css">
   <link rel="stylesheet" type="text/css" href="/css/styles.css">
-  <style>
-  </style>
 </head>
 <body>
 
@@ -20,7 +18,6 @@
     });
 
     stompClient.onConnect = (frame) => {
-      console.log('Connected: ' + frame);
       stompClient.subscribe('/topic/server', (result) => {
         const agentInfoList = JSON.parse(result.body); // Parse the received JSON string
         const container = document.getElementById('agentInfoContainer');
@@ -48,7 +45,7 @@
           agentInfoParagraph.style.padding = '0px';
           agentInfoParagraph.style.fontSize = '10px'; // 폰트 크기 설정
           agentInfoParagraph.style.fontWeight = 'bold'; // 폰트 굵기 설정
-          agentInfoDiv.appendChild(agentInfoParagraph);
+
 
           // Set styles for status circles
           const circle = document.createElement('div');
@@ -62,6 +59,8 @@
           circle.style.justifyContent = 'center'; // Horizontally center circle
           circle.style.alignItems = 'center'; // Vertically center circle
           if (agent.status === 'TESTING') {
+            const templateIds = agent.templateId.join(', ');
+            agentInfoParagraph.textContent += ` (Template IDs: ${templateIds})`;
             circle.style.backgroundColor = 'yellow';
             circle.style.boxShadow = '0 0 10px yellow';
           } else if (agent.status === 'READY') {
@@ -69,6 +68,7 @@
             circle.style.boxShadow = '0 0 10px limegreen';
           }
 
+          agentInfoDiv.appendChild(agentInfoParagraph);
           agentInfoDiv.appendChild(circle);
 
           container.appendChild(agentInfoDiv);

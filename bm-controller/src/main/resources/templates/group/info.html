@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Group Information</title>
-  <link rel="stylesheet" type="text/css" href="../css/styles.css">
-  <script src="/js/connectStomp.js"></script>
-</head>
+
+<header th:replace="fragments/commonHeader :: common('Group Information')"></header>
+
+
 <body>
 <div th:replace="fragments/currentUserFragment :: currentUser"></div>
+<div th:replace="fragments/agentStatus :: agentStatus"></div>
+
 <h1>Information about Group</h1>
 
 <div class="container">
@@ -61,7 +61,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="template : ${groupInfo.templates}">
+    <tr th:id="'template-'+${template.id}" th:each="template : ${groupInfo.templates}">
       <td th:text="${template.id}"></td>
       <td th:text="${template.url}"></td>
       <td th:text="${template.method}"></td>
@@ -134,6 +134,8 @@
 <script th:inline="javascript">
   /*<![CDATA[*/
   var initialized = [[${initialized}]];
+  var groupId = [[${groupInfo.id}]];
+
   function toggleTemplateForm() {
     var templateForm = document.getElementById('templateForm');
     var toggleButton = document.getElementById('toggleTemplateButton');
