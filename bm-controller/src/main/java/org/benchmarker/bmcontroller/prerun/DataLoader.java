@@ -30,6 +30,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -44,7 +45,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
-
+    private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
     private final UserGroupJoinRepository userGroupJoinRepository;
@@ -132,7 +133,8 @@ public class DataLoader implements CommandLineRunner {
                     noOp();
                 }
             }
-
+            messagingTemplate.convertAndSend("/topic/server",
+                agentServerManager.getAgentsUrl().values());
         }, 0, 2, TimeUnit.SECONDS);
 
 
