@@ -40,7 +40,7 @@ public class UserController {
     @GetMapping({"/users/{user_id}"})
     @PreAuthorize("hasAnyRole('USER')")
     public String getUser(
-        @PathVariable(required = false) String user_id, Model model) {
+        @PathVariable(value = "user_id", required = false) String user_id, Model model) {
         User currentUser = userContext.getCurrentUser();
         UserInfo userInfo = null;
         if (user_id == null) {
