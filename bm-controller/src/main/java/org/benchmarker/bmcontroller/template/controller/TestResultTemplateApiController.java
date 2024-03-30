@@ -16,13 +16,13 @@ public class TestResultTemplateApiController {
 
     private final ITestResultService testResultService;
 
-    @PostMapping("/groups/{group_id}/templates/{template_id}?action={action}")
-    @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<TestResultResponseDto> measurePerformance(
-            @PathVariable String  group_id,
-            @PathVariable Integer template_id,
-            @RequestParam(required = true) String action) throws InterruptedException {
-        return ResponseEntity.ok(testResultService.measurePerformance(group_id, template_id, action));
-    }
+//    @PostMapping("/groups/{group_id}/templates/{template_id}?action={action}")
+//    @PreAuthorize("hasAnyRole('USER')")
+//    public ResponseEntity<TestResultResponseDto> measurePerformance(
+//            @PathVariable String  group_id,
+//            @PathVariable Integer template_id,
+//            @RequestParam(required = true) String action) throws InterruptedException {
+//        return ResponseEntity.ok(testResultService.measurePerformance(group_id, template_id, action));
+//    }
 
 }
