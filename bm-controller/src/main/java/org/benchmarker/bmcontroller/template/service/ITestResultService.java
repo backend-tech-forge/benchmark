@@ -1,13 +1,16 @@
 package org.benchmarker.bmcontroller.template.service;
 
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
 
 public interface ITestResultService {
 
-    TestResultResponseDto measurePerformance(String group_id, Integer templateId, String action) throws InterruptedException;
+    Optional<CommonTestResult> resultSaveAndReturn(CommonTestResult commonTestResult);
 
     TestTemplateResponseDto getTemplateResult(Integer templateResultId);
 
