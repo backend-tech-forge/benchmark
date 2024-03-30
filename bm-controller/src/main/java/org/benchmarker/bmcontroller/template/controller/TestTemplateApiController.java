@@ -35,7 +35,7 @@ public class TestTemplateApiController {
         throws JsonProcessingException {
 
         if (reqTestTemplate.getMethod().equalsIgnoreCase("GET")) {
-            reqTestTemplate.setBody("");
+            reqTestTemplate.setBody("{}");
             return ResponseEntity.ok(testTemplateService.createTemplate(reqTestTemplate).get());
         }
 
