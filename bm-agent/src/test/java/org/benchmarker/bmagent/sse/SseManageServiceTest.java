@@ -47,7 +47,7 @@ class SseManageServiceTest {
         resultManagerService.save(id, resultStub);
 
         // when
-        SseEmitter result = sseManageService.start(id, new TemplateInfo());
+        SseEmitter result = sseManageService.start(id, "groupId", new TemplateInfo());
 
         // then
         assertThat(result).isNotNull();
@@ -64,10 +64,10 @@ class SseManageServiceTest {
         Long id = 1L;
         CommonTestResult resultStub = RandomUtils.generateRandomTestResult();
         resultManagerService.save(id, resultStub);
-        SseEmitter result = sseManageService.start(id, new TemplateInfo());
+        SseEmitter result = sseManageService.start(id, "groupId", new TemplateInfo());
 
         // when
-        SseEmitter res = sseManageService.start(id, new TemplateInfo());
+        SseEmitter res = sseManageService.start(id, "groupId", new TemplateInfo());
 
         // then
         assertThat(res).isNull();
@@ -81,7 +81,7 @@ class SseManageServiceTest {
         Long id = 1L;
         CommonTestResult resultStub = RandomUtils.generateRandomTestResult();
         resultManagerService.save(id, resultStub);
-        sseManageService.start(id, new TemplateInfo());
+        sseManageService.start(id, "groupId", new TemplateInfo());
         sseManageService.stop(id);
 
         // when

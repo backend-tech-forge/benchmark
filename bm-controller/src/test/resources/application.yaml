@@ -16,6 +16,9 @@ admin:
   password: 'admin'
 
 spring:
+  cloud:
+    discovery:
+      enabled: false
   profiles:
     active: test
   datasource:

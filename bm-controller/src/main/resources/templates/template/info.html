@@ -1,80 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
+
+<header th:replace="fragments/commonHeader :: common('Test Results')">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="/css/styles.css">
-  <link rel="stylesheet" type="text/css" href="/css/bar.css">
+</header>
 
-  <script src="/js/connectStomp.js"></script>
-  <title>Test Results</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f2f2f2;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      color: #333;
-      margin-top: 0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    #buttons {
-      margin-bottom: 20px;
-    }
-
-    #buttons button {
-      padding: 10px 20px;
-      margin-right: 10px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #buttons button:hover {
-      background-color: #0056b3;
-    }
-  </style>
-</head>
 <body>
 
 <div th:replace="fragments/currentUserFragment :: currentUser"></div>
+<div th:replace="fragments/agentStatus :: agentStatus"></div>
 <div class="container">
   <div id="testTemplate">
     <table>
@@ -175,43 +109,30 @@
   </div>
 </div>
 
-<script th:inline="javascript">
-  const userId = [[${currentUser.id}]];
-  // get userId from securty context
-  const groupId = [[${groupId}]]; // Replace with actual value
-  const templateId = [[${templateId}]]; // Replace with actual value
-  var initialized = [[${initialized}]];
+<script>
 
-  const jsonString = [[${template.body}]]
+  stompClient.activate();
+
+  var stompClient2 = new StompJs.Client({
+    brokerURL: 'ws://localhost:8080/gs-guide-websocket'
+  });
+
+  const userId = '[[${currentUser.id}]]';
+  // get userId from securty context
+  const groupId = '[[${groupId}]]';
+  const templateId = [[${templateId}]];
+  const jsonString = '[[${template.body}]]';
   var prettyJsonString = JSON.stringify(jsonString, null, 2); // 4 spaces for indentation
   document.getElementById('jsonOutput').innerText = prettyJsonString;
 
-  initialize(userId,groupId,templateId);
-
-  function initialize(userId,groupId,templateId) {
-    if (!initialized) {
-      stompClient = new StompJs.Client({
-        brokerURL: 'ws://localhost:8080/gs-guide-websocket'
-      });
-
-      stompClient.onConnect = (frame) => {
-        console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/'+groupId+'/'+templateId, (result) => {
-          updateResults(JSON.parse(result.body));
-        });
-        stompClient.subscribe('/topic/'+userId, (result) => {
-          console.log('Received message: /topic/userId');
-          alert('새로운 메시지가 도착했습니다: ' + result);
-        });
-      };
-
-      stompClient.onWebSocketError = (error) => {
-        console.error('Error with websocket', error);
-      };
-      initialized = true;
-    }else{
-      console.log('Already initialized');
-    }
+  stompClient2.onConnect = (frame) => {
+    stompClient2.subscribe('/topic/' + groupId + '/' + templateId, (result) => {
+      updateResults(JSON.parse(result.body));
+    });
+    stompClient2.subscribe('/topic/' + userId, (result) => {
+      console.log('Received message: /topic/userId');
+      alert('새로운 메시지가 도착했습니다: ' + result);
+    });
   }
 
 
@@ -293,7 +214,7 @@
     });
   }
 
-  stompClient.activate();
+  stompClient2.activate();
 </script>
 </body>
 </html>

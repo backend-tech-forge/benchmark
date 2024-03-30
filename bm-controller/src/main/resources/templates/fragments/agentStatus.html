@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="/css/bar.css">
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+
+<!-- Current user status bar -->
+<div th:fragment="agentStatus" id="agentInfoContainer">
+
+  <script>
+    console.log("agentStatus script");
+
+    var stompClient = new StompJs.Client({
+      brokerURL: 'ws://localhost:8080/gs-guide-websocket'
+    });
+
+    stompClient.onConnect = (frame) => {
+      stompClient.subscribe('/topic/server', (result) => {
+        const agentInfoList = JSON.parse(result.body); // Parse the received JSON string
+        const container = document.getElementById('agentInfoContainer');
+        container.innerHTML = '';
+        agentInfoList.forEach((agent, index) => {
+          // show info
+          const agentInfoDiv = document.createElement('div');
+          agentInfoDiv.id = 'agentInfoDiv';
+          agentInfoDiv.style.alignSelf='center';
+          agentInfoDiv.style.display = 'flex';
+          agentInfoDiv.style.alignItems = 'center';
+          agentInfoDiv.style.alignSelf = 'center';
+          agentInfoDiv.style.padding = '5px'; // 내부 여백 추가
+          agentInfoDiv.style.marginRight = '5px'; // 하단 마진 추가
+          agentInfoDiv.style.border = '0.5px solid #ddd'; // 테두리 추가
+          agentInfoDiv.style.borderRadius = '20px'; // 테두리 모서리를 둥글게 만듦
+          agentInfoDiv.style.color = '#ffffff';
+          agentInfoDiv.style.backgroundColor = '#000000';
+          // agentInfoDiv.style.marginBottom = '10px'; // Add margin between agent info blocks
+
+          // Set styles for agent information
+          const agentInfoParagraph = document.createElement('p');
+          agentInfoParagraph.textContent = `Agent-${index + 1}: ${agent.status}`;
+          agentInfoParagraph.style.margin = '0px';
+          agentInfoParagraph.style.padding = '0px';
+          agentInfoParagraph.style.fontSize = '10px'; // 폰트 크기 설정
+          agentInfoParagraph.style.fontWeight = 'bold'; // 폰트 굵기 설정
+
+
+          // Set styles for status circles
+          const circle = document.createElement('div');
+          circle.style.width = '10px';
+          circle.style.height = '10px';
+          circle.style.borderRadius = '50%';
+          circle.style.padding = '0px';
+          circle.style.margin = '0px';
+          circle.style.marginLeft = '10px';
+          circle.style.display = 'flex'; // Use flexbox for circle positioning
+          circle.style.justifyContent = 'center'; // Horizontally center circle
+          circle.style.alignItems = 'center'; // Vertically center circle
+          if (agent.status === 'TESTING') {
+            const templateIds = agent.templateId.join(', ');
+            agentInfoParagraph.textContent += ` (Template IDs: ${templateIds})`;
+            circle.style.backgroundColor = 'yellow';
+            circle.style.boxShadow = '0 0 10px yellow';
+          } else if (agent.status === 'READY') {
+            circle.style.backgroundColor = 'limegreen';
+            circle.style.boxShadow = '0 0 10px limegreen';
+          }
+
+          agentInfoDiv.appendChild(agentInfoParagraph);
+          agentInfoDiv.appendChild(circle);
+
+          container.appendChild(agentInfoDiv);
+        });
+
+      });
+    };
+
+    stompClient.onWebSocketError = (error) => {
+      console.error('Error with websocket', error);
+    };
+
+    console.log(stompClient);
+
+    stompClient.activate();
+
+  </script>
+</div>
+
+
+</body>
+</html>
+
+

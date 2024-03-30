@@ -1,12 +1,17 @@
 package org.benchmarker.bmcontroller.agent;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
+import org.benchmarker.bmagent.AgentInfo;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.security.JwtTokenProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -21,8 +26,8 @@ public class AgentListener {
      *
      * @return String
      */
-    @GetMapping("/api/endpoint")
-    public ResponseEntity agent(HttpServletRequest request) {
+    @PostMapping("/api/agent/register")
+    public ResponseEntity agent(HttpServletRequest request, @RequestBody AgentInfo agentInfo) {
         String authorization = request.getHeader("Authorization");
         if (authorization == null) {
             throw new GlobalException(ErrorCode.UNAUTHORIZED);
@@ -36,7 +41,13 @@ public class AgentListener {
         }
 
         // Add agent server url and port to the list
-        String url = agentServerManager.add(request.getRemoteAddr()+":"+request.getRemotePort());
-        return ResponseEntity.ok(url + " is added successfully");
+//        agentServerManager.add(agentInfo);
+        return ResponseEntity.ok(agentInfo.getServerUrl() + " is added successfully");
+    }
+
+    @GetMapping("/api/agents")
+    public List<AgentInfo> getAgents(){
+        ConcurrentHashMap<String, AgentInfo> agentsUrl = agentServerManager.getAgentsUrl();
+        return agentsUrl.values().stream().toList();
     }
 }

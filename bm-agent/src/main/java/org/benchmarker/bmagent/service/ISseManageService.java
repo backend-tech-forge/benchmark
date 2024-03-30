@@ -19,7 +19,7 @@ public interface ISseManageService extends SseManageConsts {
      * @param templateInfo TemplateInfo
      * @return SseEmitter
      */
-    SseEmitter start(Long id, TemplateInfo templateInfo);
+    SseEmitter start(Long id, String groupId, TemplateInfo templateInfo);
 
     /**
      * Stop the SSE emitter for the given id

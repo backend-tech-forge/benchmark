@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BmControllerApplication {
 
     public static void main(String[] args) {
+        System.setProperty("spring.application.name","bm-controller");
         SpringApplication.run(BmControllerApplication.class, args);
     }
 

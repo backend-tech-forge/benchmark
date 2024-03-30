@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Home</title>
-  <link rel="stylesheet" type="text/css" href="css/styles.css">
-</head>
+
+<header th:replace="fragments/commonHeader :: common(Home)"></header>
+
 <body>
 <div th:replace="fragments/currentUserFragment :: currentUser"></div>
+<div th:replace="fragments/agentStatus :: agentStatus"></div>
 <div th:replace="fragments/projectInfo :: projectInfo"></div>
+
 <h1>Welcome to the Benchmarker Home</h1>
 
 <div class="container">
