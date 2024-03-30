@@ -2,6 +2,7 @@ package org.benchmarker.bmcontroller.common.controller;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalErrorResponse;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class GlobalRestControllerAdvice {
 
     @ExceptionHandler(GlobalException.class)
@@ -32,6 +34,7 @@ public class GlobalRestControllerAdvice {
         MethodArgumentNotValidException.class,
     })
     public ResponseEntity<GlobalErrorResponse> handleBadRequestException(Exception e) {
+        log.error(e.getMessage());
         return GlobalErrorResponse.toResponseEntity(ErrorCode.BAD_REQUEST);
     }
 }

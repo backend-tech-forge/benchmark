@@ -47,9 +47,9 @@ public class SseManageService extends AbstractSseManageService {
      * @see ScheduledTaskService
      */
     @Override
-    public SseEmitter start(Long id, TemplateInfo templateInfo) {
+    public SseEmitter start(Long id, String groupId, TemplateInfo templateInfo) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
-
+        LocalDateTime startAt = LocalDateTime.now();
         // when the client disconnects, complete the SseEmitter
         alwaysDoStop(id, emitter);
 
@@ -61,7 +61,8 @@ public class SseManageService extends AbstractSseManageService {
         // Save the SseEmitter to the map
         sseEmitterHashMap.put(id, emitter);
 
-        httpSender.put(id, new HttpSender(resultManagerService, scheduledTaskService));
+
+        httpSender.put(id, new HttpSender(resultManagerService, scheduledTaskService, agentStatusManager));
         HttpSender htps = httpSender.get(id);
 
         LocalDateTime now = LocalDateTime.now();
@@ -69,11 +70,10 @@ public class SseManageService extends AbstractSseManageService {
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
-            LocalDateTime cur = LocalDateTime.now();
+            LocalDateTime curTime = LocalDateTime.now();
             Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
             Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
-            CommonTestResult data = getCommonTestResult(templateInfo, htps, now, cur, tpsP, mttfbP);
-            log.info(data.toString());
+            CommonTestResult data = getCommonTestResult(groupId,templateInfo, htps, now, curTime, tpsP, mttfbP);
             resultManagerService.save(id, data);
             send(id, resultManagerService.find(id));
         }, 0, 1, TimeUnit.SECONDS);
@@ -82,7 +82,15 @@ public class SseManageService extends AbstractSseManageService {
         // async + non-blocking 필수
         CompletableFuture.runAsync(() -> {
             try {
-                htps.sendRequests(templateInfo);
+                htps.sendRequests(emitter, templateInfo);
+                LocalDateTime finished = LocalDateTime.now();
+                Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
+                Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
+                CommonTestResult data = getCommonTestResult(groupId,templateInfo, htps, now, finished, tpsP, mttfbP);
+                data.setFinishedAt(finished.toString());
+                data.setTestStatus(AgentStatus.TESTING_FINISH);
+                send(id, data);
+                emitter.complete();
             } catch (MalformedURLException e) {
                 log.error(e.getMessage());
             }
@@ -97,17 +105,18 @@ public class SseManageService extends AbstractSseManageService {
      *
      * @param templateInfo
      * @param htps
-     * @param now
+     * @param start
      * @param cur
      * @param tpsP
      * @param mttfbP
      * @return CommonTestResult
      */
-    private CommonTestResult getCommonTestResult(TemplateInfo templateInfo, HttpSender htps,
-        LocalDateTime now, LocalDateTime cur, Map<Double, Double> tpsP,
+    private CommonTestResult getCommonTestResult(String groupId,TemplateInfo templateInfo, HttpSender htps,
+        LocalDateTime start, LocalDateTime cur, Map<Double, Double> tpsP,
         Map<Double, Double> mttfbP) {
         return CommonTestResult.builder()
-            .startedAt(now.toString())
+            .groupId(groupId)
+            .startedAt(start.toString())
             .totalRequests(htps.getTotalRequests().get())
             .totalSuccess(htps.getTotalSuccess().get())
             .totalErrors(htps.getTotalErrors().get())
@@ -116,14 +125,14 @@ public class SseManageService extends AbstractSseManageService {
             .url(templateInfo.getUrl())
             .method(templateInfo.getMethod())
             .totalUsers(templateInfo.getVuser())
-            .totalDuration(Duration.between(now, cur).toString())
+            .totalDuration(Duration.between(start, cur).toString())
             .MTTFBPercentiles(mttfbP)
             .TPSPercentiles(tpsP)
             .testStatus(agentStatusManager.getStatus().get())
+            .finishedAt(cur.toString())
             // TODO temp
             .mttfbAverage("0")
             .tpsAverage(0)
-            .finishedAt("-")
             .build();
     }
 
@@ -169,14 +178,17 @@ public class SseManageService extends AbstractSseManageService {
     private void alwaysDoStop(Long id, SseEmitter emitter) {
         emitter.onCompletion(() -> {
             log.info("SSE Completed");
+            agentStatusManager.updateAgentStatus(AgentStatus.READY);
             this.stop(id);
         });
         emitter.onTimeout(() -> {
             log.warn("SSE Timeout");
+            agentStatusManager.updateAgentStatus(AgentStatus.READY);
             this.stop(id);
         });
         emitter.onError((ex) -> {
             log.info("SSE connection error for template ID: {}", id);
+            agentStatusManager.updateAgentStatus(AgentStatus.READY);
             this.stop(id); // Call method to clean up resources
         });
     }

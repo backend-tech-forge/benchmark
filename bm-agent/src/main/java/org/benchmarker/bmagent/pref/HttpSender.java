@@ -17,10 +17,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmagent.AgentStatus;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
+import org.benchmarker.bmagent.status.AgentStatusManager;
 import org.benchmarker.bmagent.util.WebClientSupport;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Mono;
 
 /**
@@ -35,14 +38,17 @@ public class HttpSender {
     private final ResultManagerService resultManagerService;
     private final IScheduledTaskService scheduledTaskService;
 
+    private final AgentStatusManager agentStatusManager;
+
 
     public HttpSender(ResultManagerService resultManagerService,
-        IScheduledTaskService scheduledTaskService) {
+        IScheduledTaskService scheduledTaskService, AgentStatusManager agentStatusManager) {
         this.resultManagerService = resultManagerService;
         this.scheduledTaskService = scheduledTaskService;
+        this.agentStatusManager = agentStatusManager;
     }
 
-    private Integer defaultMaxRequestsPerUser = 100000000;
+    private Integer defaultMaxRequestsPerUser = Integer.MAX_VALUE;
     private Integer defaultMaxDuration = 5; // 5 hours
     private AtomicInteger totalRequests = new AtomicInteger(0);
     private AtomicInteger totalSuccess = new AtomicInteger(0);
@@ -66,7 +72,8 @@ public class HttpSender {
      *
      * @param templateInfo {@link TemplateInfo}
      */
-    public void sendRequests(TemplateInfo templateInfo) throws MalformedURLException {
+    public void sendRequests(SseEmitter sseEmitter, TemplateInfo templateInfo) throws MalformedURLException {
+
         URL url = new URL(templateInfo.getUrl());
         RequestHeadersSpec<?> req = WebClientSupport.create(templateInfo.getMethod(),
             templateInfo.getUrl(),
@@ -85,16 +92,20 @@ public class HttpSender {
         }
 
         Duration duration = templateInfo.getMaxDuration();
+        log.info("Now send multiple HTTP request to target server");
+        log.info(templateInfo.toString());
 
         // Future setup
         futures = IntStream.range(0, templateInfo.getVuser())
             .mapToObj(i -> CompletableFuture.runAsync(() -> {
                 long startTime = System.currentTimeMillis(); // 시작 시간 기록
                 long endTime = startTime + duration.toMillis();
+
                 for (int j = 0; j < templateInfo.getMaxRequest(); j++) {
                     // 만약 running 이 아니거나 시간이 끝났다면,
                     if (!isRunning || System.currentTimeMillis() > endTime) {
-                        return;
+                        agentStatusManager.updateAgentStatus(AgentStatus.READY);
+                        break;
                     }
                     long requestStartTime = System.currentTimeMillis();  // 요청 시작 시간 기록
                     req.exchangeToMono(resp -> {
@@ -192,6 +203,7 @@ public class HttpSender {
      * downstream 에서만 제거 가능. 외부에서는 cancel 불가능...
      */
     public void cancelRequests() {
+        log.info("cancel requests");
         isRunning = false;
 
     }

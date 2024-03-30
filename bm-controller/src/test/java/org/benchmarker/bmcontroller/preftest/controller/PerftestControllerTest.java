@@ -11,9 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import org.benchmarker.bmagent.AgentInfo;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcommon.util.RandomUtils;
+import org.benchmarker.bmcontroller.agent.AgentServerManager;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
@@ -54,6 +57,9 @@ public class PerftestControllerTest {
     @Mock
     private UserContext userContext;
 
+    @Mock
+    private AgentServerManager agentServerManager;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -85,8 +91,9 @@ public class PerftestControllerTest {
             randomResult).build();
         Flux<ServerSentEvent<CommonTestResult>> eventStream = Flux.just(resultStub);
 
-        when(perftestService.executePerformanceTest(eq(templateId), eq(action), any(),
+        when(perftestService.executePerformanceTest(eq(templateId), eq(groupId), eq(action), any(),
             eq(templateInfo))).thenReturn(eventStream);
+        when(agentServerManager.getReadyAgent()).thenReturn(Optional.of(new AgentInfo()));
 
         // when
         mockMvc.perform(
@@ -116,7 +123,6 @@ public class PerftestControllerTest {
             .andExpect(model().attributeExists("groupId", "templateId", "template"));
     }
 
-    // HERE!!
 
     @Test
     void testExecutePerformanceTest() {
@@ -134,12 +140,12 @@ public class PerftestControllerTest {
 
         Flux<ServerSentEvent<CommonTestResult>> mockFlux = Flux.fromIterable(mockEvents);
 
-        when(perftestService.executePerformanceTest(Mockito.anyInt(), Mockito.anyString(),
+        when(perftestService.executePerformanceTest(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(),
             any(), any())).thenReturn(mockFlux);
 
         // when
-        Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
-            2, "start", WebClient.create(), templateInfo);
+        Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(1,
+            "2", "start", WebClient.create(), templateInfo);
 
         // then
         // Verify that the mock event is received

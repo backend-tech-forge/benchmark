@@ -22,6 +22,8 @@ public class CommonTestResult {
 
     @JsonProperty("test_id")
     private int testId;
+    @JsonProperty("group_id")
+    private String groupId;
     @JsonProperty("started_at")
     private String startedAt;
     @JsonProperty("finished_at")

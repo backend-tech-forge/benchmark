@@ -3,6 +3,7 @@ package org.benchmarker.bmagent.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmagent.AgentInfo;
@@ -42,15 +43,16 @@ public class AgentApiController {
      * @param action     String
      * @return SseEmitter
      */
-    @PostMapping("/templates/{template_id}")
+    @PostMapping("/groups/{group_id}/templates/{template_id}")
     public SseEmitter manageSSE(@PathVariable("template_id") Long templateId,
+        @PathVariable("group_id") String groupId,
         @RequestParam("action") String action, @RequestBody TemplateInfo templateInfo) {
         log.info(templateInfo.toString());
-        agentStatusManager.getAndUpdateStatusIfReady(
-            AgentStatus.TESTING).orElseThrow(() -> new RuntimeException("agent is not ready"));
 
         if (action.equals("start")) {
-            return sseManageService.start(templateId, templateInfo);
+            agentStatusManager.getAndUpdateStatusIfReady(
+                AgentStatus.TESTING).orElseThrow(() -> new RuntimeException("agent is not ready"));
+            return sseManageService.start(templateId, groupId, templateInfo);
         } else {
             sseManageService.stop(templateId);
             return null;
@@ -73,10 +75,12 @@ public class AgentApiController {
         String scheme = request.getScheme(); // http or https
         String serverName = request.getServerName();
         int serverPort = request.getServerPort();
+        Set<Long> longs = scheduledTaskService.getStatus().keySet();
 
         String agentServerUrl = scheme + "://" + serverName + ":" + serverPort;
 
         return AgentInfo.builder()
+            .templateId(longs)
             .cpuUsage(agentStatusManager.getCpuUsage())
             .memoryUsage(agentStatusManager.getMemoryUsage())
             .startedAt(agentStatusManager.getStartedAt())

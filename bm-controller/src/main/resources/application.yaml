@@ -9,8 +9,6 @@ benchmark:
   description: 'Benchmark application'
   contacts: Gyumin Hwangbo;ghkdqhrbals@gmail.com,JeongGi Lee;apple4rhk@naver.com
 
-
-
 # admin user
 admin:
   id: 'admin'
@@ -52,4 +50,33 @@ logging:
   level:
     org:
       springframework:
-        security: DEBUG
+        security: INFO
+
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # 모든 엔드포인트를 노출합니다. 필요에 따라 특정 엔드포인트만 선택할 수도 있습니다.
+  endpoint:
+    health:
+      show-details: always  # Health 엔드포인트에서 상세 정보를 항상 표시합니다.
+  health:
+    groups:
+      readiness:
+        include: "*"  # 모든 상태를 readiness 그룹에 포함합니다.
+      liveness:
+        include: "*"  # 모든 상태를 liveness 그룹에 포함합니다.
+  info:
+    app:
+      name: "BM-Controller"  # 애플리케이션 이름을 설정합니다.
+      version: "1.0.0"  # 애플리케이션 버전을 설정합니다.
+    contact:
+      name: "gyumin hwangbo"  # 연락처 이름을 설정합니다.
+      email: "ghkdqhrbals@gmail.com"  # 이메일 주소를 설정합니다.

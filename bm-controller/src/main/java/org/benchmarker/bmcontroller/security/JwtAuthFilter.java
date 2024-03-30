@@ -50,9 +50,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
-
-                log.info("SecurityContextHolder.getContext().getAuthentication() : {}",
-                    SecurityContextHolder.getContext().getAuthentication());
             }
         } catch (UsernameNotFoundException ex) {
             Cookie cookie = new Cookie(TokenConsts.ACCESS_TOKEN_COOKIE_NAME, null);

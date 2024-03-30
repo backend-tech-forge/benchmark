@@ -10,7 +10,6 @@ import org.benchmarker.bmcontroller.user.controller.dto.GroupInfo;
 import org.benchmarker.bmcontroller.user.service.GroupService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @Controller
@@ -56,7 +54,7 @@ public class GroupController {
      */
     @GetMapping("/groups/{group_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public String groupGet(@PathVariable String group_id, Model model) {
+    public String groupGet(@PathVariable("group_id") String group_id, Model model) {
         GroupInfo groupInfo = null;
         if (userContext.getCurrentUser().getRole().isAdmin()) {
             groupInfo = groupService.getGroupInfoAdmin(group_id);
@@ -70,12 +68,10 @@ public class GroupController {
 
     @GetMapping("/groups")
     @PreAuthorize("hasAnyRole('USER')")
-    public String groups(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size, Model model) {
+    public String groups(Pageable pageable, Model model) {
         List<GroupInfo> groupInfo = Arrays.asList();
 
-        Pageable pageable = PageRequest.of(page, size);
+
         Page<GroupInfo> groupInfoPage;
         if (userContext.getCurrentUser().getRole().isAdmin()) {
             groupInfoPage = groupService.getAllGroupInfoAdmin(pageable);
@@ -83,7 +79,7 @@ public class GroupController {
             groupInfoPage = groupService.getAllGroupInfo(userContext.getCurrentUser().getId(), pageable);
         }
         model.addAttribute("groupInfo", groupInfoPage.getContent());
-        model.addAttribute("currentPage", page);
+        model.addAttribute("currentPage", pageable.getPageNumber());
         model.addAttribute("totalPages", groupInfoPage.getTotalPages());
         return "group/list";
     }
