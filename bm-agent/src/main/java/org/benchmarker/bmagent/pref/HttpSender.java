@@ -7,8 +7,6 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -18,6 +16,8 @@ import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmagent.AgentStatus;
+import org.benchmarker.bmagent.pref.calculate.IResultCalculator;
+import org.benchmarker.bmagent.pref.calculate.ResultCalculator;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
 import org.benchmarker.bmagent.status.AgentStatusManager;
 import org.benchmarker.bmagent.util.WebClientSupport;
@@ -40,6 +40,7 @@ public class HttpSender {
 
     private final AgentStatusManager agentStatusManager;
 
+    private IResultCalculator resultCalculator = new ResultCalculator();
 
     public HttpSender(ResultManagerService resultManagerService,
         IScheduledTaskService scheduledTaskService, AgentStatusManager agentStatusManager) {
@@ -72,7 +73,8 @@ public class HttpSender {
      *
      * @param templateInfo {@link TemplateInfo}
      */
-    public void sendRequests(SseEmitter sseEmitter, TemplateInfo templateInfo) throws MalformedURLException {
+    public void sendRequests(SseEmitter sseEmitter, TemplateInfo templateInfo)
+        throws MalformedURLException {
 
         URL url = new URL(templateInfo.getUrl());
         RequestHeadersSpec<?> req = WebClientSupport.create(templateInfo.getMethod(),
@@ -151,30 +153,7 @@ public class HttpSender {
      * @return The calculated percentile value
      */
     public Map<Double, Double> calculateTpsPercentile(List<Double> percentile) {
-        Map<Double, Double> result = new HashMap<>();
-
-        List<Double> tpsList = this.sortedTpsMap();
-        int size = tpsList.size();
-        for (Double p : percentile) {
-            int index = (int) Math.ceil((p / 100) * size) - 1;
-            if (index < 0) {
-                return Map.of(0D, 0D); // 예외처리: 인덱스가 음수인 경우
-            }
-            result.put(p, tpsList.get(index));
-        }
-
-        return result;
-    }
-
-    public List<Double> sortedTpsMap() {
-        Map<LocalDateTime, Double> tpsSnapshot = new ConcurrentHashMap<>(tpsMap);
-        return tpsSnapshot.values().stream().sorted(Comparator.reverseOrder())
-            .toList(); // <-- Here STOP!
-    }
-
-    public List<Long> sortedMttfbMap() {
-        Map<LocalDateTime, Long> tpsSnapshot = new ConcurrentHashMap<>(mttfbMap);
-        return tpsSnapshot.values().stream().sorted().toList(); // <-- Here STOP!
+        return resultCalculator.percentile(tpsMap, percentile, true);
     }
 
     /**
@@ -183,20 +162,8 @@ public class HttpSender {
      * @param percentile The percentile to calculate (e.g., 90 for 90th percentile)
      * @return The calculated percentile value
      */
-    public Map<Double, Double> calculateMttfbPercentile(List<Double> percentile) {
-        Map<Double, Double> result = new HashMap<>();
-
-        List<Long> mttfbList = this.sortedMttfbMap();
-        int size = mttfbList.size();
-        for (Double p : percentile) {
-            int index = (int) Math.ceil((p / 100) * size) - 1;
-            if (index < 0) {
-                return Map.of(0D, 0D); // 예외처리: 인덱스가 음수인 경우
-            }
-            result.put(p, Double.valueOf(mttfbList.get(index)));
-        }
-
-        return result;
+    public Map<Double, Long> calculateMttfbPercentile(List<Double> percentile) {
+        return resultCalculator.percentile(mttfbMap, percentile, false);
     }
 
     /**

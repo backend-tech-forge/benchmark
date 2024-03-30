@@ -72,7 +72,7 @@ public class SseManageService extends AbstractSseManageService {
         scheduledTaskService.start(id, () -> {
             LocalDateTime curTime = LocalDateTime.now();
             Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
-            Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
+            Map<Double, Long> mttfbP = htps.calculateMttfbPercentile(percentiles);
             CommonTestResult data = getCommonTestResult(groupId,templateInfo, htps, now, curTime, tpsP, mttfbP);
             resultManagerService.save(id, data);
             send(id, resultManagerService.find(id));
@@ -85,7 +85,7 @@ public class SseManageService extends AbstractSseManageService {
                 htps.sendRequests(emitter, templateInfo);
                 LocalDateTime finished = LocalDateTime.now();
                 Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
-                Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
+                Map<Double, Long> mttfbP = htps.calculateMttfbPercentile(percentiles);
                 CommonTestResult data = getCommonTestResult(groupId,templateInfo, htps, now, finished, tpsP, mttfbP);
                 data.setFinishedAt(finished.toString());
                 data.setTestStatus(AgentStatus.TESTING_FINISH);
@@ -113,7 +113,7 @@ public class SseManageService extends AbstractSseManageService {
      */
     private CommonTestResult getCommonTestResult(String groupId,TemplateInfo templateInfo, HttpSender htps,
         LocalDateTime start, LocalDateTime cur, Map<Double, Double> tpsP,
-        Map<Double, Double> mttfbP) {
+        Map<Double, Long> mttfbP) {
         return CommonTestResult.builder()
             .groupId(groupId)
             .startedAt(start.toString())
