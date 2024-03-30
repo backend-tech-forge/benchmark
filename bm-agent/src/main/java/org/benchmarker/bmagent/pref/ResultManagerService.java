@@ -10,13 +10,12 @@ import org.springframework.stereotype.Component;
  * ResultManagerService for managing TestResult
  *
  * <p>
- * After bmagent send multiple HTTP request to target server, calculated delays and others things need
- * to be added in resultHashMap
+ * After bmagent send multiple HTTP request to target server, calculated delays and others things
+ * need to be added in resultHashMap
  * </p>
  *
  * <p>
- * resultHashMap will be used by {@link ISseManageService} to send
- * TestResult to client
+ * resultHashMap will be used by {@link ISseManageService} to send TestResult to client
  * </p>
  *
  * @see ISseManageService
@@ -45,7 +44,8 @@ public class ResultManagerService implements MapManager<Long, CommonTestResult> 
 
     /**
      * Save TestResult to resultHashMap
-     * @param id {@link Long}
+     *
+     * @param id     {@link Long}
      * @param object {@link CommonTestResult}
      */
     @Override
@@ -55,6 +55,7 @@ public class ResultManagerService implements MapManager<Long, CommonTestResult> 
 
     /**
      * Remove TestResult from resultHashMap
+     *
      * @param id {@link Long}
      */
     @Override

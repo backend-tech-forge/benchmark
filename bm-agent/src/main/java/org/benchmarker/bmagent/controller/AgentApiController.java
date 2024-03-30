@@ -25,7 +25,13 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-
+/**
+ * Main RESTAPI endpoint
+ *
+ * <p>
+ *     bm-controller will send request to here for performance testing
+ * </p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
