@@ -20,10 +20,11 @@ import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.benchmarker.bmcontroller.template.common.TemplateUtils.convertStringToLocalDateTime;
 
 @Slf4j
 @Service
@@ -47,9 +48,8 @@ public class TestResultService extends AbstractTestResultService {
         TestTemplate testTemplate = testTemplateRepository.findById(commonTestResult.getTestId())
                 .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startedAt = LocalDateTime.parse(commonTestResult.getStartedAt(), formatter);
-        LocalDateTime finishedAt = LocalDateTime.parse(commonTestResult.getFinishedAt(), formatter);
+        LocalDateTime startedAt = convertStringToLocalDateTime(commonTestResult.getStartedAt());
+        LocalDateTime finishedAt = convertStringToLocalDateTime(commonTestResult.getFinishedAt());
 
         TestResult testResult = TestResult.builder()
                 .testTemplate(testTemplate)
