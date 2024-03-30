@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class JsonMapper {
+
     private final ObjectMapper objectMapper;
 
     /**
