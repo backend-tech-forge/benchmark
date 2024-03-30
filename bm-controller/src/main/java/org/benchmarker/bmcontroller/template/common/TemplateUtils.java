@@ -35,7 +35,7 @@ public class TemplateUtils {
     public static LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
 
         LocalDate datePart = LocalDate.parse(dateTimeString.split("T")[0]);
-        LocalTime timePart = LocalTime.parse(dateTimeString.split("T")[1]);
+        LocalTime timePart = LocalTime.parse(dateTimeString.split("T")[1].substring(0, 8));
 
         return LocalDateTime.of(datePart, timePart);
     }
