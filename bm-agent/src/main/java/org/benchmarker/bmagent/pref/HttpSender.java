@@ -4,6 +4,7 @@ import static org.benchmarker.bmcommon.util.NoOp.noOp;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -16,6 +17,7 @@ import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmagent.AgentStatus;
+import org.benchmarker.bmagent.consts.PreftestConsts;
 import org.benchmarker.bmagent.pref.calculate.IResultCalculator;
 import org.benchmarker.bmagent.pref.calculate.ResultCalculator;
 import org.benchmarker.bmagent.service.IScheduledTaskService;
@@ -28,8 +30,19 @@ import reactor.core.publisher.Mono;
 
 /**
  * High load HTTP sender
+ * <p>
+ * This class represents a high load HTTP sender responsible for sending multiple requests to a
+ * target server. It contains functionality to 1) manage request sending, 2) calculate statistics
+ * such as Transactions Per Second (TPS) and Mean Time To First Byte (MTTFB), and 3) cancel ongoing
+ * requests.
+ * </p>
+ * <p>
+ * All request will be running in {@link CompletableFuture} with common-pool. And threads will be
+ * created according to the number of {@code vuser}
+ * </p>
  *
  * @author Gyumin Hwangbo
+ * @since 2024-03-30
  */
 @Slf4j
 @Getter
@@ -41,6 +54,7 @@ public class HttpSender {
     private final AgentStatusManager agentStatusManager;
 
     private IResultCalculator resultCalculator = new ResultCalculator();
+    private DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     public HttpSender(ResultManagerService resultManagerService,
         IScheduledTaskService scheduledTaskService, AgentStatusManager agentStatusManager) {
@@ -54,6 +68,8 @@ public class HttpSender {
     private AtomicInteger totalRequests = new AtomicInteger(0);
     private AtomicInteger totalSuccess = new AtomicInteger(0);
     private AtomicInteger totalErrors = new AtomicInteger(0);
+    private Double tpsAvg = 0D;
+    private Double mttfbAvg = 0D;
     // Response time, TPS
     private AtomicInteger tps = new AtomicInteger(0);
     private ConcurrentHashMap<LocalDateTime, Double> tpsMap = new ConcurrentHashMap<>();
@@ -61,6 +77,8 @@ public class HttpSender {
     private ConcurrentHashMap<String, Integer> statusCodeCount = new ConcurrentHashMap<>();
     private List<CompletableFuture<Void>> futures;
     private Boolean isRunning = true;
+    private Boolean isErrorExceed = false;
+    private Boolean isStopped = false;
 
     /**
      * <strong>Major implementation sending multiple requests to target server</strong>
@@ -104,8 +122,12 @@ public class HttpSender {
                 long endTime = startTime + duration.toMillis();
 
                 for (int j = 0; j < templateInfo.getMaxRequest(); j++) {
-                    // 만약 running 이 아니거나 시간이 끝났다면,
-                    if (!isRunning || System.currentTimeMillis() > endTime) {
+                    // 테스트 시간 종료
+                    if (System.currentTimeMillis() > endTime){
+                        break;
+                    }
+                    // 만약 running 이 아니거나 시간이 끝났다면, 에러율이 너무 높다면
+                    if (!isRunning || isErrorExceed) {
                         agentStatusManager.updateAgentStatus(AgentStatus.READY);
                         break;
                     }
@@ -115,6 +137,7 @@ public class HttpSender {
                         statusCodeCount.merge(statusCode, 1, Integer::sum);
                         if (resp.statusCode().is2xxSuccessful()) {
                             totalSuccess.incrementAndGet();
+                            tps.incrementAndGet();
                         } else {
                             totalErrors.incrementAndGet();
                         }
@@ -127,7 +150,6 @@ public class HttpSender {
                         .truncatedTo(ChronoUnit.SECONDS);
                     mttfbMap.merge(currentTime, elapsedTime,
                         (oldValue, newValue) -> (oldValue + newValue) / 2);
-                    tps.incrementAndGet();
                     totalRequests.incrementAndGet();
                 }
 
@@ -136,11 +158,28 @@ public class HttpSender {
 
         // Need to calculate & save TPS and MTTFB in every 1 second.
         scheduledTaskService.startChild(Long.valueOf(templateInfo.getId()), "recorder", () -> {
+            LocalDateTime currentTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
             // save current tps & reset
-            tpsMap.put(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-                Double.valueOf(tps.get()));
+            tpsMap.put(currentTime, Double.valueOf(tps.get()));
+            saveAverage(currentTime);
             tps.set(0); // initial
         }, 0, 1, java.util.concurrent.TimeUnit.SECONDS);
+
+        // error observer
+        scheduledTaskService.startChild(Long.valueOf(templateInfo.getId()), "error-observer",
+            () -> {
+                int requests = totalRequests.get();
+                int errors = totalErrors.get();
+                if (requests != 0 && errors != 0) {
+                    // if error rate exceed 50%, order future to stop!
+                    if ((double) errors / requests * 100 > PreftestConsts.errorLimitRate) {
+                        log.warn("Template-{}, error rate exceed {}", templateInfo.getId(),
+                            PreftestConsts.errorLimitRate);
+                        isErrorExceed=true;
+                    }
+                }
+            }, PreftestConsts.errorLimitCheckDelay, PreftestConsts.errorLimitCheckPeriod,
+            java.util.concurrent.TimeUnit.SECONDS);
 
         // CompletableFuture 종료까지 대기
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
@@ -164,6 +203,33 @@ public class HttpSender {
      */
     public Map<Double, Long> calculateMttfbPercentile(List<Double> percentile) {
         return resultCalculator.percentile(mttfbMap, percentile, false);
+    }
+
+    /**
+     * Save current TPS, MTTFB average
+     *
+     * @param currentTime LocalDateTime
+     */
+    public void saveAverage(LocalDateTime currentTime) {
+        Double currentTps = (double) tps.get();
+        Long currentMttfb = mttfbMap.get(currentTime);
+
+        if (tpsAvg == 0) {
+            tpsAvg = currentTps;
+        } else {
+            currentTps = resultCalculator.average(tpsAvg, currentTps);
+            tpsAvg = Double.parseDouble(decimalFormat.format(currentTps));
+        }
+        if (currentMttfb != null) {
+            Double doubleMTTFB = Double.valueOf(currentMttfb);
+            if (mttfbAvg == 0) {
+                mttfbAvg = doubleMTTFB;
+            } else {
+                Double average = resultCalculator.average(mttfbAvg, doubleMTTFB);
+                mttfbAvg = Double.parseDouble(decimalFormat.format(average));
+            }
+        }
+
     }
 
     /**

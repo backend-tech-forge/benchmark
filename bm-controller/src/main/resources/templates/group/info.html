@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<header th:replace="fragments/commonHeader :: common('Group Information')"></header>
+<header th:replace="~{fragments/commonHeader :: common('Group Information')}"></header>
 
 
 <body>
-<div th:replace="fragments/currentUserFragment :: currentUser"></div>
-<div th:replace="fragments/agentStatus :: agentStatus"></div>
+<div th:replace="~{fragments/currentUserFragment :: currentUser}"></div>
+<div th:replace="~{fragments/agentStatus :: agentStatus}"></div>
 
 <h1>Information about Group</h1>
 
@@ -91,39 +91,39 @@
     <input type="hidden" id="userGroupId" name="userGroupId" th:value="${groupInfo.id}" />
 
     <div>
-      <label for="url">URL:</label>
+      <label for="url">URL</label>
       <input type="text" id="url" name="url">
     </div>
 
     <div>
-      <label for="method">Method:</label>
+      <label for="method">Method</label>
       <input type="text" id="method" name="method">
     </div>
 
 
     <div>
-      <label for="body">Body:</label>
+      <label for="body">Body</label>
       <textarea id="body" name="body" placeholder="Enter your JSON code here..."></textarea>
       <button type="button" onclick="reformatJSON()">Reformat JSON</button>
     </div>
 
     <div>
-      <label for="vuser">VUser:</label>
+      <label for="vuser">VUser (1 ~ 500)</label>
       <input type="number" id="vuser" name="vuser">
     </div>
 
     <div>
-      <label for="maxRequest">Max Request:</label>
+      <label for="maxRequest">Max Request ( ~ 1,000,000)</label>
       <input type="number" id="maxRequest" name="maxRequest">
     </div>
 
     <div>
-      <label for="maxDuration">Max Duration:</label>
+      <label for="maxDuration">Max Duration ( ~ 600)</label>
       <input type="number" id="maxDuration" name="maxDuration">
     </div>
 
     <div>
-      <label for="cpuLimit">CPU Limit:</label>
+      <label for="cpuLimit">CPU Limit</label>
       <input type="number" id="cpuLimit" name="cpuLimit">
     </div>
 

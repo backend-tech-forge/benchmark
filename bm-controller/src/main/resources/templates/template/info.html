@@ -42,24 +42,13 @@
   </div>
 
   <h1>Test Results</h1>
+
   <div id="results">
     <table border="1">
       <thead>
       <tr>
-        <th>Test ID</th>
-        <th>Started At</th>
-        <th>Finished At</th>
-        <th>URL</th>
-        <th>Method</th>
-        <th>Total Requests</th>
-        <th>Total Errors</th>
-        <th>Total Success</th>
-        <th>Total Users</th>
-        <th>Total Duration</th>
-        <th>MTTFB Average</th>
-        <th>TPS Average</th>
-        <th>Test Status</th>
-        <!-- Add other table headers here -->
+        <th>속성</th>
+        <th>값</th>
       </tr>
       </thead>
       <tbody id="resultsBody">
@@ -86,7 +75,7 @@
       <thead>
       <tr>
         <th>mttfb percentile</th>
-        <th>value</th>
+        <th>value(ms)</th>
       </tr>
       </thead>
       <tbody id="mttfbTableBody">
@@ -110,7 +99,6 @@
 </div>
 
 <script>
-
   stompClient.activate();
 
   var stompClient2 = new StompJs.Client({
@@ -131,10 +119,48 @@
     });
     stompClient2.subscribe('/topic/' + userId, (result) => {
       console.log('Received message: /topic/userId');
-      alert('새로운 메시지가 도착했습니다: ' + result);
+      alert(result.body);
     });
   }
 
+  function formatDuration(duration) {
+    const minutes = Math.floor(duration / 60000);
+    const seconds = ((duration % 60000) / 1000).toFixed(0);
+    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+  }
+
+  function addRow(label, value, container) {
+    const newRow = document.createElement('tr');
+    const labelCell = document.createElement('td');
+    labelCell.textContent = label;
+    newRow.appendChild(labelCell);
+
+    const valueCell = document.createElement('td');
+    valueCell.textContent = value;
+    newRow.appendChild(valueCell);
+
+    container.appendChild(newRow);
+  }
+  function addRowWithBadge(label, value, container) {
+    const newRow = document.createElement('tr');
+    const labelCell = document.createElement('td');
+    labelCell.textContent = label;
+    newRow.appendChild(labelCell);
+
+    const valueCell = document.createElement('td');
+    const badgeWrapper = document.createElement('span'); // span 요소 추가
+    badgeWrapper.classList.add('badge-wrapper'); // 새로운 클래스 추가
+    const badgeText = document.createElement('span'); // span 요소로 텍스트를 감싸줌
+    badgeText.textContent = value;
+    const badge = document.createElement('span');
+    badge.classList.add('badge', 'badge-blue', 'spinner');
+    badgeWrapper.appendChild(badgeText); // 텍스트 추가
+    badgeWrapper.appendChild(badge); // 로딩 원 추가
+    valueCell.appendChild(badgeWrapper); // span 요소를 추가
+    newRow.appendChild(valueCell);
+
+    container.appendChild(newRow);
+  }
 
   function updateResults(result) {
     const resultsBody = document.getElementById('resultsBody');
@@ -146,8 +172,6 @@
     statusCodeTableBody.innerHTML = '';
     mttfbTableBody.innerHTML = '';
     tpsTableBody.innerHTML = '';
-
-    const newRow = document.createElement('tr');
 
     for (const [statusCode, count] of Object.entries(result.status_code_count)) {
       const newRowForStatus = document.createElement('tr');
@@ -173,23 +197,24 @@
         `;
       tpsTableBody.appendChild(newRowForTps);
     }
-    newRow.innerHTML = `
-                <td>${result.test_id}</td>
-                <td>${result.started_at}</td>
-                <td>${result.finished_at}</td>
-                <td>${result.url}</td>
-                <td>${result.method}</td>
-                <td>${result.total_requests}</td>
-                <td>${result.total_errors}</td>
-                <td>${result.total_success}</td>
-                <td>${result.total_users}</td>
-                <td>${result.total_duration}</td>
-                <td>${result.mttfb_average}</td>
-                <td>${result.tps_average}</td>
-                <td>${result.test_status}</td>
-                <!-- Add other table cells here -->
-            `;
-    resultsBody.appendChild(newRow);
+
+    if (result.test_status === 'TESTING'){
+      addRowWithBadge('Test Status', result.test_status, resultsBody);
+    }else{
+      addRow('Test Status', result.test_status, resultsBody);
+    }
+    addRow('Started At', result.started_at, resultsBody);
+    addRow('Finished At', result.finished_at, resultsBody);
+    addRow('URL', result.url, resultsBody);
+    addRow('Method', result.method, resultsBody);
+    addRow('Total Requests', result.total_requests, resultsBody);
+    addRow('Total Errors', result.total_errors, resultsBody);
+    addRow('Total Success', result.total_success, resultsBody);
+    addRow('Total Users', result.total_users, resultsBody);
+    addRow('Total Duration', result.total_duration, resultsBody);
+    addRow('MTTFB Average(ms)', result.mttfb_average, resultsBody);
+    addRow('TPS Average', result.tps_average, resultsBody);
+
   }
 
   function sendAction(action) {

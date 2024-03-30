@@ -30,6 +30,9 @@ public class ResultCalculator implements IResultCalculator {
         Map<LocalDateTime, T> results, List<Double> percentile, Boolean reverse) {
 
         Map<LocalDateTime, T> snapshot = new ConcurrentHashMap<>(results);
+        if (snapshot.size() == 0){
+            return Map.of();
+        }
         List<T> values;
         if (!reverse) {
             values = snapshot.values().stream().sorted(Comparator.reverseOrder()).toList();
@@ -50,4 +53,5 @@ public class ResultCalculator implements IResultCalculator {
 
         return result;
     }
+
 }

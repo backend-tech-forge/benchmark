@@ -2,6 +2,7 @@ package org.benchmarker.bmagent.pref.calculate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,6 +49,17 @@ class ResultCalculatorTest {
         // then
         Map<Double, Integer> expectResult = Map.of(50D, 5, 90D, 9);
         assertThat(percentile).isEqualTo(expectResult);
+
+        double value = 123.456789;
+
+        // Format the double value to have up to two decimal places
+        DecimalFormat df = new DecimalFormat("#.##");
+        String formattedValue = df.format(value);
+
+        // Parse the formatted string back to double
+        double result = Double.parseDouble(formattedValue);
+
+        System.out.println("Formatted value: " + result);
     }
 
 }

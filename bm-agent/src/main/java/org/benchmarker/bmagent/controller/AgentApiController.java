@@ -2,6 +2,7 @@ package org.benchmarker.bmagent.controller;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +53,8 @@ public class AgentApiController {
     @PostMapping("/groups/{group_id}/templates/{template_id}")
     public SseEmitter manageSSE(@PathVariable("template_id") Long templateId,
         @PathVariable("group_id") String groupId,
-        @RequestParam("action") String action, @RequestBody TemplateInfo templateInfo) {
+        @RequestParam("action") String action, @RequestBody TemplateInfo templateInfo)
+        throws IOException {
         log.info(templateInfo.toString());
 
         if (action.equals("start")) {
@@ -60,7 +62,7 @@ public class AgentApiController {
                 AgentStatus.TESTING).orElseThrow(() -> new RuntimeException("agent is not ready"));
             return sseManageService.start(templateId, groupId, templateInfo);
         } else {
-            sseManageService.stop(templateId);
+            sseManageService.stopSign(templateId);
             return null;
         }
     }

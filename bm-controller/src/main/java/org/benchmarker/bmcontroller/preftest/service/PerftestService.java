@@ -43,6 +43,14 @@ public class PerftestService {
         ;
     }
 
+    public Boolean isRunning(String groupId, Integer templateId){
+        Set<Integer> templates = runningTemplates.get(groupId);
+        if (templates != null && templates.contains(templateId)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Execute a performance test request to the bm-agent API and receive intermediate results via
      * Server-Sent Events (SSE).
