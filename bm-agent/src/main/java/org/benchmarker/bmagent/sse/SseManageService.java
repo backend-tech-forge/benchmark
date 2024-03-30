@@ -70,10 +70,10 @@ public class SseManageService extends AbstractSseManageService {
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
-            LocalDateTime c = LocalDateTime.now();
+            LocalDateTime curTime = LocalDateTime.now();
             Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
             Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
-            CommonTestResult data = getCommonTestResult(groupId,templateInfo, htps, now, c, tpsP, mttfbP);
+            CommonTestResult data = getCommonTestResult(groupId,templateInfo, htps, now, curTime, tpsP, mttfbP);
             resultManagerService.save(id, data);
             send(id, resultManagerService.find(id));
         }, 0, 1, TimeUnit.SECONDS);
