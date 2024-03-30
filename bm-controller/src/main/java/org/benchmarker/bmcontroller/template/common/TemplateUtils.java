@@ -1,12 +1,8 @@
 package org.benchmarker.bmcontroller.template.common;
 
-import java.util.Locale;
-import java.util.Map;
-import org.benchmarker.bmcontroller.template.model.TestTemplate;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class TemplateUtils {
 
@@ -36,51 +32,11 @@ public class TemplateUtils {
         return (double) elapsedTime / totalRequests;
     }
 
-    public static Mono<ResponseEntity<String>> createRequest(WebClient webClient, TestTemplate testTemplate) {
-        String method = testTemplate.getMethod().toUpperCase(Locale.ENGLISH);
-        return switch (method) {
-            case "GET" -> webClient.get()
-                    .uri(testTemplate.getUrl())
-                    .retrieve()
-                    .toEntity(String.class);
-            case "POST" -> webClient.post()
-                    .uri(testTemplate.getUrl())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(testTemplate.getBody())
-                    .retrieve()
-                    .toEntity(String.class);
-            case "PATCH", "PUT" -> webClient.patch()
-                    .uri(testTemplate.getUrl())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(testTemplate.getBody())
-                    .retrieve()
-                    .toEntity(String.class);
-            case "DELETE" -> webClient.delete()
-                    .uri(testTemplate.getUrl())
-                    .retrieve()
-                    .toEntity(String.class);
-            default -> throw new IllegalArgumentException("Unsupported HTTP method: " + method);
-        };
-    }
+    public static LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
 
-    public static String getStatusCodeCategory(int statusCode) {
-        if (statusCode >= 200 && statusCode < 300) {
-            return "2xx";
-        } else if (statusCode >= 300 && statusCode < 400) {
-            return "3xx";
-        } else if (statusCode >= 400 && statusCode < 500) {
-            return "4xx";
-        } else if (statusCode >= 500 && statusCode < 600) {
-            return "5xx";
-        }
-        return "";
-    }
+        LocalDate datePart = LocalDate.parse(dateTimeString.split("T")[0]);
+        LocalTime timePart = LocalTime.parse(dateTimeString.split("T")[1]);
 
-    public static void addPercentile(Map<String, Double> tpsPercentiles, Map<String, Double> mttfbPercentiles, String key, long startTime, long finishTime, int totalRequest) {
-        double tpsPercentile = calculateTPS(startTime, finishTime, totalRequest);
-        double mttfbPercentile = calculateAvgResponseTime(startTime, finishTime, totalRequest);
-
-        tpsPercentiles.put(key, tpsPercentile);
-        mttfbPercentiles.put(key, mttfbPercentile);
+        return LocalDateTime.of(datePart, timePart);
     }
 }
