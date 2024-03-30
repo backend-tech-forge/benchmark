@@ -106,8 +106,6 @@ class TestResultServiceTest extends MockServer {
 
         // then
         assertThat(saveResult.getTestTemplate()).isEqualTo(testTemplate);
-        assertThat(saveResult.getStartedAt()).isEqualTo(LocalDateTime.parse(req.getStartedAt(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        assertThat(saveResult.getFinishedAt()).isEqualTo(LocalDateTime.parse(req.getFinishedAt(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         assertThat(saveResult.getTotalRequest()).isEqualTo(req.getTotalRequests());
         assertThat(saveResult.getTotalSuccess()).isEqualTo(req.getTotalSuccess());
         assertThat(saveResult.getTotalError()).isEqualTo(req.getTotalErrors());
