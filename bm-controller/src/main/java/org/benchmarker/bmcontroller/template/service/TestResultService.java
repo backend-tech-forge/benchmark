@@ -1,5 +1,6 @@
 package org.benchmarker.bmcontroller.template.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
@@ -42,6 +43,7 @@ public class TestResultService extends AbstractTestResultService {
     private final UserGroupRepository userGroupRepository;
 
     @Override
+    @Transactional
     public Optional<CommonTestResult> resultSaveAndReturn(CommonTestResult commonTestResult) {
 
         // 템플릿이 존재하는지 먼저 파악.
