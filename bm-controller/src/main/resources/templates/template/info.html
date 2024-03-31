@@ -99,11 +99,9 @@
 </div>
 
 <script>
-  stompClient.activate();
-
-  var stompClient2 = new StompJs.Client({
-    brokerURL: 'ws://localhost:8080/gs-guide-websocket'
-  });
+  var sockJs2 = new SockJS("/gs-guide-websocket");
+  var stompClient2 = Stomp.over(sockJs2);
+  stompClient2.debug = null;
 
   const userId = '[[${currentUser.id}]]';
   // get userId from securty context
@@ -113,7 +111,7 @@
   var prettyJsonString = JSON.stringify(jsonString, null, 2); // 4 spaces for indentation
   document.getElementById('jsonOutput').innerText = prettyJsonString;
 
-  stompClient2.onConnect = (frame) => {
+  stompClient2.connect({}, function () {
     stompClient2.subscribe('/topic/' + groupId + '/' + templateId, (result) => {
       updateResults(JSON.parse(result.body));
     });
@@ -121,7 +119,7 @@
       console.log('Received message: /topic/userId');
       alert(result.body);
     });
-  }
+  });
 
   function formatDuration(duration) {
     const minutes = Math.floor(duration / 60000);
@@ -239,7 +237,7 @@
     });
   }
 
-  stompClient2.activate();
+
 </script>
 </body>
 </html>

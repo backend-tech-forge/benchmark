@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
-<header th:replace="fragments/commonHeader :: common(Home)"></header>
+<head>
+  <meta charset="UTF-8">
+  <title>PerformanceTest Home</title>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
+  <link rel="stylesheet" type="text/css" href="/css/bar.css">
+  <!--  <script src="/js/connectStomp.js"></script>-->
+</head>
 
 <body>
 <div th:replace="fragments/currentUserFragment :: currentUser"></div>

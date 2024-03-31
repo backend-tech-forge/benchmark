@@ -11,13 +11,13 @@
 <div th:fragment="agentStatus" id="agentInfoContainer">
 
   <script>
-    console.log("agentStatus script");
+    console.log("agentStatus");
 
-    var stompClient = new StompJs.Client({
-      brokerURL: 'ws://localhost:8080/gs-guide-websocket'
-    });
+    var sockJs = new SockJS("/gs-guide-websocket");
+    var stompClient = Stomp.over(sockJs);
+    stompClient.debug = null;
 
-    stompClient.onConnect = (frame) => {
+    stompClient.connect ({}, function () {
       stompClient.subscribe('/topic/server', (result) => {
         const agentInfoList = JSON.parse(result.body); // Parse the received JSON string
         const container = document.getElementById('agentInfoContainer');
@@ -75,15 +75,13 @@
         });
 
       });
-    };
+    });
 
     stompClient.onWebSocketError = (error) => {
       console.error('Error with websocket', error);
     };
 
     console.log(stompClient);
-
-    stompClient.activate();
 
   </script>
 </div>
