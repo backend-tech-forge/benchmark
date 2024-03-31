@@ -5,6 +5,8 @@ import static org.benchmarker.bmcontroller.user.constant.UserConsts.USER_GROUP_D
 import static org.benchmarker.bmcontroller.user.constant.UserConsts.USER_GROUP_DEFAULT_NAME;
 
 import jakarta.transaction.Transactional;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -27,13 +29,16 @@ import org.benchmarker.bmcontroller.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * After the application starts, this class will be executed to add the default user to the
@@ -43,8 +48,10 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Component
 @Slf4j
+@Profile("production")
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
+
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
@@ -114,28 +121,45 @@ public class DataLoader implements CommandLineRunner {
                 }
             }
 
-            // get current agent from eureka discovery
-            List<ServiceInstance> instances = discoveryClient.getInstances("bm-agent");
-            // 각 인스턴스의 URL을 사용하여 요청을 보냄
-            for (ServiceInstance instance : instances) {
-                try{
-                    String serverUrl = instance.getUri().toString();
-                    AgentInfo agentInfo = WebClient.create(serverUrl)
+            List<String> podNames = new ArrayList<>();
+
+            podNames = discoveryClient.getInstances("bm-agent").stream()
+                .map((serviceInstance -> {
+                    return serviceInstance.getUri().toString();
+                })).toList();
+
+            Flux.fromIterable(podNames)
+                .parallel()
+                .runOn(Schedulers.parallel())
+                .flatMap(instanceUrl -> {
+                    return WebClient.create(instanceUrl)
                         .get()
                         .uri("/api/status")
                         .retrieve()
                         .bodyToMono(AgentInfo.class)
-                        .block();
+                        .timeout(Duration.ofSeconds(1))
+                        .onErrorResume(e -> {
+                            log.error("Error occurred while fetching data from {}", instanceUrl, e);
+                            return Mono.empty();
+                        })
+                        .map(agentInfo -> {
+                            agentInfo.setServerUrl(instanceUrl); // 수정된 부분
+                            return agentInfo;
+                        });
+                })
+                .sequential()
+                .doOnNext(agentInfo -> {
+                    if (agentInfo != null) {
+                        log.info("agentInfo {}", agentInfo.toString());
+                        agentServerManager.add(agentInfo.getServerUrl(), agentInfo);
+                    }
+                })
+                .blockLast();
 
-                    agentInfo.setServerUrl(serverUrl);
-                    agentServerManager.add(serverUrl, agentInfo);
-                }catch (Exception e){
-                    noOp();
-                }
-            }
             messagingTemplate.convertAndSend("/topic/server",
                 agentServerManager.getAgentsUrl().values());
-        }, 0, 500, TimeUnit.MILLISECONDS);
+
+        }, 0, 1000, TimeUnit.MILLISECONDS);
 
 
     }
