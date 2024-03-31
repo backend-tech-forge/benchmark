@@ -9,6 +9,7 @@ import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControlle
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
+import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +32,16 @@ import reactor.core.publisher.Flux;
 public class PerftestController {
 
     private final SimpMessagingTemplate messagingTemplate;
+
     private final ITestTemplateService testTemplateService;
+
     private final PerftestService perftestService;
+
     private final UserContext userContext;
+
     private final AgentServerManager agentServerManager;
-    private final String agentUrl = "http://localhost:8081";
+
+    private final ITestResultService testResultService;
 
     @GetMapping("/groups/{group_id}/templates/{template_id}")
     @PreAuthorize("hasRole('USER')")
@@ -59,23 +65,22 @@ public class PerftestController {
         log.info("Send action: {}", action);
         String userId = userContext.getCurrentUser().getId();
         String serverUrl = "";
-        if (action.equals("stop")){
-
+        if (action.equals("stop")) {
             serverUrl = agentServerManager.getAgentMapped().get(Long.valueOf(templateId));
             agentServerManager.removeTemplateRunnerAgent(Long.valueOf(templateId));
+
             log.info("stop to " + serverUrl);
-        }else{
+        } else {
 
             serverUrl = agentServerManager.getReadyAgent().orElseThrow(() ->
                 new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR)).getServerUrl();
+
             agentServerManager.addTemplateRunnerAgent(Long.valueOf(templateId), serverUrl);
             log.info("send to " + serverUrl);
         }
         WebClient webClient = WebClient.create(serverUrl);
 
         TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
-
-
         Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
             templateId, groupId, action, webClient, templateInfo);
         perftestService.saveRunning(groupId, templateId);
@@ -83,8 +88,7 @@ public class PerftestController {
         eventStream
             .doOnComplete(() -> {
                 perftestService.removeRunning(groupId,templateId);
-                // TODO : CommonTestResult 저장 logic 구현 필요
-                // 코드 한줄
+
                 if (action.equals("stop")) {
                     log.info("Test completed! {}", action);
                     messagingTemplate.convertAndSend("/topic/" + userId, "test started!");
@@ -92,8 +96,13 @@ public class PerftestController {
             })
             .subscribe(event -> {
                     CommonTestResult commonTestResult = event.data();
-                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId,
-                        commonTestResult);
+
+                    // 결과 저장
+                    log.info("Start save Result");
+                    CommonTestResult saveReturnResult = testResultService.resultSaveAndReturn(commonTestResult)
+                            .orElseThrow(() -> new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR));
+                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId, saveReturnResult);
+                    log.info("End save Result");
                 },
                 error -> {
                     log.error("Error receiving SSE: {}", error.getMessage());

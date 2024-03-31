@@ -37,6 +37,7 @@ public class TestTemplate extends BaseTime {
     @Column(nullable = false)
     private String method;
 
+    @Column(length = 1000)
     private String body;
 
     @Column(nullable = false)
