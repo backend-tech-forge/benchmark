@@ -12,32 +12,48 @@ spec:
       labels:
         app: controller-service
     spec:
-      containers:
-        - env:
-            - name: SERVER_PORT
-              value: "8080"
-            - name: spring_datasource_url
-              value: "jdbc:postgresql://benchmark-db:5433/test"
-            - name: spring_datasource_hikari_password
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: password
-            - name: spring_datasource_hikari_username
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: username
-            - name: token_secret
-              valueFrom:
-                secretKeyRef:
-                  name: token-secret
-                  key: secret
-            - name: token_expiration_time
-              valueFrom:
-                secretKeyRef:
-                  name: token-secret
-                  key: exp
-          image: ghkdqhrbals/bm-controller:latest
-          name: bm-controller
       restartPolicy: Always
+      serviceAccountName: my-service-account
+      containers:
+      - image: ghkdqhrbals/bm-controller:latest
+        imagePullPolicy: Always
+        name: bm-controller
+        env:
+          - name: spring_profiles_active
+            value: kubernetes
+          - name: SERVER_PORT
+            value: "8080"
+          - name: eureka_client_serviceUrl_defaultZone
+            value: "http://eureka-service:8761/eureka/"
+          - name: spring_datasource_url
+            value: "jdbc:postgresql://benchmark-db:5433/test"
+          - name: spring_datasource_hikari_password
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: password
+          - name: admin_id
+            valueFrom:
+              secretKeyRef:
+                name: admin-secret
+                key: username
+          - name: admin_password
+            valueFrom:
+              secretKeyRef:
+                name: admin-secret
+                key: password
+          - name: spring_datasource_hikari_username
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: username
+          - name: token_secret
+            valueFrom:
+              secretKeyRef:
+                name: token-secret
+                key: secret
+          - name: token_expiration_time
+            valueFrom:
+              secretKeyRef:
+                name: token-secret
+                key: exp
