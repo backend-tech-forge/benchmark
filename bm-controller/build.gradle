@@ -98,6 +98,9 @@ dependencies {
     implementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+    implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client'
+
+
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
@@ -106,6 +109,7 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers:1.19.3'
     testImplementation 'org.testcontainers:postgresql:1.19.3'
     testImplementation "org.testcontainers:junit-jupiter:1.19.3"
+
 
     implementation 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
