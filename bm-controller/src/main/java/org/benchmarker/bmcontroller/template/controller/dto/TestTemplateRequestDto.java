@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -32,18 +31,15 @@ public class TestTemplateRequestDto {
     @Pattern(regexp = "^(?i)(GET|PUT|DELETE|POST|PATCH)$", message = "HTTP method must be GET, PUT, DELETE, POST, or PATCH")
     private String method;
     private String body;
-    @NotNull
     @Min(value = 1, message = "Virtual users must be at least 1")
     @Max(value = 500, message = "Virtual users must be at most 500")
     private Integer vuser;
-    @NotNull
-    @Min(value = 1, message = "Virtual users must be at least 1")
-    @Max(value = 1000000, message = "Virtual users must be at most 500")
+    @Min(value = 1)
+    @Max(value = 1000000)
     private Integer maxRequest;
     // maxDuration is in seconds
     @Max(600)
     private Integer maxDuration;
-    @NotNull
     private Integer cpuLimit;
 
     private Map<String, Object> headers;
