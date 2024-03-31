@@ -4,6 +4,13 @@ import static org.benchmarker.bmcontroller.common.util.NoOp.noOp;
 import static org.benchmarker.bmcontroller.user.constant.UserConsts.USER_GROUP_DEFAULT_ID;
 import static org.benchmarker.bmcontroller.user.constant.UserConsts.USER_GROUP_DEFAULT_NAME;
 
+import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.ApiException;
+import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.apis.CoreV1Api;
+import io.kubernetes.client.openapi.models.V1Pod;
+import io.kubernetes.client.openapi.models.V1PodList;
+import io.kubernetes.client.util.Config;
 import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -44,13 +51,13 @@ import reactor.core.scheduler.Schedulers;
  * After the application starts, this class will be executed to add the default user to the
  * database.
  *
- * @see org.springframework.boot.CommandLineRunner
+ * @see CommandLineRunner
  */
 @Component
 @Slf4j
-@Profile("production")
+@Profile("kubernetes")
 @RequiredArgsConstructor
-public class DataLoader implements CommandLineRunner {
+public class DataLoaderKubernetes implements CommandLineRunner {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
@@ -123,10 +130,36 @@ public class DataLoader implements CommandLineRunner {
 
             List<String> podNames = new ArrayList<>();
 
-            podNames = discoveryClient.getInstances("bm-agent").stream()
-                .map((serviceInstance -> {
-                    return serviceInstance.getUri().toString();
-                })).toList();
+            try {
+                // Kubernetes 클라이언트 설정
+                ApiClient client = Config.defaultClient();
+                Configuration.setDefaultApiClient(client);
+
+                // CoreV1Api 객체 생성
+                CoreV1Api api = new CoreV1Api();
+
+                V1PodList podList = api.listNamespacedPod("default", null, null, null, null,
+                    "app=agent-service", null, null, null, null, null, null);
+                // Pod 목록 순회
+                for (V1Pod pod : podList.getItems()) {
+                    // Pod 이름 출력
+                    String podIP = pod.getStatus().getPodIP();
+                    podNames.add("http://" + podIP + ":8081");
+                }
+
+            } catch (ApiException e) {
+                System.err.println(
+                    "Exception when calling CoreV1Api#listServiceForAllNamespaces");
+                e.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("Exception: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+//            podNames = discoveryClient.getInstances("bm-agent").stream()
+//                .map((serviceInstance -> {
+//                    return serviceInstance.getUri().toString();
+//                })).toList();
 
             Flux.fromIterable(podNames)
                 .parallel()

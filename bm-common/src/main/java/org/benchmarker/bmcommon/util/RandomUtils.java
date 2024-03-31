@@ -27,10 +27,10 @@ public class RandomUtils {
             .totalUsers(1)
             .totalDuration("1s")
             .mttfbAverage("1ms")
-            .MTTFBPercentiles(new HashMap<Double, Double>() {{
-                put(50D, randDouble(0, 100));
-                put(95D, randDouble(0, 100));
-                put(99D, randDouble(0, 100));
+            .MTTFBPercentiles(new HashMap<Double, Long>() {{
+                put(50D, randLong(0, 100));
+                put(95D, randLong(0, 100));
+                put(99D, randLong(0, 100));
             }})
             .tpsAverage(randDouble(0, 100))
             .TPSPercentiles(new HashMap<Double, Double>() {{

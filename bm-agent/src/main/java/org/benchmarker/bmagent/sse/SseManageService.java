@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,7 @@ public class SseManageService extends AbstractSseManageService {
     private final IScheduledTaskService scheduledTaskService;
     private final ResultManagerService resultManagerService;
     private final AgentStatusManager agentStatusManager;
-    private HashMap<Long, HttpSender> httpSender = new HashMap<>();
+    private HashMap<Long, CurrentRunner> runner = new HashMap<>();
 
     /**
      * Start the SseEmitter for the given id and return the SseEmitter
@@ -53,42 +52,52 @@ public class SseManageService extends AbstractSseManageService {
         // when the client disconnects, complete the SseEmitter
         alwaysDoStop(id, emitter);
 
-        if (sseEmitterHashMap.containsKey(id)) {
+        if (sseEmitterHashMap.get(id) != null) {
             log.debug("SSE already exists for template ID: {}", id);
             return null;
         }
 
         // Save the SseEmitter to the map
+        LocalDateTime startTime = LocalDateTime.now();
         sseEmitterHashMap.put(id, emitter);
 
+        HttpSender httpSender = new HttpSender(resultManagerService, scheduledTaskService,
+            agentStatusManager);
 
-        httpSender.put(id, new HttpSender(resultManagerService, scheduledTaskService, agentStatusManager));
-        HttpSender htps = httpSender.get(id);
-
-        LocalDateTime now = LocalDateTime.now();
-        List<Double> percentiles = PreftestConsts.percentiles;
+        runner.put(id,
+            CurrentRunner.builder()
+                .httpSender(httpSender)
+                .groupId(groupId)
+                .startAt(startTime)
+                .templateInfo(templateInfo).build());
 
         // 1초마다 TestResult 를 보내는 스케줄러 시작
         scheduledTaskService.start(id, () -> {
             LocalDateTime curTime = LocalDateTime.now();
-            Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
-            Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
-            CommonTestResult data = getCommonTestResult(groupId,templateInfo, htps, now, curTime, tpsP, mttfbP);
+            CommonTestResult data = getCommonTestResult(groupId, templateInfo, httpSender,
+                startTime, curTime);
+            data.setFinishedAt("-");
+
             resultManagerService.save(id, data);
             send(id, resultManagerService.find(id));
         }, 0, 1, TimeUnit.SECONDS);
 
-
         // async + non-blocking 필수
         CompletableFuture.runAsync(() -> {
             try {
-                htps.sendRequests(emitter, templateInfo);
+                httpSender.sendRequests(emitter, templateInfo);
                 LocalDateTime finished = LocalDateTime.now();
-                Map<Double, Double> tpsP = htps.calculateTpsPercentile(percentiles);
-                Map<Double, Double> mttfbP = htps.calculateMttfbPercentile(percentiles);
-                CommonTestResult data = getCommonTestResult(groupId,templateInfo, htps, now, finished, tpsP, mttfbP);
+                CommonTestResult data = getCommonTestResult(groupId, templateInfo, httpSender,
+                    startTime,
+                    finished);
                 data.setFinishedAt(finished.toString());
-                data.setTestStatus(AgentStatus.TESTING_FINISH);
+                if (httpSender.getIsErrorExceed()) { // error rate exceeded
+                    data.setTestStatus(AgentStatus.STOP_BY_ERROR);
+                } else if (!httpSender.getIsRunning()) { // bm-controller send stop sign
+                    data.setTestStatus(AgentStatus.STOP);
+                } else { // performance test finished
+                    data.setTestStatus(AgentStatus.TESTING_FINISH);
+                }
                 send(id, data);
                 emitter.complete();
             } catch (MalformedURLException e) {
@@ -107,13 +116,11 @@ public class SseManageService extends AbstractSseManageService {
      * @param htps
      * @param start
      * @param cur
-     * @param tpsP
-     * @param mttfbP
      * @return CommonTestResult
      */
-    private CommonTestResult getCommonTestResult(String groupId,TemplateInfo templateInfo, HttpSender htps,
-        LocalDateTime start, LocalDateTime cur, Map<Double, Double> tpsP,
-        Map<Double, Double> mttfbP) {
+    private CommonTestResult getCommonTestResult(String groupId, TemplateInfo templateInfo,
+        HttpSender htps, LocalDateTime start, LocalDateTime cur) {
+        List<Double> percentiles = PreftestConsts.percentiles;
         return CommonTestResult.builder()
             .groupId(groupId)
             .startedAt(start.toString())
@@ -126,13 +133,12 @@ public class SseManageService extends AbstractSseManageService {
             .method(templateInfo.getMethod())
             .totalUsers(templateInfo.getVuser())
             .totalDuration(Duration.between(start, cur).toString())
-            .MTTFBPercentiles(mttfbP)
-            .TPSPercentiles(tpsP)
+            .MTTFBPercentiles(htps.calculateMttfbPercentile(percentiles))
+            .TPSPercentiles(htps.calculateTpsPercentile(percentiles))
             .testStatus(agentStatusManager.getStatus().get())
             .finishedAt(cur.toString())
-            // TODO temp
-            .mttfbAverage("0")
-            .tpsAverage(0)
+            .mttfbAverage(htps.getMttfbAvg().toString())
+            .tpsAverage(htps.getTpsAvg())
             .build();
     }
 
@@ -151,8 +157,32 @@ public class SseManageService extends AbstractSseManageService {
             this.send(id, "SSE completed");
             emitter.complete();
         }
-        httpSender.get(id).cancelRequests();
-        scheduledTaskService.shutdown(id);
+
+        runner.get(id).getHttpSender().cancelRequests();
+        scheduledTaskService.shutdown(id); // but shutdown
+        resultManagerService.remove(id);
+        agentStatusManager.updateAgentStatus(AgentStatus.READY);
+    }
+
+    @Override
+    public void stopSign(Long id) throws IOException {
+        SseEmitter emitter = sseEmitterHashMap.remove(id);
+        CurrentRunner curRunner = runner.get(id);
+        CommonTestResult commonTestResult = this.getCommonTestResult(curRunner.getGroupId(),
+            curRunner.getTemplateInfo(), curRunner.getHttpSender(),
+            curRunner.getStartAt(), LocalDateTime.now());
+        commonTestResult.setTestStatus(AgentStatus.STOP);
+
+        if (emitter != null) {
+            emitter.send(commonTestResult);
+            log.info("remove sse emitter");
+            this.send(id, "SSE completed");
+            emitter.complete();
+        }
+
+        curRunner.getHttpSender().cancelRequests();
+        runner.remove(id);
+        scheduledTaskService.shutdown(id); // but shutdown
         resultManagerService.remove(id);
         agentStatusManager.updateAgentStatus(AgentStatus.READY);
     }

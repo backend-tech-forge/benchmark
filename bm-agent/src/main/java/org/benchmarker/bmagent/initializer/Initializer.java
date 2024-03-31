@@ -13,6 +13,13 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Initializer class is responsible for <strong>initializing various components of the
+ * application when it starts up</strong>.
+ *
+ * <p>
+ * The Initializer will start system scheduler which recording CPU / MEMORY usage in every seconds
+ */
 @Component
 @Profile("!test")
 @Slf4j
@@ -26,7 +33,6 @@ public class Initializer implements CommandLineRunner, ApplicationContextAware {
 
     @Override
     public void run(String... args) throws Exception {
-        log.info("init");
         // cpu, memory usage checker
         scheduledTaskService.startChild(SystemSchedulerConst.systemSchedulerId,
             SystemSchedulerConst.systemUsageSchedulerName, agentStatusManager::updateStats, 0, 1,

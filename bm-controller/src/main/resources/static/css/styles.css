@@ -222,3 +222,26 @@ button[type="submit"]:hover {
   height: 20px;
   margin-left: 15px; /* 원과 텍스트 간격 늘리기 */
 }
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 6px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: #007bff;
+  animation: spin 1s ease-in-out infinite;
+}
+.badge-wrapper {
+  display: flex; /* 내부 요소를 가로로 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+}
+
+.badge-wrapper span {
+  margin-right: 5px; /* 텍스트와 로딩 원 사이 간격 조정 */
+}

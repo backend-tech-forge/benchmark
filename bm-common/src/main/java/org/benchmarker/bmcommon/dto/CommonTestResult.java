@@ -58,8 +58,7 @@ public class CommonTestResult {
     private String mttfbAverage;
 
     @JsonProperty("mttfb_percentiles")
-    private Map<Double, Double> MTTFBPercentiles;
-
+    private Map<Double, Long> MTTFBPercentiles;
     @JsonProperty("tps_average")
     private double tpsAverage;
 

@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: agent-deployment
+  name: agent-statefulset
 spec:
-  replicas: 1
+  replicas: 3
+  serviceName: agent-service
   selector:
     matchLabels:
       app: agent-service
@@ -13,9 +14,13 @@ spec:
         app: agent-service
     spec:
       containers:
-        - env:
+        - name: bm-agent
+          imagePullPolicy: Always
+          image: ghkdqhrbals/bm-agent:latest
+          ports:
+            - containerPort: 8081
+          env:
             - name: SERVER_PORT
               value: "8081"
-          image: ghkdqhrbals/bm-agent:latest
-          name: bm-agent
-      restartPolicy: Always
+            - name: eureka_client_serviceUrl_defaultZone
+              value: "http://eureka-service:8761/eureka/"

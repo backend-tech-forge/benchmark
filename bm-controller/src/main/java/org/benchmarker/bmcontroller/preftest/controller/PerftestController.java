@@ -70,8 +70,11 @@ public class PerftestController {
             agentServerManager.removeTemplateRunnerAgent(Long.valueOf(templateId));
 
             log.info("stop to " + serverUrl);
-        } else {
-
+        }else{
+            if (perftestService.isRunning(groupId, templateId)){
+                log.warn("template is already running");
+                throw new GlobalException(ErrorCode.ALREADY_RUNNING);
+            }
             serverUrl = agentServerManager.getReadyAgent().orElseThrow(() ->
                 new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR)).getServerUrl();
 
@@ -90,8 +93,8 @@ public class PerftestController {
                 perftestService.removeRunning(groupId,templateId);
 
                 if (action.equals("stop")) {
-                    log.info("Test completed! {}", action);
-                    messagingTemplate.convertAndSend("/topic/" + userId, "test started!");
+                    log.info("Test completed! {}", templateId);
+                    messagingTemplate.convertAndSend("/topic/" + userId, "test complete");
                 }
             })
             .subscribe(event -> {

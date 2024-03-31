@@ -104,7 +104,7 @@ public class AgentApiControllerTest extends MockServer {
 
         // then
         // sseManageService.stop() 메서드가 호출되었는지 검증
-        verify(sseManageService, times(1)).stop(eq(templateId));
+        verify(sseManageService, times(1)).stopSign(eq(templateId));
     }
 
     @Test

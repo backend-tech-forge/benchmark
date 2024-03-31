@@ -1,7 +1,9 @@
 package org.benchmarker.bmagent.controller;
 
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +23,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-
+/**
+ * Main RESTAPI endpoint
+ *
+ * <p>
+ *     bm-controller will send request to here for performance testing
+ * </p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -46,7 +52,8 @@ public class AgentApiController {
     @PostMapping("/groups/{group_id}/templates/{template_id}")
     public SseEmitter manageSSE(@PathVariable("template_id") Long templateId,
         @PathVariable("group_id") String groupId,
-        @RequestParam("action") String action, @RequestBody TemplateInfo templateInfo) {
+        @RequestParam("action") String action, @RequestBody TemplateInfo templateInfo)
+        throws IOException {
         log.info(templateInfo.toString());
 
         if (action.equals("start")) {
@@ -54,7 +61,7 @@ public class AgentApiController {
                 AgentStatus.TESTING).orElseThrow(() -> new RuntimeException("agent is not ready"));
             return sseManageService.start(templateId, groupId, templateInfo);
         } else {
-            sseManageService.stop(templateId);
+            sseManageService.stopSign(templateId);
             return null;
         }
     }
@@ -70,16 +77,17 @@ public class AgentApiController {
     }
 
     @GetMapping("/status")
-    public AgentInfo getStatus() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        String scheme = request.getScheme(); // http or https
-        String serverName = request.getServerName();
-        int serverPort = request.getServerPort();
+    public AgentInfo getStatus() throws UnknownHostException {
+        log.info("Check current status");
+        InetAddress localHost = InetAddress.getLocalHost();
+        String serverAddress = localHost.getHostAddress();
+        String scheme = "http"; // Assuming it's always HTTP when accessed locally
+        int serverPort = 8081; // Assuming default port is 8080
+
         Set<Long> longs = scheduledTaskService.getStatus().keySet();
 
-        String agentServerUrl = scheme + "://" + serverName + ":" + serverPort;
-
-        return AgentInfo.builder()
+        String agentServerUrl = scheme + "://" + serverAddress + ":" + serverPort;
+        AgentInfo info = AgentInfo.builder()
             .templateId(longs)
             .cpuUsage(agentStatusManager.getCpuUsage())
             .memoryUsage(agentStatusManager.getMemoryUsage())
@@ -87,6 +95,8 @@ public class AgentApiController {
             .serverUrl(agentServerUrl)
             .status(agentStatusManager.getStatus().get())
             .build();
+        log.info(info.toString());
+        return info;
     }
 }
 

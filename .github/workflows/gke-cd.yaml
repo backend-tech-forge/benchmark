@@ -72,7 +72,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build and test project
-        run: ./gradlew build
+        run: ./gradlew clean build
 
       - name: Build docker image and push
         run: bash ./script/img_push_multi_arch.sh -u ${{ secrets.DOCKERHUB_USERNAME }} -t ${{ secrets.DOCKERHUB_TOKEN }}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: eureka-service
+  name: eureka-service
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8761 # This is the port that the service listens on
+      targetPort: 8761 # This is the port that the container listens on
+  type: ClusterIP
+  selector:
+    app: eureka-service

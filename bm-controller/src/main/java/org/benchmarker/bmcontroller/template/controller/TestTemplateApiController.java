@@ -1,6 +1,8 @@
 package org.benchmarker.bmcontroller.template.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
@@ -15,9 +17,14 @@ import org.benchmarker.bmcontroller.user.model.enums.Role;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -31,7 +38,7 @@ public class TestTemplateApiController {
 
     @PostMapping("/template")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<TestTemplateResponseDto> createTemplate(@RequestBody TestTemplateRequestDto reqTestTemplate)
+    public ResponseEntity<TestTemplateResponseDto> createTemplate(@Valid @RequestBody TestTemplateRequestDto reqTestTemplate)
         throws JsonProcessingException {
 
         if (reqTestTemplate.getMethod().equalsIgnoreCase("GET")) {

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka-service
+  template:
+    metadata:
+      labels:
+        app: eureka-service
+    spec:
+      containers:
+        - env:
+            - name: SERVER_PORT
+              value: "8761"
+          image: ghkdqhrbals/bm-eureka:latest
+          name: bm-eureka
+      restartPolicy: Always
