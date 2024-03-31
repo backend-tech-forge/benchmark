@@ -5,10 +5,17 @@ metadata:
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
+    cert-manager.io/issuer: "letsencrypt-prod"
+    cert-manager.io/acme-challenge-type: http01
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - www.high-load.org
+      secretName: hbgm-tls-cert
   rules:
-    - http:
+    - host: "www.high-load.org"
+      http:
         paths:
           - path: /eureka(/|$)(.*)
             pathType: ImplementationSpecific
