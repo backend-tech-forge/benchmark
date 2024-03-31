@@ -69,6 +69,7 @@ class TestTemplateApiControllerTest {
 
     @MockBean
     private TestTemplateRepository testTemplateRepository;
+
     @MockBean
     private JsonMapper jsonMapper;
 

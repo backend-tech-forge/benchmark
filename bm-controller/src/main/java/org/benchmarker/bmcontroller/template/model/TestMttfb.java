@@ -34,7 +34,7 @@ public class TestMttfb extends BaseTime {
     @JoinColumn(name = "test_result_id", referencedColumnName = "id", nullable = false)
     private TestResult testResult;
 
-    private Double mttfb;
+    private String mttfb;
 
     @Column(columnDefinition = "timestamp(6)")
     protected LocalDateTime startAt;

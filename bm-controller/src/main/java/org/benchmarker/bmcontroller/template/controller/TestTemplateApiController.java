@@ -40,6 +40,12 @@ public class TestTemplateApiController {
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<TestTemplateResponseDto> createTemplate(@Valid @RequestBody TestTemplateRequestDto reqTestTemplate)
         throws JsonProcessingException {
+
+        if (reqTestTemplate.getMethod().equalsIgnoreCase("GET")) {
+            reqTestTemplate.setBody("{}");
+            return ResponseEntity.ok(testTemplateService.createTemplate(reqTestTemplate).get());
+        }
+
         if (!jsonMapper.isValidJson(reqTestTemplate.getBody())) {
             log.error("Invalid JSON body");
             throw new GlobalException(ErrorCode.INVALID_JSON);
@@ -62,10 +68,12 @@ public class TestTemplateApiController {
     @GetMapping("/groups/{group_id}/templates")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<List<TestTemplateResponseDto>> getTemplates(@PathVariable("group_id") String group_id) {
+
         User currentUser = userContext.getCurrentUser();
         if (currentUser.getRole().equals(Role.ROLE_ADMIN)) {
             return ResponseEntity.ok(testTemplateService.getTemplates(group_id));
         }
+
         return ResponseEntity.ok(testTemplateService.getTemplates(group_id, currentUser.getId()));
     }
 
@@ -74,7 +82,6 @@ public class TestTemplateApiController {
     public ResponseEntity<TestTemplateResponseDto> updateTemplate(@RequestBody TestTemplateUpdateDto resTestTemplate) throws Exception {
 
         User currentUser = userContext.getCurrentUser();
-
         return ResponseEntity.ok(testTemplateService.updateTemplate(resTestTemplate, currentUser.getId()).get());
     }
 
@@ -83,8 +90,8 @@ public class TestTemplateApiController {
     public ResponseEntity<Void> deleteTemplate(@PathVariable Integer template_id) {
 
         User currentUser = userContext.getCurrentUser();
-
         testTemplateService.deleteTemplate(template_id, currentUser.getId());
+
         return ResponseEntity.ok().build();
     }
 

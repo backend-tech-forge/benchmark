@@ -18,6 +18,7 @@ import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcommon.util.RandomUtils;
 import org.benchmarker.bmcontroller.agent.AgentServerManager;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
+import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
 import org.benchmarker.bmcontroller.user.helper.UserHelper;
@@ -55,6 +56,9 @@ public class PerftestControllerTest {
     private ITestTemplateService testTemplateService;
 
     @Mock
+    private ITestResultService testResultService;
+
+    @Mock
     private UserContext userContext;
 
     @Mock
@@ -82,17 +86,16 @@ public class PerftestControllerTest {
         String action = "start";
         TemplateInfo templateInfo = new TemplateInfo();
         when(userContext.getCurrentUser()).thenReturn(defaultUser);
-        when(testTemplateService.getTemplateInfo(eq(userId), eq(templateId))).thenReturn(
-            templateInfo);
+        when(testTemplateService.getTemplateInfo(eq(userId), eq(templateId))).thenReturn(templateInfo);
 
         // sse event stubbing
         CommonTestResult randomResult = RandomUtils.generateRandomTestResult();
-        ServerSentEvent<CommonTestResult> resultStub = ServerSentEvent.builder(
-            randomResult).build();
+        ServerSentEvent<CommonTestResult> resultStub = ServerSentEvent.builder(randomResult).build();
         Flux<ServerSentEvent<CommonTestResult>> eventStream = Flux.just(resultStub);
 
+        when(testResultService.resultSaveAndReturn(randomResult)).thenReturn(Optional.of(randomResult));
         when(perftestService.executePerformanceTest(eq(templateId), eq(groupId), eq(action), any(),
-            eq(templateInfo))).thenReturn(eventStream);
+                eq(templateInfo))).thenReturn(eventStream);
         when(agentServerManager.getReadyAgent()).thenReturn(Optional.of(new AgentInfo()));
 
         // when
