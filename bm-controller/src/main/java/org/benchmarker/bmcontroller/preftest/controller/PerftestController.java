@@ -68,7 +68,6 @@ public class PerftestController {
         if (action.equals("stop")) {
             serverUrl = agentServerManager.getAgentMapped().get(Long.valueOf(templateId));
             agentServerManager.removeTemplateRunnerAgent(Long.valueOf(templateId));
-
             log.info("stop to " + serverUrl);
         }else{
             if (perftestService.isRunning(groupId, templateId)){
@@ -99,7 +98,6 @@ public class PerftestController {
             })
             .subscribe(event -> {
                     CommonTestResult commonTestResult = event.data();
-
                     // 결과 저장
                     log.info("Start save Result");
                     CommonTestResult saveReturnResult = testResultService.resultSaveAndReturn(commonTestResult)
@@ -108,6 +106,7 @@ public class PerftestController {
                     log.info("End save Result");
                 },
                 error -> {
+                    perftestService.removeRunning(groupId,templateId);
                     log.error("Error receiving SSE: {}", error.getMessage());
                 });
 

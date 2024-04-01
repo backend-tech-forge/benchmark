@@ -115,12 +115,11 @@ public class HttpSender {
         log.info("Now send multiple HTTP request to target server");
         log.info(templateInfo.toString());
 
+        long startTime = System.currentTimeMillis(); // 시작 시간 기록
+        long endTime = startTime + duration.toMillis();
         // Future setup
         futures = IntStream.range(0, templateInfo.getVuser())
             .mapToObj(i -> CompletableFuture.runAsync(() -> {
-                long startTime = System.currentTimeMillis(); // 시작 시간 기록
-                long endTime = startTime + duration.toMillis();
-
                 for (int j = 0; j < templateInfo.getMaxRequest(); j++) {
                     // 테스트 시간 종료
                     if (System.currentTimeMillis() > endTime){

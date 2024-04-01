@@ -147,7 +147,7 @@ public class AgentStatusManager {
     public void updateStats() {
         // Update CPU usage
         OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        cpuUsage = osBean.getSystemCpuLoad();
+        cpuUsage = osBean.getCpuLoad();
 
         // Update memory usage
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();

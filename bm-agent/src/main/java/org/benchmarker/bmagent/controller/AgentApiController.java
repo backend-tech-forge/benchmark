@@ -78,7 +78,6 @@ public class AgentApiController {
 
     @GetMapping("/status")
     public AgentInfo getStatus() throws UnknownHostException {
-        log.info("Check current status");
         InetAddress localHost = InetAddress.getLocalHost();
         String serverAddress = localHost.getHostAddress();
         String scheme = "http"; // Assuming it's always HTTP when accessed locally
@@ -87,7 +86,7 @@ public class AgentApiController {
         Set<Long> longs = scheduledTaskService.getStatus().keySet();
 
         String agentServerUrl = scheme + "://" + serverAddress + ":" + serverPort;
-        AgentInfo info = AgentInfo.builder()
+        return AgentInfo.builder()
             .templateId(longs)
             .cpuUsage(agentStatusManager.getCpuUsage())
             .memoryUsage(agentStatusManager.getMemoryUsage())
@@ -95,8 +94,6 @@ public class AgentApiController {
             .serverUrl(agentServerUrl)
             .status(agentStatusManager.getStatus().get())
             .build();
-        log.info(info.toString());
-        return info;
     }
 }
 

@@ -1,6 +1,12 @@
 package org.benchmarker.bmcontroller.template.service;
 
+import static org.benchmarker.bmcontroller.template.common.TemplateUtils.convertStringToLocalDateTime;
+
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
@@ -19,13 +25,6 @@ import org.benchmarker.bmcontroller.template.repository.TestTpsRepository;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.benchmarker.bmcontroller.template.common.TemplateUtils.convertStringToLocalDateTime;
 
 @Slf4j
 @Service
@@ -62,6 +61,7 @@ public class TestResultService extends AbstractTestResultService {
                 .totalError(commonTestResult.getTotalErrors())
                 .tpsAvg(commonTestResult.getTpsAverage())
                 .mttbfbAvg(commonTestResult.getMttfbAverage())
+                .agentStatus(commonTestResult.getTestStatus())
                 .build();
 
         TestResult saveTestResult = testResultRepository.save(testResult);
