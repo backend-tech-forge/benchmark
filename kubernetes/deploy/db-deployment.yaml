@@ -13,13 +13,6 @@ spec:
         app: benchmark-db
     spec:
       # directory creation setup
-      initContainers:
-        - name: init-data-dir
-          image: busybox
-          command: ["sh", "-c", "mkdir -p /var/lib/postgresql/production/data"]
-          volumeMounts:
-            - name: benchmark-vol
-              mountPath: /var/lib/postgresql/production/data
       containers:
         - args:
             - -c
@@ -29,6 +22,8 @@ spec:
             - -p
             - "5433"
           env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_DB
               value: test
             - name: POSTGRES_PASSWORD
@@ -49,7 +44,7 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: benchmark-vol
-              mountPath: /var/lib/postgresql/production/data
+              mountPath: /var/lib/postgresql/data
       restartPolicy: Always
       volumes:
         - name: benchmark-vol
