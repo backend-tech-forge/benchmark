@@ -100,7 +100,7 @@ dependencies {
 
     implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client'
 
-
+    implementation 'org.springframework.boot:spring-boot-starter-mail' //mail
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
