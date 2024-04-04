@@ -38,6 +38,17 @@ spring:
         jdbc:
           time_zone: UTC
           batch_size: 50
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: 'benchmark.admin'
+    password: 'rdndiwbefqkbvnau'
+    properties:
+      mail:
+        debug: true
+        smtp.auth: true
+        smtp.timeout: 50000
+        smtp.starttls.enable: true
 
 server:
   servlet:
