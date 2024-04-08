@@ -43,4 +43,8 @@ spring:
         jdbc:
           time_zone: UTC
           batch_size: 50
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
