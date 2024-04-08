@@ -1,5 +1,6 @@
 package org.benchmarker.bmcontroller.preftest.controller;
 
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
@@ -8,9 +9,12 @@ import org.benchmarker.bmcontroller.agent.AgentServerManager;
 import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.preftest.common.TestInfo;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
+import org.benchmarker.bmcontroller.template.model.TestExecution;
 import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
+import org.benchmarker.bmcontroller.template.service.TestExecutionService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
@@ -42,6 +46,7 @@ public class PerftestController {
     private final AgentServerManager agentServerManager;
 
     private final ITestResultService testResultService;
+    private final TestExecutionService testExecutionService;
 
     @GetMapping("/groups/{group_id}/templates/{template_id}")
     @PreAuthorize("hasRole('USER')")
@@ -65,33 +70,43 @@ public class PerftestController {
         log.info("Send action: {}", action);
         String userId = userContext.getCurrentUser().getId();
         String serverUrl = "";
+        String testId = UUID.randomUUID().toString();
+        TestInfo testInfo = TestInfo.builder().testId(testId).groupId(groupId)
+            .templateId(templateId).build();
+
         if (action.equals("stop")) {
             serverUrl = agentServerManager.getAgentMapped().get(Long.valueOf(templateId));
             agentServerManager.removeTemplateRunnerAgent(Long.valueOf(templateId));
             log.info("stop to " + serverUrl);
-        }else{
-            if (perftestService.isRunning(groupId, templateId)){
-                log.warn("template is already running");
+//            return ResponseEntity.ok("stop signal append");
+        }
+        if (action.equals("start")) {
+            String runningTestId = perftestService.isRunning(testInfo);
+            if (runningTestId != null) {
+                log.warn("template is already running in testId {}", runningTestId);
                 throw new GlobalException(ErrorCode.ALREADY_RUNNING);
             }
+
+            // init : save testExecution
+            TestExecution testExecution = testExecutionService.init(testInfo);
+
             serverUrl = agentServerManager.getReadyAgent().orElseThrow(() ->
                 new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR)).getServerUrl();
 
             agentServerManager.addTemplateRunnerAgent(Long.valueOf(templateId), serverUrl);
             log.info("send to " + serverUrl);
         }
-        WebClient webClient = WebClient.create(serverUrl);
 
+        WebClient webClient = WebClient.create(serverUrl);
         TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
         Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
             templateId, groupId, action, webClient, templateInfo);
-        perftestService.saveRunning(groupId, templateId);
+        perftestService.saveRunning(testInfo);
 
         eventStream
             .doOnComplete(() -> {
-                perftestService.removeRunning(groupId,templateId);
-
-                if (action.equals("stop")) {
+                if (!action.equals("stop")){
+                    perftestService.removeRunning(testInfo);
                     log.info("Test completed! {}", templateId);
                     messagingTemplate.convertAndSend("/topic/" + userId, "test complete");
                 }
@@ -99,14 +114,14 @@ public class PerftestController {
             .subscribe(event -> {
                     CommonTestResult commonTestResult = event.data();
                     // 결과 저장
-                    log.info("Start save Result");
-                    CommonTestResult saveReturnResult = testResultService.resultSaveAndReturn(commonTestResult)
-                            .orElseThrow(() -> new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR));
-                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId, saveReturnResult);
-                    log.info("End save Result");
+                    CommonTestResult saveReturnResult = testResultService.resultSaveAndReturn(
+                            commonTestResult, testInfo)
+                        .orElseThrow(() -> new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR));
+                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId,
+                        saveReturnResult);
                 },
                 error -> {
-                    perftestService.removeRunning(groupId,templateId);
+                    perftestService.removeRunning(testInfo);
                     log.error("Error receiving SSE: {}", error.getMessage());
                 });
 

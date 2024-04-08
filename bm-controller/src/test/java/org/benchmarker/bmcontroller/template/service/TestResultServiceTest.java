@@ -1,15 +1,23 @@
 package org.benchmarker.bmcontroller.template.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+import java.util.UUID;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.util.RandomUtils;
 import org.benchmarker.bmcontroller.MockServer;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.preftest.common.TestInfo;
 import org.benchmarker.bmcontroller.template.helper.TemplateHelper;
+import org.benchmarker.bmcontroller.template.model.TestExecution;
 import org.benchmarker.bmcontroller.template.model.TestMttfb;
 import org.benchmarker.bmcontroller.template.model.TestResult;
 import org.benchmarker.bmcontroller.template.model.TestTemplate;
 import org.benchmarker.bmcontroller.template.model.TestTps;
+import org.benchmarker.bmcontroller.template.repository.TestExecutionRepository;
 import org.benchmarker.bmcontroller.template.repository.TestMttfbRepository;
 import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
 import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
@@ -25,17 +33,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @Testcontainers
+@Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TestResultServiceTest extends MockServer {
 
@@ -54,6 +57,9 @@ class TestResultServiceTest extends MockServer {
     @Autowired
     private UserGroupRepository userGroupRepository;
 
+    @SpyBean
+    private TestExecutionRepository testExecutionRepository;
+
     @Autowired
     private UserGroupJoinRepository userGroupJoinRepository;
 
@@ -69,6 +75,7 @@ class TestResultServiceTest extends MockServer {
         mttfbRepository.deleteAll();
 
         testResultRepository.deleteAll();
+        testExecutionRepository.deleteAll();
         testTemplateRepository.deleteAll();
 
         userGroupJoinRepository.deleteAll();
@@ -94,18 +101,28 @@ class TestResultServiceTest extends MockServer {
         CommonTestResult req = RandomUtils.generateRandomTestResult();
         req.setTestId(saveTemplate.getId());
 
+        TestInfo testInfo = TestInfo.builder().testId(UUID.randomUUID().toString())
+            .templateId(testTemplate.getId())
+            .groupId(userGroup.getId()).build();
+
+        testExecutionRepository.save(TestExecution.builder()
+            .id(UUID.fromString(testInfo.getTestId()))
+            .testTemplate(saveTemplate)
+            .build());
+
+
         // when
-        CommonTestResult saveResultResDto = testResultService.resultSaveAndReturn(req)
-                .orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
+        CommonTestResult saveResultResDto = testResultService.resultSaveAndReturn(req,testInfo)
+            .orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
 
         TestResult saveResult = testResultRepository.findById(saveResultResDto.getTestId())
-                .orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
+            .orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
 
         List<TestMttfb> mttfbs = mttfbRepository.findByTestResult(saveResult);
         List<TestTps> tps = tpsRepository.findByTestResult(saveResult);
 
         // then
-        assertThat(saveResult.getTestTemplate()).isEqualTo(testTemplate);
+        assertThat(saveResult.getTestExecution().getTestTemplate()).isEqualTo(testTemplate);
         assertThat(saveResult.getTotalRequest()).isEqualTo(req.getTotalRequests());
         assertThat(saveResult.getTotalSuccess()).isEqualTo(req.getTotalSuccess());
         assertThat(saveResult.getTotalError()).isEqualTo(req.getTotalErrors());
@@ -131,12 +148,16 @@ class TestResultServiceTest extends MockServer {
         TestTemplate testTemplate = TemplateHelper.createDefaultTemplate();
         testTemplate.setUserGroup(userGroup);
 
+        TestInfo testInfo = TestInfo.builder().testId(UUID.randomUUID().toString())
+            .templateId(testTemplate.getId())
+            .groupId(userGroup.getId()).build();
+
         CommonTestResult req = RandomUtils.generateRandomTestResult();
         req.setTestId(9999);
 
         // When & Then
         assertThrows(GlobalException.class, () -> {
-            testResultService.resultSaveAndReturn(req);
+            testResultService.resultSaveAndReturn(req, testInfo);
         });
 
     }
