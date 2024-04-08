@@ -150,7 +150,6 @@ public class DataLoader implements CommandLineRunner {
                 .sequential()
                 .doOnNext(agentInfo -> {
                     if (agentInfo != null) {
-                        log.info("agentInfo {}", agentInfo.toString());
                         agentServerManager.add(agentInfo.getServerUrl(), agentInfo);
                     }
                 })

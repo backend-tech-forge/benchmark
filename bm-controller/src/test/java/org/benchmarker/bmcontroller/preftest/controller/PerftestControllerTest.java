@@ -93,7 +93,7 @@ public class PerftestControllerTest {
         ServerSentEvent<CommonTestResult> resultStub = ServerSentEvent.builder(randomResult).build();
         Flux<ServerSentEvent<CommonTestResult>> eventStream = Flux.just(resultStub);
 
-        when(testResultService.resultSaveAndReturn(randomResult)).thenReturn(Optional.of(randomResult));
+        when(testResultService.resultSaveAndReturn(randomResult,any())).thenReturn(Optional.of(randomResult));
         when(perftestService.executePerformanceTest(eq(templateId), eq(groupId), eq(action), any(),
                 eq(templateInfo))).thenReturn(eventStream);
         when(agentServerManager.getReadyAgent()).thenReturn(Optional.of(new AgentInfo()));
