@@ -42,6 +42,7 @@ public enum ErrorCode {
     GROUP_NOT_FOUND(404, "그룹이 존재하지 않습니다."),
     TEMPLATE_NOT_FOUND(404, "탬플릿이 존재하지 않습니다."),
     TEMPLATE_RESULT_NOT_FOUND(404, "탬플릿에 대한 결과가 존재하지 않습니다."),
+    TEST_NOT_FOUND(404, "테스트 결과가 존재하지 않습니다."),
 
     /**
      * 500
