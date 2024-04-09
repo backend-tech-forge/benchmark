@@ -1,8 +1,11 @@
 package org.benchmarker.bmcontroller.preftest.controller;
 
+
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmagent.AgentStatus;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcontroller.agent.AgentServerManager;
@@ -16,6 +19,9 @@ import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.template.service.TestExecutionService;
 import org.benchmarker.bmcontroller.user.service.UserContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -51,14 +57,24 @@ public class PerftestController {
     @GetMapping("/groups/{group_id}/templates/{template_id}")
     @PreAuthorize("hasRole('USER')")
     public String getTest(@PathVariable("group_id") String groupId,
-        @PathVariable("template_id") Integer templateId, Model model) throws Exception {
+        @PathVariable("template_id") Integer templateId, Model model,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size)
+        throws Exception {
         String userId = userContext.getCurrentUser().getId();
+
+        Pageable pageable = PageRequest.of(page, size);
 
         model.addAttribute("groupId", groupId);
         model.addAttribute("templateId", templateId);
         TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
         model.addAttribute("template", templateInfo);
 
+        Page<TestInfo> testInfosPageable = testExecutionService.getTestInfosPageable(pageable,
+            templateId);
+        model.addAttribute("testCurrentPage", pageable.getPageNumber());
+        model.addAttribute("testTotalPages", testInfosPageable.getTotalPages());
+        model.addAttribute("testTable", testInfosPageable.getContent());
         return "template/info"; // Thymeleaf 템플릿의 이름
     }
 
@@ -78,7 +94,6 @@ public class PerftestController {
             serverUrl = agentServerManager.getAgentMapped().get(Long.valueOf(templateId));
             agentServerManager.removeTemplateRunnerAgent(Long.valueOf(templateId));
             log.info("stop to " + serverUrl);
-//            return ResponseEntity.ok("stop signal append");
         }
         if (action.equals("start")) {
             String runningTestId = perftestService.isRunning(testInfo);
@@ -105,7 +120,7 @@ public class PerftestController {
 
         eventStream
             .doOnComplete(() -> {
-                if (!action.equals("stop")){
+                if (!action.equals("stop")) {
                     perftestService.removeRunning(testInfo);
                     log.info("Test completed! {}", templateId);
                     messagingTemplate.convertAndSend("/topic/" + userId, "test complete");
@@ -117,15 +132,31 @@ public class PerftestController {
                     CommonTestResult saveReturnResult = testResultService.resultSaveAndReturn(
                             commonTestResult, testInfo)
                         .orElseThrow(() -> new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR));
+                    testExecutionService.updateAgentStatus(testInfo.getTestId(),
+                        commonTestResult.getTestStatus());
                     messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId,
                         saveReturnResult);
                 },
                 error -> {
+                    testExecutionService.updateAgentStatus(testInfo.getTestId(),
+                        AgentStatus.UNKNOWN);
                     perftestService.removeRunning(testInfo);
                     log.error("Error receiving SSE: {}", error.getMessage());
                 });
 
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/api/groups/{group_id}/templates/{template_id}/tests")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<TestInfo>> getTestExecutions(
+        @PathVariable("group_id") String groupId,
+        @PathVariable("template_id") Integer templateId,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            testExecutionService.getTestInfosList(pageable, templateId));
+    }
+
 
 }
