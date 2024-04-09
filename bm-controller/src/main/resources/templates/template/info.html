@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<header th:replace="fragments/commonHeader :: common('Test Results')">
+<header th:replace="~{fragments/commonHeader :: common('Test Results')}">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </header>
 
 <body>
 
-<div th:replace="fragments/currentUserFragment :: currentUser"></div>
-<div th:replace="fragments/agentStatus :: agentStatus"></div>
+<div th:replace="~{fragments/currentUserFragment :: currentUser}"></div>
+<div th:replace="~{fragments/agentStatus :: agentStatus}"></div>
 <div class="container">
   <div id="testTemplate">
     <table>
@@ -35,6 +35,42 @@
     <div style="background-color: #eeeeee">
       <pre id="jsonOutput"></pre>
     </div>
+
+    <h2>Test Executions</h2>
+    <div class="pagination" id="testPagination">
+      <div th:if="${testCurrentPage > 0}">
+        <a th:with="prevUrl=@{|/groups/${groupId}/templates/${templateId}?page=${testCurrentPage - 1}|}"
+           th:href="${prevUrl}">
+          <button> < </button>
+        </a>
+      </div>
+
+      <div th:if="${testCurrentPage + 1 < testTotalPages}">
+        <a th:with="nxtUrl=@{|/groups/${groupId}/templates/${templateId}?page=${testCurrentPage + 1}|}"
+           th:href="${nxtUrl}">
+          <button> > </button>
+        </a>
+      </div>
+    </div>
+    <table>
+      <thead>
+      <tr>
+        <th>Test ID</th>
+        <th>Test Status</th>
+        <th>Start Time</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- Iterate over each TestInfo object and populate table rows -->
+      <tr th:each="testInfo : ${testTable}">
+        <td th:text="${testInfo.testId}"></td>
+        <td th:text="${testInfo.testStatus}"></td>
+        <td th:text="${testInfo.startedAt}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
 
   <div id="buttons">
     <button id="startButton" onclick="sendAction('start')">시작</button>
@@ -120,6 +156,41 @@
       alert(result.body);
     });
   });
+
+  function fetchTestExecutions(groupId, templateId, page) {
+    var url = '/api/groups/' + groupId + '/templates/' + templateId + '/tests?page=' + page;
+
+    fetch(url)
+    .then(response => {
+      console.log(response.body)
+      if (!response.ok) {
+        console.error('Error:', response.statusText);
+        throw new Error('Failed to fetch test executions');
+      }
+      return response.json();
+    })
+    .then(data => {
+      updateTestTable(data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // Handle error, e.g., display error message to user
+    });
+  }
+
+  // Function to update the test table with fetched data
+  function updateTestTable(data) {
+    var tableBody = document.querySelector('#testTable tbody');
+    tableBody.innerHTML = ''; // Clear existing rows
+    data.forEach(function(test) {
+      var row = document.createElement('tr');
+      row.innerHTML = '<td>' + test.groupId + '</td>' +
+          '<td>' + test.templateId + '</td>' +
+          '<td>' + test.testId + '</td>' +
+          '<td>' + test.testStatus + '</td>';
+      tableBody.appendChild(row);
+    });
+  }
 
   function formatDuration(duration) {
     const minutes = Math.floor(duration / 60000);
