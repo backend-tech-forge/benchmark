@@ -1,91 +1,169 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>User Registration</title>
-  <link rel="stylesheet" type="text/css" href="../css/styles.css">
-  <style>
-    #groupInfo {
-      display: none; /* 초기에는 숨김 상태로 설정 */
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <style>
+        #groupInfo {
+            display: none; /* 초기에는 숨김 상태로 설정 */
+        }
+
+        .verification-code-section {
+            display: none; /* 초기에는 숨김 상태로 설정 */
+        }
+
+        #registerButton {
+            background-color: green;
+            color: white;
+        }
+
+        #registerButton:disabled {
+            background-color: gray;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 <h1>User Registration</h1>
 <div class="container">
-<form th:action="@{/user}" th:object="${userRegisterDto}" method="post">
-  <div th:if="${#fields.hasErrors('*')}" style="color: red;">
-    <p>Please correct the following errors:</p>
-    <ul>
-      <li th:each="error : ${#fields.errors('*')}" th:text="${error}">Error</li>
-    </ul>
-  </div>
-  <button type="button" id="addUserGroupButton">Add User Group</button>
-  <label for="id">ID:</label>
-  <input type="text" id="id" th:field="*{id}" required/><br/>
+    <form th:action="@{/user}" th:object="${userRegisterDto}" method="post">
+        <div th:if="${#fields.hasErrors('*')}" style="color: red;">
+            <p>Please correct the following errors:</p>
+            <ul>
+                <li th:each="error : ${#fields.errors('*')}" th:text="${error}">Error</li>
+            </ul>
+        </div>
+        <button type="button" id="addUserGroupButton">Add User Group</button>
+        <label for="id">ID:</label>
+        <input type="text" id="id" th:field="*{id}" required/><br/>
 
-  <label for="password">Password:</label>
-  <input type="password" id="password" th:field="*{password}" required/><br/>
+        <label for="password">Password:</label>
+        <input type="password" id="password" th:field="*{password}" required/><br/>
 
-  <label for="slackWebhookUrl">Slack Webhook URL:</label>
-  <input type="text" id="slackWebhookUrl" th:field="*{slackWebhookUrl}" required/><br/>
+        <label for="slackWebhookUrl">Slack Webhook URL:</label>
+        <input type="text" id="slackWebhookUrl" th:field="*{slackWebhookUrl}" required/><br/>
 
-  <div style="display: flex;">
-    <label style="align-items: center;" for="slackNotification">Slack Notification:
-      <input type="checkbox" id="slackNotification" th:field="*{slackNotification}"/>
-    </label>
-  </div>
-  <br/>
+        <div style="display: flex;">
+            <label style="align-items: center;" for="slackNotification">Slack Notification:
+                <input type="checkbox" id="slackNotification" th:field="*{slackNotification}"/>
+            </label>
+        </div>
+        <br/>
 
-  <label for="email">Email:</label>
-  <input type="text" id="email" th:field="*{email}" required/><br/>
+        <label for="email">Email:</label>
+        <input type="text" id="email" th:field="*{email}" required/>
+        <button type="button" id="sendVerificationCodeButton" onclick="sendVerificationCode()">Send Verification Code
+        </button>
+        <br/>
+
+        <!-- 이메일 인증 추가 -->
+        <div class="verification-code-section" id="verification-code-section">
+            <label for="verificationCode">Verification Code:</label>
+            <input type="text" id="verificationCode" name="verificationCode" required/>
+            <button type="button" id="codeChk" onclick="emailCodeChk()">Check</button>
+            <br/>
+        </div>
 
 
-  <div style="display: flex;">
-    <label for="emailNotification">Email Notification:
-      <input type="checkbox" id="emailNotification" th:field="*{emailNotification}"/>
-    </label>
-  </div>
-  <br/>
+        <div style="display: flex;">
+            <label for="emailNotification">Email Notification:
+                <input type="checkbox" id="emailNotification" th:field="*{emailNotification}"/>
+            </label>
+        </div>
+        <br/>
 
-  <!-- 버튼 클릭 시 화면에 표시될 입력란과 라벨 -->
+        <!-- 버튼 클릭 시 화면에 표시될 입력란과 라벨 -->
 
 
-  <div id="userGroupFields"></div>
+        <div id="userGroupFields"></div>
 
-  <script>
-    var userGroupCount = 0;
+        <script>
+            var userGroupCount = 0;
 
-    function addUserGroup() {
-      var userGroupFieldsDiv = document.getElementById("userGroupFields");
+            function addUserGroup() {
+                var userGroupFieldsDiv = document.getElementById("userGroupFields");
 
-      // Check if userGroup already exists, if so, return
-      if (userGroupFieldsDiv.querySelector('div[id^="userGroup"]')) {
-        return;
-      }
+                // Check if userGroup already exists, if so, return
+                if (userGroupFieldsDiv.querySelector('div[id^="userGroup"]')) {
+                    return;
+                }
 
-      var newUserGroupDiv = document.createElement("div");
-      newUserGroupDiv.innerHTML =
-          '<div id="userGroup0">' +
-          '<label for="userGroup[0].id">Group ID:</label>' +
-          '<input type="text" id="userGroup[0].id" name="userGroup[0].id"><br/>' +
-          '<label for="userGroup[0].name">Group Name:</label>' +
-          '<input type="text" id="userGroup[0].name" name="userGroup[0].name">' +
-          '<button type="button" id="deleteUserGroupButton" onclick="removeUserGroup()">Remove User Group</button>' +
-          '</div>';
-      userGroupFieldsDiv.appendChild(newUserGroupDiv);
-    }
+                var newUserGroupDiv = document.createElement("div");
+                newUserGroupDiv.innerHTML =
+                    '<div id="userGroup0">' +
+                    '<label for="userGroup[0].id">Group ID:</label>' +
+                    '<input type="text" id="userGroup[0].id" name="userGroup[0].id"><br/>' +
+                    '<label for="userGroup[0].name">Group Name:</label>' +
+                    '<input type="text" id="userGroup[0].name" name="userGroup[0].name">' +
+                    '<button type="button" id="deleteUserGroupButton" onclick="removeUserGroup()">Remove User Group</button>' +
+                    '</div>';
+                userGroupFieldsDiv.appendChild(newUserGroupDiv);
+            }
 
-    function removeUserGroup() {
-      var userGroupToRemove = document.getElementById("userGroup0");
-      userGroupToRemove.parentNode.removeChild(userGroupToRemove);
-    }
+            function removeUserGroup() {
+                var userGroupToRemove = document.getElementById("userGroup0");
+                userGroupToRemove.parentNode.removeChild(userGroupToRemove);
+            }
 
-    document.getElementById("addUserGroupButton").addEventListener("click", addUserGroup);
-  </script>
+            function sendVerificationCode() {
+                var email = document.getElementById("email").value;
 
-  <button type="submit">Register</button>
-</form>
+                fetch('/api/mail/certification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({email: email})
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Email has been sent");
+                        } else {
+                            alert('Please write in email format');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+
+                var verificationCodeSection = document.querySelector(".verification-code-section");
+                verificationCodeSection.style.display = "block";
+            }
+
+            function emailCodeChk() {
+                var code = document.getElementById("verificationCode").value;
+
+                // session 값이랑 비교
+                fetch('/api/mail/certification/code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({code: code})
+                })
+                    .then(response => response.json())
+                    .then(data => {
+
+                        if (data.status === 'success') {
+                            alert("Authentication successful!!");
+
+                            document.getElementById("registerButton").disabled = false;
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+
+            document.getElementById("addUserGroupButton").addEventListener("click", addUserGroup);
+        </script>
+
+        <button type="submit" id="registerButton" disabled >Register</button>
+
+    </form>
 </div>
 </body>
 </html>
