@@ -2,15 +2,12 @@ package org.benchmarker.bmcontroller.mail.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.benchmarker.bmcontroller.mail.common.config.SessionData;
 import org.benchmarker.bmcontroller.mail.controller.dto.EmailCertificationDto;
 import org.benchmarker.bmcontroller.mail.controller.dto.EmailResDto;
 import org.benchmarker.bmcontroller.mail.service.IMailSender;
 import org.benchmarker.bmcontroller.mail.strategy.IRandomCodeGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -23,8 +20,6 @@ public class MailSenderImpl implements IMailSender {
     private final JavaMailSender javaMailSender;
 
     private final IRandomCodeGenerator randomNumber;
-
-    private SessionData sessionData;
 
     @Override
     public EmailResDto sendMail(EmailCertificationDto emailCertificationDto) {
