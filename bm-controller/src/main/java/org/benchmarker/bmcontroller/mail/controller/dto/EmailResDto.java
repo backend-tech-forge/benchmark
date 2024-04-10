@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class EmailResDto {
 
     private String mail;
+
     private String certificationCode;
 }
