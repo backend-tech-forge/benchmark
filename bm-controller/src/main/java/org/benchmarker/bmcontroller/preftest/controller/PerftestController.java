@@ -14,7 +14,6 @@ import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.preftest.common.TestInfo;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
-import org.benchmarker.bmcontroller.template.model.TestExecution;
 import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
 import org.benchmarker.bmcontroller.template.service.TestExecutionService;
@@ -98,51 +97,21 @@ public class PerftestController {
         if (action.equals("start")) {
             String runningTestId = perftestService.isRunning(testInfo);
             if (runningTestId != null) {
-                log.warn("template is already running in testId {}", runningTestId);
-                throw new GlobalException(ErrorCode.ALREADY_RUNNING);
+                throw new GlobalException(ErrorCode.ALREADY_RUNNING, "template is already running in testId " + runningTestId);
             }
-
             // init : save testExecution
-            TestExecution testExecution = testExecutionService.init(testInfo);
-
+            testExecutionService.init(testInfo);
             serverUrl = agentServerManager.getReadyAgent().orElseThrow(() ->
                 new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR)).getServerUrl();
-
             agentServerManager.addTemplateRunnerAgent(Long.valueOf(templateId), serverUrl);
-            log.info("send to " + serverUrl);
+            perftestService.saveRunning(testInfo);
         }
 
-        WebClient webClient = WebClient.create(serverUrl);
         TemplateInfo templateInfo = testTemplateService.getTemplateInfo(userId, templateId);
         Flux<ServerSentEvent<CommonTestResult>> eventStream = perftestService.executePerformanceTest(
-            templateId, groupId, action, webClient, templateInfo);
-        perftestService.saveRunning(testInfo);
+            templateId, groupId, action, WebClient.create(serverUrl), templateInfo);
 
-        eventStream
-            .doOnComplete(() -> {
-                if (!action.equals("stop")) {
-                    perftestService.removeRunning(testInfo);
-                    log.info("Test completed! {}", templateId);
-                    messagingTemplate.convertAndSend("/topic/" + userId, "test complete");
-                }
-            })
-            .subscribe(event -> {
-                    CommonTestResult commonTestResult = event.data();
-                    // 결과 저장
-                    CommonTestResult saveReturnResult = testResultService.resultSaveAndReturn(
-                            commonTestResult, testInfo)
-                        .orElseThrow(() -> new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR));
-                    testExecutionService.updateAgentStatus(testInfo.getTestId(),
-                        commonTestResult.getTestStatus());
-                    messagingTemplate.convertAndSend("/topic/" + groupId + "/" + templateId,
-                        saveReturnResult);
-                },
-                error -> {
-                    testExecutionService.updateAgentStatus(testInfo.getTestId(),
-                        AgentStatus.UNKNOWN);
-                    perftestService.removeRunning(testInfo);
-                    log.error("Error receiving SSE: {}", error.getMessage());
-                });
+        handleEvent(eventStream, action, userId, testInfo);
 
         return ResponseEntity.ok().build();
     }
@@ -158,5 +127,40 @@ public class PerftestController {
             testExecutionService.getTestInfosList(pageable, templateId));
     }
 
+    /**
+     * Handling event stream
+     * @param eventStream
+     * @param action
+     * @param userId
+     * @param testInfo
+     */
+    private void handleEvent(Flux<ServerSentEvent<CommonTestResult>> eventStream, String action, String userId,
+        TestInfo testInfo) {
+        eventStream
+            .doOnComplete(() -> {
+                if (!action.equals("stop")) {
+                    perftestService.removeRunning(testInfo);
+                    log.info("Test completed! {}", testInfo.getTemplateId());
+                    messagingTemplate.convertAndSend("/topic/" + userId, "test complete");
+                }
+            })
+            .subscribe(event -> {
+                    CommonTestResult commonTestResult = event.data();
+                    // 결과 저장
+                    CommonTestResult saveReturnResult = testResultService.resultSaveAndReturn(
+                            commonTestResult, testInfo)
+                        .orElseThrow(() -> new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR));
+                    testExecutionService.updateAgentStatus(testInfo.getTestId(),
+                        commonTestResult.getTestStatus());
+                    messagingTemplate.convertAndSend("/topic/" + testInfo.getGroupId() + "/" + testInfo.getTemplateId(),
+                        saveReturnResult);
+                },
+                error -> {
+                    testExecutionService.updateAgentStatus(testInfo.getTestId(),
+                        AgentStatus.UNKNOWN);
+                    perftestService.removeRunning(testInfo);
+                    log.error("Error receiving SSE: {}", error.getMessage());
+                });
+    }
 
 }

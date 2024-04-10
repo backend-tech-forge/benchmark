@@ -18,7 +18,7 @@ public class AgentServerManager {
     public void add(String url, AgentInfo agentInfo) {
         agentsUrl.put(url, agentInfo);
     }
-    public void update(String url, AgentInfo agentInfo){
+    public void update(AgentInfo agentInfo){
         if (agentsUrl.get(agentInfo.getServerUrl())==null){
             log.error("cannot find agent");
             return;
@@ -33,10 +33,6 @@ public class AgentServerManager {
             }
         }
         return Optional.empty();
-    }
-
-    public void removeAgent(String url){
-        agentsUrl.remove(url);
     }
 
     public void addTemplateRunnerAgent(Long id, String url){
