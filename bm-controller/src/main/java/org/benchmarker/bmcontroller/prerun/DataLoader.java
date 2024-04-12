@@ -114,7 +114,7 @@ public class DataLoader implements CommandLineRunner {
                 .runOn(Schedulers.parallel())
                 .flatMap(this::fetchAgentInfo)
                 .sequential()
-                .doOnNext(this::addAgentToManager).log()
+                .doOnNext(this::addAgentToManager)
                 .blockLast();
 
             messagingTemplate.convertAndSend("/topic/server", agentsUrl.values());
