@@ -54,4 +54,8 @@ spring:
         smtp.auth: true
         smtp.timeout: 50000
         smtp.starttls.enable: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
 

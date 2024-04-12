@@ -38,7 +38,7 @@ public class UserApiController {
     @GetMapping({"/user", "/users/{user_id}"})
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<UserInfo> getUser(
-        @PathVariable(required = false) String user_id) {
+        @PathVariable(required = false,name = "user_id") String user_id) {
         User currentUser = userContext.getCurrentUser();
         if (user_id == null) {
             UserInfo userInfo = userService.getUser(currentUser.getId()).get();

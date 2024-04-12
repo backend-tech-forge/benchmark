@@ -1,15 +1,13 @@
 package org.benchmarker.bmcontroller.prerun;
 
-import static org.benchmarker.bmcontroller.common.util.NoOp.noOp;
 import static org.benchmarker.bmcontroller.user.constant.UserConsts.USER_GROUP_DEFAULT_ID;
 import static org.benchmarker.bmcontroller.user.constant.UserConsts.USER_GROUP_DEFAULT_NAME;
 
 import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +24,6 @@ import org.benchmarker.bmcontroller.user.model.enums.Role;
 import org.benchmarker.bmcontroller.user.repository.UserGroupJoinRepository;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.benchmarker.bmcontroller.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -61,117 +58,113 @@ public class DataLoader implements CommandLineRunner {
     private final AgentServerManager agentServerManager;
 
     @Value("${admin.id}")
-    private String adminId;
+    private String adminId = "admin";
     @Value("${admin.password}")
-    private String adminPassword;
-    @Autowired
-    private DiscoveryClient discoveryClient;
+    private String adminPassword = "admin";
+
+    private final DiscoveryClient discoveryClient;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // 데이터베이스에 초기 사용자 추가
+        addUserAndGroupIfNotExist();
+        performAgentHealthChecks();
+    }
+
+    void addUserAndGroupIfNotExist() {
         Optional<User> adminUser = userRepository.findById(adminId);
-        Optional<UserGroup> defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID);
-        adminUser.ifPresentOrElse(
-            user -> {
-                noOp();
-            },
-            () -> userRepository.save(adminUser()));
-        defaultGroup.ifPresentOrElse(
-            userGroup -> {
-                noOp();
-            },
-            () -> userGroupRepository.save(defaultAdminGroup()));
-        List<UserGroupJoin> findJoin = userGroupJoinRepository.findByUserId(adminId);
-        if (findJoin.isEmpty()) {
-            Optional<UserGroup> group = userGroupRepository.findById(USER_GROUP_DEFAULT_ID);
-            group.ifPresent(userGroup -> userGroupJoinRepository.save(
-                UserGroupJoin.builder()
-                    .user(adminUser())
-                    .userGroup(defaultAdminGroup())
-                    .role(GroupRole.LEADER)
-                    .build()
-            ));
+        if (adminUser.isEmpty()) {
+            userRepository.save(createAdminUser());
         }
 
-        // remove & add agent in every seconds
-        scheduledTaskService.start(-100L, () -> {
-            // agent health check
-            Iterator<Entry<String, AgentInfo>> iterator = agentServerManager.getAgentsUrl()
-                .entrySet().iterator();
-            while (iterator.hasNext()) {
-                Entry<String, AgentInfo> next = iterator.next();
-                try {
-                    ResponseEntity<AgentInfo> agentInfo = WebClient.create(next.getKey())
-                        .get()
-                        .uri("/api/status")
-                        .retrieve()
-                        .toEntity(AgentInfo.class)
-                        .block();
+        Optional<UserGroup> defaultGroup = userGroupRepository.findById(USER_GROUP_DEFAULT_ID);
+        if (defaultGroup.isEmpty()) {
+            userGroupRepository.save(createDefaultAdminGroup());
+        }
 
-                    assert agentInfo != null;
-                    if (agentInfo.getStatusCode().is2xxSuccessful()) {
-                        next.setValue(Objects.requireNonNull(agentInfo.getBody()));
-                    } else {
-                        iterator.remove();
-                    }
-                } catch (Exception e) {
-                    iterator.remove();
-                }
-            }
+        if (userGroupJoinRepository.findByUserId(adminId).isEmpty()) {
+            userGroupRepository.findById(USER_GROUP_DEFAULT_ID).ifPresent(group -> {
+                userGroupJoinRepository.save(UserGroupJoin.builder()
+                    .user(createAdminUser())
+                    .userGroup(createDefaultAdminGroup())
+                    .role(GroupRole.LEADER)
+                    .build());
+            });
+        }
+    }
+
+    void performAgentHealthChecks() {
+        scheduledTaskService.start(-100L, () -> {
+            Map<String, AgentInfo> agentsUrl = agentServerManager.getAgentsUrl();
+
+            agentsUrl.entrySet().iterator().forEachRemaining(entry -> {
+                String serverUrl = entry.getKey();
+                AgentInfo agentInfo = entry.getValue();
+
+                checkAgentHealth(serverUrl, agentInfo);
+            });
 
             List<String> podNames = new ArrayList<>();
-
-            podNames = discoveryClient.getInstances("bm-agent").stream()
-                .map((serviceInstance -> {
-                    return serviceInstance.getUri().toString();
-                })).toList();
+            discoveryClient.getInstances("bm-agent").forEach(serviceInstance -> {
+                podNames.add(serviceInstance.getUri().toString());
+            });
 
             Flux.fromIterable(podNames)
                 .parallel()
                 .runOn(Schedulers.parallel())
-                .flatMap(instanceUrl -> {
-                    return WebClient.create(instanceUrl)
-                        .get()
-                        .uri("/api/status")
-                        .retrieve()
-                        .bodyToMono(AgentInfo.class)
-                        .timeout(Duration.ofSeconds(1))
-                        .onErrorResume(e -> {
-                            log.error("Error occurred while fetching data from {}", instanceUrl, e);
-                            return Mono.empty();
-                        })
-                        .map(agentInfo -> {
-                            agentInfo.setServerUrl(instanceUrl); // 수정된 부분
-                            return agentInfo;
-                        });
-                })
+                .flatMap(this::fetchAgentInfo)
                 .sequential()
-                .doOnNext(agentInfo -> {
-                    if (agentInfo != null) {
-                        log.info("agentInfo {}", agentInfo.toString());
-                        agentServerManager.add(agentInfo.getServerUrl(), agentInfo);
-                    }
-                })
+                .doOnNext(this::addAgentToManager)
                 .blockLast();
 
-            messagingTemplate.convertAndSend("/topic/server",
-                agentServerManager.getAgentsUrl().values());
-
+            messagingTemplate.convertAndSend("/topic/server", agentsUrl.values());
         }, 0, 1000, TimeUnit.MILLISECONDS);
-
-
     }
 
-    private UserGroup defaultAdminGroup() {
-        return UserGroup.builder()
-            .id(USER_GROUP_DEFAULT_ID)
-            .name(USER_GROUP_DEFAULT_NAME)
-            .build();
+    void checkAgentHealth(String serverUrl, AgentInfo agentInfo) {
+        try {
+            ResponseEntity<AgentInfo> responseEntity = WebClient.create(serverUrl)
+                .get()
+                .uri("/api/status")
+                .retrieve()
+                .toEntity(AgentInfo.class)
+                .block();
+
+            if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+                agentInfo = Objects.requireNonNull(responseEntity.getBody());
+            } else {
+                agentServerManager.remove(serverUrl);
+            }
+        } catch (Exception e) {
+            agentServerManager.remove(serverUrl);
+            log.error("Error occurred while fetching data from {}", serverUrl, e);
+        }
     }
 
-    private User adminUser() {
+    private Mono<AgentInfo> fetchAgentInfo(String instanceUrl) {
+        return WebClient.create(instanceUrl)
+            .get()
+            .uri("/api/status")
+            .retrieve()
+            .bodyToMono(AgentInfo.class)
+            .timeout(Duration.ofSeconds(1))
+            .onErrorResume(e -> {
+                log.error("Error occurred while fetching data from {}", instanceUrl, e);
+                return Mono.empty();
+            })
+            .map(agentInfo -> {
+                agentInfo.setServerUrl(instanceUrl);
+                return agentInfo;
+            });
+    }
+
+    private void addAgentToManager(AgentInfo agentInfo) {
+        if (agentInfo != null) {
+            agentServerManager.add(agentInfo.getServerUrl(), agentInfo);
+        }
+    }
+
+    private User createAdminUser() {
         return User.builder()
             .id(adminId)
             .password(passwordEncoder.encode(adminPassword))
@@ -180,6 +173,13 @@ public class DataLoader implements CommandLineRunner {
             .slackNotification(false)
             .slackWebhookUrl("admin-webhook-url")
             .role(Role.ROLE_ADMIN)
+            .build();
+    }
+
+    private UserGroup createDefaultAdminGroup() {
+        return UserGroup.builder()
+            .id(USER_GROUP_DEFAULT_ID)
+            .name(USER_GROUP_DEFAULT_NAME)
             .build();
     }
 }

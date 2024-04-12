@@ -7,17 +7,21 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
+import org.benchmarker.bmcontroller.preftest.common.TestInfo;
 import org.benchmarker.bmcontroller.template.controller.dto.TestResultResponseDto;
 import org.benchmarker.bmcontroller.template.controller.dto.TestTemplateResponseDto;
+import org.benchmarker.bmcontroller.template.model.TestExecution;
 import org.benchmarker.bmcontroller.template.model.TestMttfb;
 import org.benchmarker.bmcontroller.template.model.TestResult;
 import org.benchmarker.bmcontroller.template.model.TestTemplate;
 import org.benchmarker.bmcontroller.template.model.TestTps;
+import org.benchmarker.bmcontroller.template.repository.TestExecutionRepository;
 import org.benchmarker.bmcontroller.template.repository.TestMttfbRepository;
 import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
 import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
@@ -40,29 +44,36 @@ public class TestResultService extends AbstractTestResultService {
     private final TestMttfbRepository testMttfbRepository;
 
     private final UserGroupRepository userGroupRepository;
+    private final TestExecutionRepository testExecutionRepository;
 
     @Override
     @Transactional
-    public Optional<CommonTestResult> resultSaveAndReturn(CommonTestResult commonTestResult) {
+    public Optional<CommonTestResult> resultSaveAndReturn(CommonTestResult commonTestResult, TestInfo testInfo) {
+        TestExecution testExecution = testExecutionRepository.findById(
+            UUID.fromString(testInfo.getTestId())).orElseThrow(() -> new GlobalException(ErrorCode.BAD_REQUEST));
 
         // 템플릿이 존재하는지 먼저 파악.
         TestTemplate testTemplate = testTemplateRepository.findById(commonTestResult.getTestId())
                 .orElseThrow(() -> new GlobalException(ErrorCode.TEMPLATE_NOT_FOUND));
 
+
         LocalDateTime startedAt = convertStringToLocalDateTime(commonTestResult.getStartedAt());
         LocalDateTime finishedAt = convertStringToLocalDateTime(commonTestResult.getFinishedAt());
 
+        // TestExecution 찾기
+
         TestResult testResult = TestResult.builder()
-                .testTemplate(testTemplate)
-                .startedAt(startedAt)
-                .finishedAt(finishedAt)
-                .totalRequest(commonTestResult.getTotalRequests())
-                .totalSuccess(commonTestResult.getTotalSuccess())
-                .totalError(commonTestResult.getTotalErrors())
-                .tpsAvg(commonTestResult.getTpsAverage())
-                .mttbfbAvg(commonTestResult.getMttfbAverage())
-                .agentStatus(commonTestResult.getTestStatus())
-                .build();
+            .startedAt(startedAt)
+            .testExecution(testExecution)
+            .finishedAt(finishedAt)
+            .testExecution(testExecution)
+            .totalRequest(commonTestResult.getTotalRequests())
+            .totalSuccess(commonTestResult.getTotalSuccess())
+            .totalError(commonTestResult.getTotalErrors())
+            .tpsAvg(commonTestResult.getTpsAverage())
+            .mttbfbAvg(commonTestResult.getMttfbAverage())
+            .agentStatus(commonTestResult.getTestStatus())
+            .build();
 
         TestResult saveTestResult = testResultRepository.save(testResult);
 
@@ -113,7 +124,7 @@ public class TestResultService extends AbstractTestResultService {
         List<TestTemplate> testTemplates = testTemplateRepository.findAllByUserGroupId(userGroup.getId());
         List<TestResultResponseDto> results = new ArrayList<>();
         for (int i = 0; i < testTemplates.size(); i++) {
-            TestResult tempResult = testResultRepository.findByTestTemplate(testTemplates.get(i));
+            TestResult tempResult = testResultRepository.findByTestTemplate(testTemplates.get(i).getId());
             results.add(tempResult.convertToResponseDto());
         }
 

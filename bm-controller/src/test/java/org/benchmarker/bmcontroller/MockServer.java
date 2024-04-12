@@ -2,6 +2,7 @@ package org.benchmarker.bmcontroller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -71,7 +72,7 @@ public class MockServer {
     public void addMockResponse(Object object, int repeat) {
         String json = "";
         try {
-            json = objectMapper.writeValueAsString(object);
+            json = objectMapper.registerModule(new JavaTimeModule()).writeValueAsString(object);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
