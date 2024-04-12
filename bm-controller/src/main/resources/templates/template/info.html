@@ -63,7 +63,11 @@
       <tbody>
       <!-- Iterate over each TestInfo object and populate table rows -->
       <tr th:each="testInfo : ${testTable}">
-        <td th:text="${testInfo.testId}"></td>
+        <td>
+          <a th:href="@{'/templates/' + ${templateId} + '/tests/' + ${testInfo.testId}}">
+            <span th:text="${testInfo.testId}"></span>
+          </a>
+        </td>
         <td th:text="${testInfo.testStatus}"></td>
         <td th:text="${testInfo.startedAt}"></td>
       </tr>
