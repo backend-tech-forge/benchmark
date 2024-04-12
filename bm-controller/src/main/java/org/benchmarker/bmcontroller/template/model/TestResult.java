@@ -67,7 +67,7 @@ public class TestResult extends BaseTime {
                 .totalSuccess(this.totalSuccess)
                 .totalError(this.totalError)
                 .tpsAvg(this.tpsAvg)
-//                .mttbfbAvg(this.mttbfbAvg)
+                .mttbfbAvg(Double.valueOf(this.mttbfbAvg))
                 .build();
     }
 
