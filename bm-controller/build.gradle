@@ -105,7 +105,8 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client'
-
+    implementation 'org.webjars:webjars-locator-core'
+    implementation 'org.webjars:chartjs:2.9.3'
 
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
