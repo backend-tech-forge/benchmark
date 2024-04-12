@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Time Series Chart</title>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .chart-container {
+      width: 90%;
+      margin-bottom: 20px;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
+</head>
+<body>
+<div class="chart-container">
+  <canvas id="mttfbChart"></canvas>
+</div>
+<div class="chart-container">
+  <canvas id="tpsChart"></canvas>
+</div>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  var mttfbCtx = document.getElementById('mttfbChart').getContext('2d');
+  var tpsCtx = document.getElementById('tpsChart').getContext('2d');
+
+  // MTTFB 데이터
+  var mttfbData = /*[[${mttfbInfoList}]]*/ [];
+  var mttfbLabels = mttfbData.map(function(info) {
+    return new Date(info.timestamp);
+  });
+  var mttfbValues = mttfbData.map(function(info) {
+    return info.mttbfb;
+  });
+
+  var mttfbChart = new Chart(mttfbCtx, {
+    type: 'line',
+    data: {
+      labels: mttfbLabels,
+      datasets: [{
+        label: 'MTTFB (ms)',
+        data: mttfbValues,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        xAxes: [{
+          type: 'time',
+          time: {
+            unit: 'minute',
+            displayFormats: {
+              minute: 'MMM DD, HH:mm'
+            }
+          },
+          ticks: {
+            autoSkip: true,
+            maxTicksLimit: 10
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'MTTFB (ms)'
+          }
+        }]
+      }
+    }
+  });
+
+  // TPS 데이터
+  var tpsData = /*[[${tpsInfoList}]]*/ [];
+  var tpsLabels = tpsData.map(function(info) {
+    return new Date(info.timestamp);
+  });
+  var tpsValues = tpsData.map(function(info) {
+    return info.tps;
+  });
+
+  var tpsChart = new Chart(tpsCtx, {
+    type: 'line',
+    data: {
+      labels: tpsLabels,
+      datasets: [{
+        label: 'TPS',
+        data: tpsValues,
+        borderColor: 'rgba(192, 75, 192, 1)',
+        backgroundColor: 'rgba(192, 75, 192, 0.2)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        xAxes: [{
+          type: 'time',
+          time: {
+            unit: 'minute',
+            displayFormats: {
+              minute: 'MMM DD, HH:mm'
+            }
+          },
+          ticks: {
+            autoSkip: true,
+            maxTicksLimit: 10
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'TPS'
+          }
+        }]
+      }
+    }
+  });
+  /*]]>*/
+</script>
+</body>
+</html>

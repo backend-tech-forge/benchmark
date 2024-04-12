@@ -1,6 +1,7 @@
 package org.benchmarker.bmcommon.util;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import org.benchmarker.bmagent.AgentStatus;
 import org.benchmarker.bmcommon.dto.CommonTestResult;
@@ -56,5 +57,31 @@ public class RandomUtils {
     public static double randDouble(long min, long max) {
         return ThreadLocalRandom.current().nextDouble(min, max + 1);
     }
+
+    public static String randString(int length) {
+        // Define the ASCII range for alphabetic characters
+        int lowerBound = 65; // ASCII value for 'A'
+        int upperBound = 122; // ASCII value for 'z'
+
+        // Create a StringBuilder to store the random string
+        StringBuilder stringBuilder = new StringBuilder(length);
+
+        // Create a Random object
+        Random random = new Random();
+
+        // Generate random characters and append them to the StringBuilder
+        for (int i = 0; i < length; i++) {
+            // Generate a random ASCII value within the range
+            int asciiValue = lowerBound + random.nextInt(upperBound - lowerBound + 1);
+
+            // Convert the ASCII value to a character and append it to the StringBuilder
+            stringBuilder.append((char) asciiValue);
+        }
+
+        // Return the generated random string
+        return stringBuilder.toString();
+    }
+
+
 
 }

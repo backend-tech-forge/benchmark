@@ -9,6 +9,7 @@ import lombok.Getter;
 public class GlobalException extends RuntimeException {
 
     private final ErrorCode errorCode;
+    private String message = null;
 
     public static ErrorCode toErrorCode(Throwable e) {
         GlobalException customException = (GlobalException) e;
@@ -22,4 +23,10 @@ public class GlobalException extends RuntimeException {
     public GlobalException(ErrorCode errorCode) {
         this.errorCode = errorCode;
     }
+
+    public GlobalException(ErrorCode errorCode, String message) {
+        this.errorCode = errorCode;
+        this.message = message;
+    }
+
 }

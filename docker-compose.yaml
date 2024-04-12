@@ -13,6 +13,17 @@ services:
       - ./backups:/home/backups
     command: -c wal_level=logical -p 5433
     restart: always
+  redis-db:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 6379:6379
+    expose:
+      - 6379
+    volumes:
+      - ./data-redis:/data
+    restart: always
+    command: redis-server
   eureka:
     build:
       context: ./eureka

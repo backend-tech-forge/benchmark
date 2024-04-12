@@ -4,7 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,12 +20,12 @@ import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalErrorResponse;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
-import org.benchmarker.bmcontroller.user.helper.UserHelper;
 import org.benchmarker.bmcontroller.user.controller.dto.UserInfo;
 import org.benchmarker.bmcontroller.user.controller.dto.UserRegisterDto;
-import org.benchmarker.bmcontroller.user.model.enums.Role;
+import org.benchmarker.bmcontroller.user.helper.UserHelper;
 import org.benchmarker.bmcontroller.user.model.User;
 import org.benchmarker.bmcontroller.user.model.UserGroup;
+import org.benchmarker.bmcontroller.user.model.enums.Role;
 import org.benchmarker.bmcontroller.user.service.UserContext;
 import org.benchmarker.bmcontroller.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,13 +40,13 @@ import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.util.annotations.RestDocsTest;
 
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-
 
 @SpringBootTest
+@Transactional
 @RestDocsTest
 class UserApiControllerTest {
 

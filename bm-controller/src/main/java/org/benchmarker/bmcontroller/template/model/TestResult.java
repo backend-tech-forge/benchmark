@@ -24,9 +24,9 @@ public class TestResult extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "test_template_id", referencedColumnName = "id", nullable = false)
-    private TestTemplate testTemplate;
+//    @ManyToOne(fetch = FetchType.EAGER)
+//    @JoinColumn(name = "test_template_id", referencedColumnName = "id", nullable = false)
+//    private TestTemplate testTemplate;
 
     private Integer totalRequest;
 
@@ -43,6 +43,10 @@ public class TestResult extends BaseTime {
 
     @Column(columnDefinition = "timestamp(6)")
     private LocalDateTime finishedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "test_id", referencedColumnName = "id", nullable = false)
+    private TestExecution testExecution;
 
     @OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
     private List<TestMttfb> testMttfbs;
@@ -63,7 +67,7 @@ public class TestResult extends BaseTime {
                 .totalSuccess(this.totalSuccess)
                 .totalError(this.totalError)
                 .tpsAvg(this.tpsAvg)
-//                .mttbfbAvg(this.mttbfbAvg)
+                .mttbfbAvg(Double.valueOf(this.mttbfbAvg))
                 .build();
     }
 
