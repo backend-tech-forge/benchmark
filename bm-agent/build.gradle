@@ -11,6 +11,7 @@ version = '1.0.0'
 
 def excludeJacocoTestCoverageReport = [
         // bmagent
+        'org/benchmarker/bmagent/consts/**',
         'org/benchmarker/bmagent/BmAgentApplication**',
         'org/benchmarker/bmagent/sse/**',
         'org/benchmarker/bmagent/consts/SystemSchedulerConst',
