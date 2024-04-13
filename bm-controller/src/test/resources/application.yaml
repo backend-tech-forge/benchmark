@@ -43,6 +43,17 @@ spring:
         jdbc:
           time_zone: UTC
           batch_size: 50
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: 'apple4rhk'
+    password: 'rdndiwbefqkbvnau'
+    properties:
+      mail:
+        debug: true
+        smtp.auth: true
+        smtp.timeout: 50000
+        smtp.starttls.enable: true
   data:
     redis:
       host: localhost
