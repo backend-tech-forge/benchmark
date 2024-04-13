@@ -1,7 +1,5 @@
 package org.benchmarker.bmcontroller.mail.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import org.benchmarker.bmcontroller.mail.common.factory.EmailBodyGenerator;
 import org.benchmarker.bmcontroller.mail.common.factory.EmailVerificationFactory;
@@ -11,15 +9,12 @@ import org.benchmarker.bmcontroller.mail.service.impl.MailSenderImpl;
 import org.benchmarker.bmcontroller.mail.strategy.IRandomCodeGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @Transactional
 @SpringBootTest
