@@ -4,6 +4,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmcontroller.mail.common.factory.EmailBodyGenerator;
+import org.benchmarker.bmcontroller.mail.common.factory.EmailVerificationFactory;
 import org.benchmarker.bmcontroller.mail.controller.dto.EmailCertificationDto;
 import org.benchmarker.bmcontroller.mail.controller.dto.EmailResDto;
 import org.benchmarker.bmcontroller.mail.service.IMailSender;
@@ -22,12 +24,11 @@ public class MailSenderImpl implements IMailSender {
     private final IRandomCodeGenerator randomNumber;
 
     @Override
-    public EmailResDto sendMail(EmailCertificationDto emailCertificationDto) {
+    public EmailResDto sendMail(EmailCertificationDto emailCertificationDto, EmailBodyGenerator emailBodyGenerator) {
         String authNum = randomNumber.generateVerificationCode();
 
         String subject = "회원 가입 인증 코드";
-        String body = "안녕하세요!\n\n회원 가입을 위한 인증 코드를 안내드립니다. 아래의 인증 코드를 입력하여 계정을 활성화하세요:\n\n"
-                + "인증 코드: " + authNum;
+        String body = emailBodyGenerator.createBody(authNum);
 
         log.info("Start mail sender!!");
         try {

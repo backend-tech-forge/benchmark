@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmcontroller.mail.common.factory.EmailBodyGenerator;
+import org.benchmarker.bmcontroller.mail.common.factory.EmailVerificationFactory;
 import org.benchmarker.bmcontroller.mail.controller.dto.*;
 import org.benchmarker.bmcontroller.mail.service.IMailSender;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +30,8 @@ public class MailController {
     public ResponseEntity<EmailResDto> mailSend(HttpServletRequest request,
                                                       @Valid @RequestBody EmailCertificationDto emailCertification) {
 
-        EmailResDto mailResDto = mailSender.sendMail(emailCertification);
+        EmailBodyGenerator emailBodyGenerator = new EmailVerificationFactory();
+        EmailResDto mailResDto = mailSender.sendMail(emailCertification, emailBodyGenerator);
 
         HttpSession session = request.getSession();
 
