@@ -1,32 +1,23 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Time Series Chart</title>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    .chart-container {
-      width: 90%;
-      margin-bottom: 20px;
-    }
-    canvas {
-      width: 100% !important;
-      height: auto !important;
-    }
-  </style>
-</head>
+<header th:replace="~{fragments/commonHeader :: common('Time Series Chart')}">
+
+</header>
+
 <body>
-<div class="chart-container">
-  <canvas id="mttfbChart"></canvas>
-</div>
-<div class="chart-container">
-  <canvas id="tpsChart"></canvas>
+
+<div th:replace="~{fragments/currentUserFragment :: currentUser}"></div>
+
+
+<div th:replace="~{fragments/agentStatus :: agentStatus}"></div>
+
+<div class="charts-container">
+  <div class="chart-container">
+    <canvas id="mttfbChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="tpsChart"></canvas>
+  </div>
 </div>
 <script th:inline="javascript">
   /*<![CDATA[*/
@@ -36,7 +27,11 @@
   // MTTFB 데이터
   var mttfbData = /*[[${mttfbInfoList}]]*/ [];
   var mttfbLabels = mttfbData.map(function(info) {
-    return new Date(info.timestamp);
+    var date = new Date(info.timestamp);
+    var hours = date.getHours().toString().padStart(2, '0');
+    var minutes = date.getMinutes().toString().padStart(2, '0');
+    var seconds = date.getSeconds().toString().padStart(2, '0');
+    return hours + ":" + minutes + ":" + seconds;
   });
   var mttfbValues = mttfbData.map(function(info) {
     return info.mttbfb;
@@ -57,34 +52,32 @@
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      scales: {
-        xAxes: [{
-          type: 'time',
-          time: {
-            unit: 'minute',
-            displayFormats: {
-              minute: 'MMM DD, HH:mm'
-            }
-          },
-          ticks: {
-            autoSkip: true,
-            maxTicksLimit: 10
-          }
-        }],
-        yAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'MTTFB (ms)'
-          }
-        }]
-      }
+      // scales: {
+      //   xAxes: [{
+      //     type: 'time',
+      //     ticks: {
+      //       autoSkip: true,
+      //       maxTicksLimit: 10
+      //     }
+      //   }],
+      //   yAxes: [{
+      //     scaleLabel: {
+      //       display: true,
+      //       labelString: 'MTTFB (ms)'
+      //     }
+      //   }]
+      // }
     }
   });
 
   // TPS 데이터
   var tpsData = /*[[${tpsInfoList}]]*/ [];
   var tpsLabels = tpsData.map(function(info) {
-    return new Date(info.timestamp);
+    var date = new Date(info.timestamp);
+    var hours = date.getHours().toString().padStart(2, '0');
+    var minutes = date.getMinutes().toString().padStart(2, '0');
+    var seconds = date.getSeconds().toString().padStart(2, '0');
+    return hours + ":" + minutes + ":" + seconds;
   });
   var tpsValues = tpsData.map(function(info) {
     return info.tps;
@@ -105,30 +98,61 @@
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      scales: {
-        xAxes: [{
-          type: 'time',
-          time: {
-            unit: 'minute',
-            displayFormats: {
-              minute: 'MMM DD, HH:mm'
-            }
-          },
-          ticks: {
-            autoSkip: true,
-            maxTicksLimit: 10
-          }
-        }],
-        yAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'TPS'
-          }
-        }]
-      }
+      // scales: {
+      //   xAxes: [{
+      //     type: 'time',
+      //     ticks: {
+      //       autoSkip: true,
+      //       maxTicksLimit: 10
+      //     }
+      //   }],
+      //   yAxes: [{
+      //     scaleLabel: {
+      //       display: true,
+      //       labelString: 'TPS'
+      //     }
+      //   }]
+      // }
     }
   });
   /*]]>*/
 </script>
+
+<h2>Test Results</h2>
+<table>
+  <tr>
+    <th>Test ID</th>
+    <th>Group ID</th>
+    <th>Started At</th>
+    <th>Finished At</th>
+    <th>URL</th>
+    <th>Method</th>
+    <th>Total Requests</th>
+    <th>Total Errors</th>
+    <th>Total Success</th>
+    <th>Total Users</th>
+    <th>Total Duration</th>
+    <th>MTTFB Average</th>
+    <th>TPS Average</th>
+    <th>Test Status</th>
+  </tr>
+  <tr>
+    <td th:text="${commonTestResult.testId}"></td>
+    <td th:text="${commonTestResult.groupId}"></td>
+    <td th:text="${commonTestResult.startedAt}"></td>
+    <td th:text="${commonTestResult.finishedAt}"></td>
+    <td th:text="${commonTestResult.url}"></td>
+    <td th:text="${commonTestResult.method}"></td>
+    <td th:text="${commonTestResult.totalRequests}"></td>
+    <td th:text="${commonTestResult.totalErrors}"></td>
+    <td th:text="${commonTestResult.totalSuccess}"></td>
+    <td th:text="${commonTestResult.totalUsers}"></td>
+    <td th:text="${commonTestResult.totalDuration}"></td>
+    <td th:text="${commonTestResult.mttfbAverage}"></td>
+    <td th:text="${commonTestResult.tpsAverage}"></td>
+    <td th:text="${commonTestResult.testStatus}"></td>
+  </tr>
+</table>
+
 </body>
 </html>

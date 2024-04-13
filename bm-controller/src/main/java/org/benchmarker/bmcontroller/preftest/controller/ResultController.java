@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.MTTFBInfo;
 import org.benchmarker.bmcommon.dto.TPSInfo;
+import org.benchmarker.bmcontroller.common.controller.annotation.GlobalControllerModel;
 import org.benchmarker.bmcontroller.common.model.BaseTime;
 import org.benchmarker.bmcontroller.template.model.TestExecution;
 import org.benchmarker.bmcontroller.template.model.TestMttfb;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
+@GlobalControllerModel
 public class ResultController {
 
     private final TestExecutionService testExecutionService;
@@ -55,7 +58,7 @@ public class ResultController {
         List<MTTFBInfo> mttfbInfoList = new ArrayList<>();
         List<TPSInfo> tpsInfoList = new ArrayList<>();
 
-        AtomicReference<TestResult> lastTestResult = new AtomicReference<TestResult>();
+        AtomicReference<TestResult> resultSets = new AtomicReference<TestResult>();
 
         // TODO : N+1 prob. n.n
         testResults.stream().forEach(testResult -> {
@@ -68,9 +71,12 @@ public class ResultController {
                 TPSInfo.builder().timestamp(testTps.getCreatedAt()).tps(testTps.getTransaction())
                     .build());
             assert false;
-            lastTestResult.set(testResult);
+            resultSets.set(testResult);
         });
 
+        CommonTestResult lastTestResult = testExecutionService.getLastTestResult(testId);
+
+        model.addAttribute("commonTestResult",lastTestResult);
         model.addAttribute("mttfbInfoList", mttfbInfoList);
         model.addAttribute("tpsInfoList", tpsInfoList);
 

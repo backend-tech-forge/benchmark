@@ -4,13 +4,17 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.benchmarker.bmagent.AgentStatus;
+import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
 import org.benchmarker.bmcontroller.common.error.GlobalException;
 import org.benchmarker.bmcontroller.preftest.common.TestInfo;
 import org.benchmarker.bmcontroller.template.model.TestExecution;
+import org.benchmarker.bmcontroller.template.model.TestResult;
 import org.benchmarker.bmcontroller.template.model.TestTemplate;
 import org.benchmarker.bmcontroller.template.repository.TestExecutionRepository;
+import org.benchmarker.bmcontroller.template.repository.TestResultRepository;
 import org.benchmarker.bmcontroller.template.repository.TestTemplateRepository;
+import org.benchmarker.bmcontroller.template.service.utils.CommonDtoConversion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,7 @@ public class TestExecutionService {
 
     private final TestExecutionRepository testExecutionRepository;
     private final TestTemplateRepository testTemplateRepository;
+    private final TestResultRepository testResultRepository;
 
     /**
      * 테스트 시작 전 TestExecution 을 DB 에 저장합니다.
@@ -45,6 +50,18 @@ public class TestExecutionService {
     public TestExecution getTest(String id) {
         return testExecutionRepository.findById(UUID.fromString(id))
             .orElseThrow(() -> new GlobalException(ErrorCode.TEST_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public CommonTestResult getLastTestResult(String testId) {
+        List<TestResult> findResults = testResultRepository.findAllByTestExecutionId(
+            UUID.fromString(testId));
+        if (findResults.isEmpty()) {
+            throw new GlobalException(ErrorCode.TEST_RESULT_NOT_FOUND);
+        }
+        // get latest test result
+        TestResult testResult = findResults.get(0);
+        return CommonDtoConversion.convertToCommonTestResult(testResult);
     }
 
     @Transactional(readOnly = true)

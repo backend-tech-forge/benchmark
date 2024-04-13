@@ -10,6 +10,7 @@
 <div th:fragment="currentUser" class="status-bar" th:classappend="${currentUser} ? 'logged-in' : ''">
   <link rel="stylesheet" type="text/css" href="/css/bar.css">
   <a th:href="@{/}" class="home-link">Benchmark</a>
+  <button id="toggleButton">see agents</button>
   <p th:if="${currentUser}" class="user-text">
     Logged in as:
     <a th:href="@{'/users/' + ${currentUser.id}}" class="user-link" th:text="${currentUser.id}"></a>
