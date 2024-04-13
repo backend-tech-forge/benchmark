@@ -3,6 +3,8 @@ package org.benchmarker.bmcontroller.mail.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
+import org.benchmarker.bmcontroller.mail.common.factory.EmailBodyGenerator;
+import org.benchmarker.bmcontroller.mail.common.factory.EmailVerificationFactory;
 import org.benchmarker.bmcontroller.mail.controller.dto.EmailCertificationDto;
 import org.benchmarker.bmcontroller.mail.controller.dto.EmailResDto;
 import org.benchmarker.bmcontroller.mail.service.impl.MailSenderImpl;
@@ -43,10 +45,12 @@ class MailSenderImplTest {
                 .certificationCode(authNum)
                 .build();
 
-        when(mailSender.sendMail(any())).thenReturn(res);
+        EmailBodyGenerator emailBodyGenerator = new EmailVerificationFactory();
+
+        when(mailSender.sendMail(any(), any())).thenReturn(res);
 
         // When
-        EmailResDto emailResDto = mailSender.sendMail(emailCertificationDto);
+        EmailResDto emailResDto = mailSender.sendMail(emailCertificationDto, emailBodyGenerator);
 
         // Then
         assertThat(emailResDto.getMail()).isEqualTo(emailCertificationDto.getEmail());

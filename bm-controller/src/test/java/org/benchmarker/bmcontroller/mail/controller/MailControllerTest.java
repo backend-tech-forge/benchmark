@@ -59,7 +59,7 @@ class MailControllerTest {
 
 
         // when
-        when(mailSender.sendMail(any())).thenReturn(res);
+        when(mailSender.sendMail(any(), any())).thenReturn(res);
 
         // then
         mockMvc.perform(post("/api/mail/certification")
@@ -94,7 +94,7 @@ class MailControllerTest {
 
 
         // when
-        when(mailSender.sendMail(any())).thenReturn(res);
+        when(mailSender.sendMail(any(), any())).thenReturn(res);
 
         // then
         mockMvc.perform(post("/api/mail/certification")
