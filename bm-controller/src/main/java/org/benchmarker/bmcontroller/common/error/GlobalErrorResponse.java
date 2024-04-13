@@ -42,6 +42,16 @@ public class GlobalErrorResponse implements Serializable {
 
     public static ResponseEntity<GlobalErrorResponse> toResponseEntity(GlobalException e) {
         ErrorCode errorCode = e.getErrorCode();
+        if (e.getMessage() != null){
+            return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(GlobalErrorResponse.builder()
+                    .status(errorCode.getHttpStatus())
+                    .code(errorCode.name())
+                    .message(e.getMessage())
+                    .build()
+                );
+        }
         return ResponseEntity
             .status(errorCode.getHttpStatus())
             .body(GlobalErrorResponse.builder()

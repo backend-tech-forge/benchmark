@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.benchmarker.bmagent.AgentInfo;
@@ -17,9 +18,11 @@ import org.benchmarker.bmcommon.dto.CommonTestResult;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcommon.util.RandomUtils;
 import org.benchmarker.bmcontroller.agent.AgentServerManager;
+import org.benchmarker.bmcontroller.preftest.common.TestInfo;
 import org.benchmarker.bmcontroller.preftest.service.PerftestService;
 import org.benchmarker.bmcontroller.template.service.ITestResultService;
 import org.benchmarker.bmcontroller.template.service.ITestTemplateService;
+import org.benchmarker.bmcontroller.template.service.TestExecutionService;
 import org.benchmarker.bmcontroller.user.controller.constant.TestUserConsts;
 import org.benchmarker.bmcontroller.user.helper.UserHelper;
 import org.benchmarker.bmcontroller.user.model.User;
@@ -32,6 +35,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -43,7 +50,6 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 public class PerftestControllerTest {
-
     @InjectMocks
     private PerftestController perftestController;
     @Mock
@@ -51,10 +57,11 @@ public class PerftestControllerTest {
 
     @Mock
     private SimpMessagingTemplate messagingTemplate;
+    @Mock
+    private TestExecutionService testExecutionService;
 
     @Mock
     private ITestTemplateService testTemplateService;
-
     @Mock
     private ITestResultService testResultService;
 
@@ -85,6 +92,7 @@ public class PerftestControllerTest {
         Integer templateId = 1;
         String action = "start";
         TemplateInfo templateInfo = new TemplateInfo();
+
         when(userContext.getCurrentUser()).thenReturn(defaultUser);
         when(testTemplateService.getTemplateInfo(eq(userId), eq(templateId))).thenReturn(templateInfo);
 
@@ -93,7 +101,7 @@ public class PerftestControllerTest {
         ServerSentEvent<CommonTestResult> resultStub = ServerSentEvent.builder(randomResult).build();
         Flux<ServerSentEvent<CommonTestResult>> eventStream = Flux.just(resultStub);
 
-        when(testResultService.resultSaveAndReturn(randomResult)).thenReturn(Optional.of(randomResult));
+        when(testResultService.resultSaveAndReturn(eq(randomResult), any())).thenReturn(Optional.of(randomResult));
         when(perftestService.executePerformanceTest(eq(templateId), eq(groupId), eq(action), any(),
                 eq(templateInfo))).thenReturn(eventStream);
         when(agentServerManager.getReadyAgent()).thenReturn(Optional.of(new AgentInfo()));
@@ -118,6 +126,15 @@ public class PerftestControllerTest {
         when(testTemplateService.getTemplateInfo(defaultUser.getId(), 1)).thenReturn(
             new TemplateInfo(/* mock template info */)
         );
+        List<TestInfo> testInfos = Arrays.asList(TestInfo.builder().build());
+
+        // Pageable 객체를 생성 (예: 페이징 정보가 필요한 경우)
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // 가짜 페이징된 데이터를 포함하는 Page 객체 생성
+        Page<TestInfo> testInfosPage = new PageImpl<>(testInfos, pageable, testInfos.size());
+
+        when(testExecutionService.getTestInfosPageable(any(),any())).thenReturn(testInfosPage);
 
         // then
         mockMvc.perform(MockMvcRequestBuilders.get("/groups/1/templates/1"))

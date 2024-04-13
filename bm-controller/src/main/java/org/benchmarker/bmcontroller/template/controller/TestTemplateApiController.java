@@ -55,7 +55,7 @@ public class TestTemplateApiController {
 
     @GetMapping("/template/{template_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<TestTemplateResponseDto> getTemplate(@PathVariable Integer template_id) {
+    public ResponseEntity<TestTemplateResponseDto> getTemplate(@PathVariable("template_id") Integer template_id) {
         return ResponseEntity.ok(testTemplateService.getTemplate(template_id));
     }
 
@@ -87,7 +87,7 @@ public class TestTemplateApiController {
 
     @DeleteMapping("/template/{template_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<Void> deleteTemplate(@PathVariable Integer template_id) {
+    public ResponseEntity<Void> deleteTemplate(@PathVariable("template_id") Integer template_id) {
 
         User currentUser = userContext.getCurrentUser();
         testTemplateService.deleteTemplate(template_id, currentUser.getId());

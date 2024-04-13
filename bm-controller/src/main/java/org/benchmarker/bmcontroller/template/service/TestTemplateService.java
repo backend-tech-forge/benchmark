@@ -1,8 +1,13 @@
 package org.benchmarker.bmcontroller.template.service;
 
+import static org.benchmarker.bmcommon.util.NoOp.noOp;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.benchmarker.bmcommon.dto.TemplateInfo;
 import org.benchmarker.bmcontroller.common.error.ErrorCode;
@@ -18,12 +23,7 @@ import org.benchmarker.bmcontroller.user.repository.UserGroupJoinRepository;
 import org.benchmarker.bmcontroller.user.repository.UserGroupRepository;
 import org.benchmarker.bmcontroller.user.util.UserServiceUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.benchmarker.bmcommon.util.NoOp.noOp;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +37,7 @@ public class TestTemplateService extends AbstractTestTemplateService {
     private final JsonMapper jsonMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public TemplateInfo getTemplateInfo(String userId, Integer templateId)
         throws Exception {
         userServiceUtils.verifyAccessTemplate(userId, templateId);
