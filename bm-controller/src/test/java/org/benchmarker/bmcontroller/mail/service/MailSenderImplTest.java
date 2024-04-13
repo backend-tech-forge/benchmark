@@ -6,7 +6,7 @@ import org.benchmarker.bmcontroller.mail.common.factory.EmailVerificationFactory
 import org.benchmarker.bmcontroller.mail.controller.dto.EmailCertificationDto;
 import org.benchmarker.bmcontroller.mail.controller.dto.EmailResDto;
 import org.benchmarker.bmcontroller.mail.service.impl.MailSenderImpl;
-import org.benchmarker.bmcontroller.mail.strategy.IRandomCodeGenerator;
+import org.benchmarker.bmcontroller.mail.common.strategy.IRandomCodeGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

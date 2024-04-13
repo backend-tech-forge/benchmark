@@ -1,4 +1,4 @@
-package org.benchmarker.bmcontroller.mail.strategy;
+package org.benchmarker.bmcontroller.mail.common.strategy;
 
 public interface IRandomCodeGenerator {
 

@@ -1,5 +1,6 @@
 package org.benchmarker.bmcontroller.mail.strategy;
 
+import org.benchmarker.bmcontroller.mail.common.strategy.IRandomCodeGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

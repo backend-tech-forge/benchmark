@@ -30,6 +30,7 @@ testlogger {
 // define exclude classes for Jacoco test coverage report
 def excludeJacocoTestCoverageReport = [
         'org/benchmarker/bmcontroller/mail/controller/dto/**',
+        'org/benchmarker/bmcontroller/mail/common/**',
         'org/benchmarker/bmcontroller/home/**',
         'org/benchmarker/bmcontroller/template/**',
         'org/benchmarker/bmcontroller/prerun/**',
