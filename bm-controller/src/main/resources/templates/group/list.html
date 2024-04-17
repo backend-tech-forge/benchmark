@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Group Information</title>
-  <link rel="stylesheet" type="text/css" href="../css/styles.css">
-</head>
-<body>
+<header th:replace="~{fragments/commonHeader :: common('My Groups')}"></header>
+
 <div th:replace="fragments/currentUserFragment :: currentUser"></div>
+<div th:replace="~{fragments/agentStatus :: agentStatus}"></div>
+
 <h1>Groups</h1>
 
 <div class="container">

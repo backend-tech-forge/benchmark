@@ -4,15 +4,14 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="/css/bar.css">
   <link rel="stylesheet" type="text/css" href="/css/styles.css">
+
 </head>
 <body>
 
 <!-- Current user status bar -->
-<div th:fragment="agentStatus" id="agentInfoContainer">
+<div th:fragment="agentStatus" id="agentInfoContainer" style="visibility: hidden;">
 
   <script>
-    console.log("agentStatus");
-
     var sockJs = new SockJS("/gs-guide-websocket");
     var stompClient = Stomp.over(sockJs);
     stompClient.debug = null;
@@ -97,13 +96,20 @@
       console.error('Error with websocket', error);
     };
 
-    console.log(stompClient);
+    const toggleButton = document.getElementById('toggleButton');
+    const agentContainer = document.getElementById('agentInfoContainer');
+
+    toggleButton.addEventListener('click', function() {
+      // Toggle the display property of the agent status container
+      if (agentContainer.style.visibility === 'hidden') {
+        agentContainer.style.visibility = 'visible';
+      } else {
+        agentContainer.style.visibility = 'hidden';
+      }
+    });
 
   </script>
 </div>
 
-
 </body>
 </html>
-
-

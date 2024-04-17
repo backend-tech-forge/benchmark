@@ -37,6 +37,7 @@ public enum ErrorCode {
     /**
      * 404
      */
+    TEST_RESULT_NOT_FOUND(404, "테스트 결과가 존재하지 않습니다."),
     USER_NOT_FOUND(404, "유저가 존재하지 않습니다."),
     USER_ALREADY_EXIST(404, "유저가 이미 존재합니다."),
     GROUP_NOT_FOUND(404, "그룹이 존재하지 않습니다."),
@@ -47,7 +48,7 @@ public enum ErrorCode {
     /**
      * 500
      */
-    INTERNAL_SERVER_ERROR(500, "서버 내부 오류"),;
+    INTERNAL_SERVER_ERROR(500, "서버 내부 오류"), ;
   
     private final int httpStatus;
     private final String message;

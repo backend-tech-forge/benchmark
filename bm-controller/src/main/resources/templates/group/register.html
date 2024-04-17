@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Register Group</title>
-  <link rel="stylesheet" type="text/css" href="../css/styles.css">
-</head>
-<body>
+<header th:replace="~{fragments/commonHeader :: common('Register Group')}"></header>
 <div th:replace="fragments/currentUserFragment :: currentUser"></div>
+<div th:replace="~{fragments/agentStatus :: agentStatus}"></div>
 
 <div class="container">
   <h1>Register Group</h1>
