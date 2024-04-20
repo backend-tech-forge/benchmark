@@ -4,7 +4,7 @@ BM performance tester
 
 A enterprise level performance testing solution. Taking inspiration from [nGrinder](https://github.com/naver/ngrinder), this project aims to develop a Spring Boot application mirroring nGrinder’s functionality as closely as possible.
 
-You can use our service in [https://www.high-load.org](https://www.high-load.org).
+~~You can use our service in [https://www.high-load.org](https://www.high-load.org).~~ currently deactivated.
 
 BM has 2 major components.
 * **bm-controller**
